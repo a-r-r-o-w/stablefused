@@ -1,0 +1,26 @@
+# python directories
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+*.model
+*.egg-info
+
+# vscode
+.vscode/
+
+# build
+build/
+*.out
+*.s
+
+# tensorflow
+training_checkpoints/
+
+# local test files
+test/
+
+# environment files
+.env
+
+# datasets
+*.csv
