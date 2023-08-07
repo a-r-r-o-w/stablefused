@@ -110,7 +110,7 @@ class BaseDiffusion:
         image_height: int = None,
         image_width: int = None,
         start_step: int = None,
-        num_inference_steps: int = None
+        num_inference_steps: int = None,
     ) -> None:
         if image_height is not None and image_width is not None:
             if image_height % 8 != 0 or image_width % 8 != 0:
