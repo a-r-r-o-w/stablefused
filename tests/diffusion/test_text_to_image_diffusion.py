@@ -35,7 +35,7 @@ def config():
     }
 
 
-def test_text_to_image_diffusion_1(model: TextToImageDiffusion, config: dict):
+def test_text_to_image_diffusion(model: TextToImageDiffusion, config: dict) -> None:
     """
     Test case for the TextToImageDiffusion model.
 
@@ -66,7 +66,7 @@ def test_text_to_image_diffusion_1(model: TextToImageDiffusion, config: dict):
     assert images.shape == (1, dim, dim, 3)
 
 
-def test_text_to_image_diffusion_2(model: TextToImageDiffusion, config: dict):
+def test_return_latent_history(model: TextToImageDiffusion, config: dict) -> None:
     """
     Test case for the TextToImageDiffusion model.
 

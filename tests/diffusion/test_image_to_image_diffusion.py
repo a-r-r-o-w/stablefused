@@ -32,11 +32,11 @@ def config():
         "prompt": "a photo of a cat",
         "num_inference_steps": 2,
         "start_step": 1,
-        "image_dim": 64,
+        "image_dim": 32,
     }
 
 
-def test_image_to_image_diffusion_1(model: ImageToImageDiffusion, config: dict):
+def test_image_to_image_diffusion(model: ImageToImageDiffusion, config: dict) -> None:
     """
     Test case for the ImageToImageDiffusion model.
 
@@ -67,7 +67,7 @@ def test_image_to_image_diffusion_1(model: ImageToImageDiffusion, config: dict):
     assert images.shape == (1, dim, dim, 3)
 
 
-def test_image_to_image_diffusion_2(model: ImageToImageDiffusion, config: dict):
+def test_return_latent_history(model: ImageToImageDiffusion, config: dict) -> None:
     """
     Test case for the ImageToImageDiffusion model.
 
