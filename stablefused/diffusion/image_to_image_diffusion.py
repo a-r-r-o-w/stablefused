@@ -26,70 +26,6 @@ class ImageToImageDiffusion(BaseDiffusion):
             model_id, tokenizer, text_encoder, vae, unet, scheduler, device
         )
 
-    def prompt_to_embedding(
-        self,
-        prompt: Union[str, List[str]],
-        guidance_scale: float,
-        negative_prompt: Optional[Union[str, List[str]]] = None,
-    ) -> torch.FloatTensor:
-        """Convert prompt(s) to a CLIP embedding(s)."""
-
-        use_classifier_free_guidance = guidance_scale > 1.0
-
-        if negative_prompt is not None:
-            assert type(prompt) is type(negative_prompt)
-
-        if isinstance(prompt, str):
-            batch_size = 1
-            prompt = [prompt]
-            if negative_prompt is not None:
-                negative_prompt = [negative_prompt]
-        elif isinstance(prompt, list):
-            batch_size = len(prompt)
-        else:
-            raise TypeError("`prompt` must be a string or a list of strings")
-
-        text_input = self.tokenizer(
-            prompt,
-            padding="max_length",
-            max_length=self.tokenizer.model_max_length,
-            truncation=True,
-            return_tensors="pt",
-        )
-
-        if (
-            hasattr(self.text_encoder.config, "use_attention_mask")
-            and self.text_encoder.config.use_attention_mask
-        ):
-            attention_mask = text_input.attention_mask.to(self.device)
-        else:
-            attention_mask = None
-
-        text_embedding = self.text_encoder(
-            text_input.input_ids.to(self.device), attention_mask=attention_mask
-        )[0]
-
-        if use_classifier_free_guidance:
-            if negative_prompt is None:
-                unconditioning_input = [""] * batch_size
-            else:
-                unconditioning_input = negative_prompt
-
-            unconditioning_input = self.tokenizer(
-                unconditioning_input,
-                padding="max_length",
-                max_length=self.tokenizer.model_max_length,
-                truncation=True,
-                return_tensors="pt",
-            )
-            unconditional_embedding = self.text_encoder(
-                unconditioning_input.input_ids.to(self.device),
-                attention_mask=attention_mask,
-            )[0]
-
-        embedding = torch.cat([unconditional_embedding, text_embedding])
-        return embedding
-
     def embedding_to_latent(
         self,
         embedding: torch.FloatTensor,
@@ -151,7 +87,7 @@ class ImageToImageDiffusion(BaseDiffusion):
     def __call__(
         self,
         image: Image.Image,
-        prompt: Optional[Union[str, List[str]]],
+        prompt: Union[str, List[str]],
         num_inference_steps: int = 50,
         start_step: int = 0,
         guidance_scale: float = 7.5,
@@ -189,3 +125,5 @@ class ImageToImageDiffusion(BaseDiffusion):
         else:
             image = self.latent_to_image(latent, output_type)
         return image
+
+    generate = __call__

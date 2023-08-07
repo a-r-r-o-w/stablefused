@@ -2,10 +2,11 @@ import numpy as np
 import torch
 
 from PIL import Image
+from abc import ABC, abstractmethod
 from diffusers import AutoencoderKL, DPMSolverMultistepScheduler, UNet2DConditionModel
 from diffusers.schedulers import KarrasDiffusionSchedulers
 from transformers import CLIPTextModel, CLIPTokenizer
-from typing import List, Union
+from typing import Any, List, Optional, Union
 
 from ..utils import (
     denormalize,
@@ -17,7 +18,7 @@ from ..utils import (
 )
 
 
-class BaseDiffusion:
+class BaseDiffusion(ABC):
     def __init__(
         self,
         model_id: str = None,
@@ -42,11 +43,11 @@ class BaseDiffusion:
                 raise ValueError(
                     "Either (`model_id`) or (`tokenizer`, `text_encoder`, `vae`, `unet` and `scheduler`) must be provided."
                 )
-            self.tokenizer = tokenizer
-            self.text_encoder = text_encoder.to(device)
-            self.vae = vae.to(device)
-            self.unet = unet.to(device)
-            self.scheduler = scheduler
+            self.tokenizer: CLIPTokenizer = tokenizer
+            self.text_encoder: CLIPTextModel = text_encoder.to(device)
+            self.vae: AutoencoderKL = vae.to(device)
+            self.unet: UNet2DConditionModel = unet.to(device)
+            self.scheduler: KarrasDiffusionSchedulers = scheduler
         else:
             self.tokenizer = CLIPTokenizer.from_pretrained(
                 model_id, subfolder="tokenizer"
@@ -74,6 +75,7 @@ class BaseDiffusion:
         image_width: int = None,
         start_step: int = None,
         num_inference_steps: int = None,
+        strength: float = None,
     ) -> None:
         if image_height is not None and image_width is not None:
             if image_height % 8 != 0 or image_width % 8 != 0:
@@ -98,6 +100,81 @@ class BaseDiffusion:
                 raise ValueError(
                     "`start_step` must be in the range [0, `num_inference_steps` - 1]"
                 )
+        if strength is not None:
+            if strength < 0 or strength > 1:
+                raise ValueError("`strength` must be in the range [0.0, 1.0]")
+
+    def prompt_to_embedding(
+        self,
+        prompt: Union[str, List[str]],
+        guidance_scale: float,
+        negative_prompt: Optional[Union[str, List[str]]] = None,
+    ) -> torch.FloatTensor:
+        """Convert prompt(s) to a CLIP embedding(s)."""
+
+        use_classifier_free_guidance = guidance_scale > 1.0
+
+        if negative_prompt is not None:
+            assert type(prompt) is type(negative_prompt)
+
+        if isinstance(prompt, str):
+            batch_size = 1
+            prompt = [prompt]
+            if negative_prompt is not None:
+                negative_prompt = [negative_prompt]
+        elif isinstance(prompt, list):
+            batch_size = len(prompt)
+        else:
+            raise TypeError("`prompt` must be a string or a list of strings")
+
+        text_input = self.tokenizer(
+            prompt,
+            padding="max_length",
+            max_length=self.tokenizer.model_max_length,
+            truncation=True,
+            return_tensors="pt",
+        )
+
+        if (
+            hasattr(self.text_encoder.config, "use_attention_mask")
+            and self.text_encoder.config.use_attention_mask
+        ):
+            attention_mask = text_input.attention_mask.to(self.device)
+        else:
+            attention_mask = None
+
+        text_embedding = self.text_encoder(
+            text_input.input_ids.to(self.device), attention_mask=attention_mask
+        )[0]
+
+        if use_classifier_free_guidance:
+            if negative_prompt is None:
+                unconditioning_input = [""] * batch_size
+            else:
+                unconditioning_input = negative_prompt
+
+            unconditioning_input = self.tokenizer(
+                unconditioning_input,
+                padding="max_length",
+                max_length=self.tokenizer.model_max_length,
+                truncation=True,
+                return_tensors="pt",
+            )
+            unconditional_embedding = self.text_encoder(
+                unconditioning_input.input_ids.to(self.device),
+                attention_mask=attention_mask,
+            )[0]
+
+        embedding = torch.cat([unconditional_embedding, text_embedding])
+        return embedding
+
+    @abstractmethod
+    def embedding_to_latent(self, *args: Any, **kwargs: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        pass
 
     def latent_to_image(
         self, latent: torch.FloatTensor, output_type: str

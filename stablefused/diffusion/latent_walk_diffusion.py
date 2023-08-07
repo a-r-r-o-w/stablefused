@@ -6,12 +6,12 @@ from diffusers import AutoencoderKL, UNet2DConditionModel
 from diffusers.schedulers import KarrasDiffusionSchedulers
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from .base_diffusion import BaseDiffusion
 
 
-class TextToImageDiffusion(BaseDiffusion):
+class LatentWalkDiffusion(BaseDiffusion):
     def __init__(
         self,
         model_id: str = None,
@@ -26,28 +26,27 @@ class TextToImageDiffusion(BaseDiffusion):
             model_id, tokenizer, text_encoder, vae, unet, scheduler, device
         )
 
+    def modify_latent(
+        self,
+        latent: torch.FloatTensor,
+        strength: float,
+    ) -> torch.FloatTensor:
+        """Modify latent with strength."""
+        noise = torch.randn(latent.shape).to(self.device)
+        new_latent = (1 - strength) * latent + strength * noise
+        new_latent = (new_latent - new_latent.mean()) / new_latent.std()
+        return new_latent
+
     def embedding_to_latent(
         self,
         embedding: torch.FloatTensor,
-        image_height: int,
-        image_width: int,
         num_inference_steps: int,
         guidance_scale: float,
-        latent: Optional[torch.FloatTensor] = None,
+        latent: torch.FloatTensor,
         return_latent_history: bool = False,
     ) -> Union[torch.FloatTensor, List[torch.FloatTensor]]:
         """Convert CLIP embedding(s) to latent vector(s)."""
-
         use_classifier_free_guidance = guidance_scale > 1.0
-
-        if latent is None:
-            shape = (
-                embedding.shape[0] // 2,
-                self.unet.config.in_channels,
-                image_height // self.vae_scale_factor,
-                image_width // self.vae_scale_factor,
-            )
-            latent = torch.randn(shape)
         latent = latent.to(self.device)
 
         self.scheduler.set_timesteps(num_inference_steps)
@@ -90,28 +89,24 @@ class TextToImageDiffusion(BaseDiffusion):
     def __call__(
         self,
         prompt: Union[str, List[str]],
-        image_height: int = 512,
-        image_width: int = 512,
+        latent: torch.FloatTensor,
+        strength: float = 0.2,
         num_inference_steps: int = 50,
         guidance_scale: float = 7.5,
-        negative_prompt=None,
-        latent: Optional[torch.FloatTensor] = None,
+        negative_prompt: Optional[Union[str, List[str]]] = None,
         output_type: str = "pil",
         return_latent_history: bool = False,
     ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
-        """Generate image(s) from prompt(s)."""
-
+        """Walk latent space from latent to generate similar image(s)."""
         self.validate_input(
             prompt=prompt,
             negative_prompt=negative_prompt,
-            image_height=image_height,
-            image_width=image_width,
+            strength=strength,
         )
         embedding = self.prompt_to_embedding(prompt, guidance_scale, negative_prompt)
+        latent = self.modify_latent(latent, strength)
         latent = self.embedding_to_latent(
             embedding=embedding,
-            image_height=image_height,
-            image_width=image_width,
             num_inference_steps=num_inference_steps,
             guidance_scale=guidance_scale,
             latent=latent,

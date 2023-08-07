@@ -1,6 +1,7 @@
 from .diffusion import (
     BaseDiffusion,
     ImageToImageDiffusion,
+    LatentWalkDiffusion,
     TextToImageDiffusion,
 )
 
