@@ -186,7 +186,7 @@ class TextToImageDiffusion(BaseDiffusion):
             return latent
 
         if return_latent_history:
-            image = np.array(
+            image: np.ndarray = np.array(
                 [self.latent_to_image(l, output_type) for l in tqdm(latent)]
             )
             dims = len(image.shape)

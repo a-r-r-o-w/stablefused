@@ -7,6 +7,15 @@ from diffusers.schedulers import KarrasDiffusionSchedulers
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Union
 
+from ..utils import (
+    denormalize,
+    normalize,
+    numpy_to_pil,
+    numpy_to_pt,
+    pil_to_numpy,
+    pt_to_numpy,
+)
+
 
 class BaseDiffusion:
     def __init__(
@@ -58,52 +67,6 @@ class BaseDiffusion:
         self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1)
 
     @staticmethod
-    def pt_to_numpy(images: torch.FloatTensor) -> np.ndarray:
-        """Convert pytorch tensor to numpy image."""
-        return images.detach().cpu().permute(0, 2, 3, 1).float().numpy()
-
-    @staticmethod
-    def numpy_to_pt(images: np.ndarray) -> torch.FloatTensor:
-        """Convert numpy image to pytorch tensor."""
-        if images.ndim == 3:
-            images = images[..., None]
-        return torch.from_numpy(images.transpose(0, 3, 1, 2))
-
-    @staticmethod
-    def numpy_to_pil(images: np.ndarray) -> Image.Image:
-        """Convert numpy image to PIL image."""
-        if images.ndim == 3:
-            images = images[None, ...]
-        images = (images * 255).round().astype("uint8")
-        if images.shape[-1] == 1:
-            # grayscale images (single channel)
-            pil_images = [
-                Image.fromarray(image.squeeze(), mode="L") for image in images
-            ]
-        else:
-            pil_images = [Image.fromarray(image) for image in images]
-        return pil_images
-
-    @staticmethod
-    def pil_to_numpy(images: Union[List[Image.Image], Image.Image]) -> np.ndarray:
-        """Convert PIL image to numpy image."""
-        if not isinstance(images, list):
-            images = [images]
-        images = [np.array(image).astype(np.float32) / 255.0 for image in images]
-        images = np.stack(images, axis=0)
-        return images
-
-    @staticmethod
-    def normalize(images):
-        """Normalize an image array to the range [-1, 1]."""
-        return 2.0 * images - 1.0
-
-    @staticmethod
-    def denormalize(images):
-        """Denormalize an image array to the range [0.0, 1.0]"""
-        return (0.5 + images / 2).clamp(0, 1)
-
-    @staticmethod
     def validate_input(
         prompt: Union[str, List[str]] = None,
         negative_prompt: Union[str, List[str]] = None,
@@ -145,17 +108,17 @@ class BaseDiffusion:
         image = self.vae.decode(
             latent / self.vae.config.scaling_factor, return_dict=False
         )[0]
-        image = self.denormalize(image)
+        image = denormalize(image)
 
         if output_type == "pt":
             return image
 
-        image = self.pt_to_numpy(image)
+        image = pt_to_numpy(image)
 
         if output_type == "np":
             return image
 
-        image = self.numpy_to_pil(image)
+        image = numpy_to_pil(image)
         return image
 
     def image_to_latent(
@@ -172,13 +135,13 @@ class BaseDiffusion:
                 "`image` type must be one of (`PIL.Image.Image`, `np.ndarray`, `torch.Tensor`). Other types are not supported yet"
             )
         if isinstance(image, Image.Image):
-            image = [image]
+            image: List[Image.Image] = [image]
 
         if isinstance(image[0], Image.Image):
-            image = self.pil_to_numpy(image)
+            image: np.ndarray = pil_to_numpy(image)
 
         if isinstance(image[0], np.ndarray):
-            image = self.numpy_to_pt(image)
+            image: torch.FloatTensor = numpy_to_pt(image)
 
         image = image.to(self.device)
         latent = (
