@@ -20,10 +20,20 @@ class ImageToImageDiffusion(BaseDiffusion):
         vae: AutoencoderKL = None,
         unet: UNet2DConditionModel = None,
         scheduler: KarrasDiffusionSchedulers = None,
+        name: str = None,
+        torch_dtype: torch.dtype = torch.float32,
         device="cuda",
     ) -> None:
         super().__init__(
-            model_id, tokenizer, text_encoder, vae, unet, scheduler, device
+            model_id=model_id,
+            tokenizer=tokenizer,
+            text_encoder=text_encoder,
+            vae=vae,
+            unet=unet,
+            scheduler=scheduler,
+            name=name,
+            torch_dtype=torch_dtype,
+            device=device,
         )
 
     def embedding_to_latent(
@@ -120,6 +130,7 @@ class ImageToImageDiffusion(BaseDiffusion):
             image: np.ndarray = np.array(
                 [self.latent_to_image(l, output_type) for l in tqdm(latent)]
             )
+            print(image.shape)
             dims = len(image.shape)
             image = np.transpose(image, (1, 0, *range(2, dims)))
         else:

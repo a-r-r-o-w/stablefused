@@ -7,6 +7,7 @@ setup(
     author="Aryan V S",
     author_email="contact.aryanvs+stablefused@gmail.com",
     python_requires=">=3.6.0",
+    license="MIT",
     packages=find_packages(),
     install_requires=[
         "accelerate",

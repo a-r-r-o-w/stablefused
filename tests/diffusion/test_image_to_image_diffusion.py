@@ -38,14 +38,7 @@ def config():
 
 def test_image_to_image_diffusion(model: ImageToImageDiffusion, config: dict) -> None:
     """
-    Test case for the ImageToImageDiffusion model.
-
-    Parameters
-    ----------
-    model
-        The initialized ImageToImageDiffusion model fixture.
-    config
-        The configuration dictionary for the test case.
+    Test case to check if the ImageToImageDiffusion is working correctly.
 
     Raises
     ------
@@ -69,14 +62,7 @@ def test_image_to_image_diffusion(model: ImageToImageDiffusion, config: dict) ->
 
 def test_return_latent_history(model: ImageToImageDiffusion, config: dict) -> None:
     """
-    Test case for the ImageToImageDiffusion model.
-
-    Parameters
-    ----------
-    model
-        The initialized ImageToImageDiffusion model fixture.
-    config
-        The configuration dictionary for the test case.
+    Test case to check if latent history is returned correctly.
 
     Raises
     ------

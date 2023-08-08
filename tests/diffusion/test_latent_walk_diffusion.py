@@ -31,20 +31,13 @@ def config():
     return {
         "prompt": "a photo of a cat",
         "num_inference_steps": 1,
-        "image_dim": 64,
+        "image_dim": 32,
     }
 
 
 def test_latent_walk_diffusion(model: LatentWalkDiffusion, config: dict) -> None:
     """
-    Test case for the LatentWalkDiffusion model.
-
-    Parameters
-    ----------
-    model
-        The initialized LatentWalkDiffusion model fixture.
-    config
-        The configuration dictionary for the test case.
+    Test case to check if the LatentWalkDiffusion is working correctly.
 
     Raises
     ------

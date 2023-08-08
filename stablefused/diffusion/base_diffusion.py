@@ -9,7 +9,9 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, List, Optional, Union
 
 from ..utils import (
+    cache_model,
     denormalize,
+    load_model,
     normalize,
     numpy_to_pil,
     numpy_to_pt,
@@ -27,9 +29,10 @@ class BaseDiffusion(ABC):
         vae: AutoencoderKL = None,
         unet: UNet2DConditionModel = None,
         scheduler: KarrasDiffusionSchedulers = None,
+        name: str = None,
+        torch_dtype: torch.dtype = torch.float32,
         device="cuda",
     ) -> None:
-        self.model_id = model_id
         self.device = device
 
         if model_id is None:
@@ -39,33 +42,43 @@ class BaseDiffusion(ABC):
                 or vae is None
                 or unet is None
                 or scheduler is None
+                or name is None
             ):
                 raise ValueError(
-                    "Either (`model_id`) or (`tokenizer`, `text_encoder`, `vae`, `unet` and `scheduler`) must be provided."
+                    "Either (`model_id`) or (`tokenizer`, `text_encoder`, `vae`, `unet`, `scheduler`, `name`) must be provided."
                 )
-            self.tokenizer: CLIPTokenizer = tokenizer
-            self.text_encoder: CLIPTextModel = text_encoder.to(device)
-            self.vae: AutoencoderKL = vae.to(device)
-            self.unet: UNet2DConditionModel = unet.to(device)
-            self.scheduler: KarrasDiffusionSchedulers = scheduler
-        else:
-            self.tokenizer = CLIPTokenizer.from_pretrained(
-                model_id, subfolder="tokenizer"
-            )
-            self.text_encoder = CLIPTextModel.from_pretrained(
-                model_id, subfolder="text_encoder"
-            ).to(device)
-            self.vae = AutoencoderKL.from_pretrained(model_id, subfolder="vae").to(
-                device
-            )
-            self.unet = UNet2DConditionModel.from_pretrained(
-                model_id, subfolder="unet"
-            ).to(device)
-            self.scheduler = DPMSolverMultistepScheduler.from_pretrained(
-                model_id, subfolder="scheduler"
-            )
 
+            model = cache_model(
+                name=name,
+                tokenizer=tokenizer,
+                text_encoder=text_encoder,
+                vae=vae,
+                unet=unet,
+                scheduler=scheduler,
+            )
+            self.model_id: str = name
+            self.tokenizer: CLIPTokenizer = model.tokenizer
+            self.text_encoder: CLIPTextModel = model.text_encoder.to(device)
+            self.vae: AutoencoderKL = model.vae.to(device)
+            self.unet: UNet2DConditionModel = model.unet.to(device)
+            self.scheduler: KarrasDiffusionSchedulers = model.scheduler
+        else:
+            model = load_model(model_id, torch_dtype=torch_dtype)
+            self.model_id = model_id
+            self.tokenizer: CLIPTokenizer = model.tokenizer
+            self.text_encoder: CLIPTextModel = model.text_encoder
+            self.vae: AutoencoderKL = model.vae
+            self.unet: UNet2DConditionModel = model.unet
+            self.scheduler: KarrasDiffusionSchedulers = model.scheduler
+
+        self.to(self.device)
         self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1)
+
+    def to(self, device: str) -> None:
+        self.device = device
+        self.text_encoder = self.text_encoder.to(device)
+        self.vae = self.vae.to(device)
+        self.unet = self.unet.to(device)
 
     @staticmethod
     def validate_input(

@@ -31,20 +31,16 @@ def config():
     return {
         "prompt": "a photo of a cat",
         "num_inference_steps": 1,
-        "image_dim": 64,
+        "image_dim": 32,
     }
 
 
 def test_text_to_image_diffusion(model: TextToImageDiffusion, config: dict) -> None:
     """
-    Test case for the TextToImageDiffusion model.
+    Test case to check if the TextToImageDiffusion is working correctly.
 
     Parameters
     ----------
-    model
-        The initialized TextToImageDiffusion model fixture.
-    config
-        The configuration dictionary for the test case.
 
     Raises
     ------
@@ -68,14 +64,7 @@ def test_text_to_image_diffusion(model: TextToImageDiffusion, config: dict) -> N
 
 def test_return_latent_history(model: TextToImageDiffusion, config: dict) -> None:
     """
-    Test case for the TextToImageDiffusion model.
-
-    Parameters
-    ----------
-    model
-        The initialized TextToImageDiffusion model fixture.
-    config
-        The configuration dictionary for the test case.
+    Test case to check if the latent history is returned correctly.
 
     Raises
     ------

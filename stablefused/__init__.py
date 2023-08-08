@@ -6,7 +6,10 @@ from .diffusion import (
 )
 
 from .utils import (
+    ModelCache,
+    cache_model,
     denormalize,
+    load_model,
     normalize,
     numpy_to_pil,
     numpy_to_pt,

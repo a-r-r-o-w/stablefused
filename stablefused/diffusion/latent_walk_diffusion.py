@@ -20,10 +20,20 @@ class LatentWalkDiffusion(BaseDiffusion):
         vae: AutoencoderKL = None,
         unet: UNet2DConditionModel = None,
         scheduler: KarrasDiffusionSchedulers = None,
+        name: str = None,
+        torch_dtype: torch.dtype = torch.float32,
         device="cuda",
     ) -> None:
         super().__init__(
-            model_id, tokenizer, text_encoder, vae, unet, scheduler, device
+            model_id=model_id,
+            tokenizer=tokenizer,
+            text_encoder=text_encoder,
+            vae=vae,
+            unet=unet,
+            scheduler=scheduler,
+            name=name,
+            torch_dtype=torch_dtype,
+            device=device,
         )
 
     def modify_latent(
