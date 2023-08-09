@@ -1,7 +1,12 @@
 import torch
 
 from dataclasses import dataclass
-from diffusers import AutoencoderKL, DPMSolverMultistepScheduler, UNet2DConditionModel
+from diffusers import (
+    AutoencoderKL,
+    DPMSolverMultistepScheduler,
+    SchedulerMixin,
+    UNet2DConditionModel,
+)
 from diffusers.schedulers import KarrasDiffusionSchedulers
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, Dict
@@ -16,7 +21,7 @@ class StableDiffusionModel:
     text_encoder: CLIPTextModel
     vae: AutoencoderKL
     unet: UNet2DConditionModel
-    scheduler: KarrasDiffusionSchedulers
+    scheduler: SchedulerMixin
 
 
 class ModelCache:

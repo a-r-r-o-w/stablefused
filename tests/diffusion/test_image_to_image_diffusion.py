@@ -72,6 +72,7 @@ def test_return_latent_history(model: ImageToImageDiffusion, config: dict) -> No
     """
     dim = config.get("image_dim")
     image = torch.randn(1, 3, dim, dim)
+    history_size = config.get("num_inference_steps") + 1 - config.get("start_step")
 
     images = model(
         image=image,
@@ -83,13 +84,36 @@ def test_return_latent_history(model: ImageToImageDiffusion, config: dict) -> No
     )
 
     assert type(images) is np.ndarray
-    assert images.shape == (
-        1,
-        config.get("num_inference_steps") + 1 - config.get("start_step"),
-        3,
-        dim,
-        dim,
+    assert images.shape == (1, history_size, 3, dim, dim)
+
+
+def test_no_classifier_free_guidance(
+    model: ImageToImageDiffusion, config: dict
+) -> None:
+    """
+    Test case to check if the ImageToImageDiffusion is working correctly when classifier
+    free guidance is disabled.
+
+    Raises
+    ------
+    AssertionError
+        If the generated image is not of type np.ndarray.
+        If the generated image does not have the expected shape.
+    """
+    dim = config.get("image_dim")
+    image = torch.randn(1, 3, dim, dim)
+
+    images = model(
+        image=image,
+        prompt=config.get("prompt"),
+        num_inference_steps=config.get("num_inference_steps"),
+        start_step=config.get("start_step"),
+        output_type="np",
+        guidance_scale=1.0,  # setting guidance_scale <= 1.0 effectively disables classifier free guidance
     )
+
+    assert type(images) is np.ndarray
+    assert images.shape == (1, dim, dim, 3)
 
 
 if __name__ == "__main__":
