@@ -144,7 +144,6 @@ class ImageToImageDiffusion(BaseDiffusion):
         image_latent = self.image_to_latent(image)
         latent = self.embedding_to_latent(
             embedding=embedding,
-            image=image,
             num_inference_steps=num_inference_steps,
             start_step=start_step,
             guidance_scale=guidance_scale,
