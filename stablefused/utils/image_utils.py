@@ -1,3 +1,4 @@
+import imageio
 import numpy as np
 import torch
 
@@ -46,3 +47,24 @@ def normalize(images: torch.FloatTensor):
 def denormalize(images: torch.FloatTensor):
     """Denormalize an image array to the range [0.0, 1.0]"""
     return (0.5 + images / 2).clamp(0, 1)
+
+
+def pil_to_video(images: List[Image.Image], filename: str, fps: int = 60) -> None:
+    """Convert a list of PIL images to a video."""
+    frames = [np.array(image) for image in images]
+    with imageio.get_writer(filename, fps=fps) as video_writer:
+        for frame in frames:
+            video_writer.append_data(frame)
+
+
+def image_grid(images: List[Image.Image], rows: int, cols: int) -> Image.Image:
+    """Create a grid of images."""
+    if len(images) > rows * cols:
+        raise ValueError(
+            f"Number of images ({len(images)}) exceeds grid size ({rows}x{cols})."
+        )
+    w, h = images[0].size
+    grid = Image.new("RGB", size=(cols * w, rows * h))
+    for i, image in enumerate(images):
+        grid.paste(image, box=(i % cols * w, i // cols * h))
+    return grid
