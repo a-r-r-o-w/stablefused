@@ -9,7 +9,7 @@ from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, List, Optional, Union
 
-from ..utils import (
+from stablefused.utils import (
     cache_model,
     denormalize,
     load_model,
@@ -231,10 +231,28 @@ class BaseDiffusion(ABC):
         guidance_rescale: float,
     ) -> torch.FloatTensor:
         """Apply classifier-free guidance to noise prediction."""
+
+        # Perform guidance
         noise_unconditional, noise_prompt = noise_prediction.chunk(2)
         noise_prediction = noise_unconditional + guidance_scale * (
             noise_prompt - noise_unconditional
         )
+
+        # Rescale noise prediction according to guidance scale
+        # Based on findings in Section 3.4  of [Common Diffusion Noise Schedules and Sample
+        # Steps are Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+        std_prompt = noise_prompt.std(
+            dim=list(range(1, noise_prompt.ndim)), keepdim=True
+        )
+        std_prediction = noise_prediction.std(
+            dim=list(range(1, noise_prediction.ndim)), keepdim=True
+        )
+        noise_prediction_rescaled = noise_prediction * (std_prompt / std_prediction)
+        noise_prediction = (
+            noise_prediction * (1 - guidance_rescale)
+            + noise_prediction_rescaled * guidance_rescale
+        )
+
         return noise_prediction
 
     def latent_to_image(
