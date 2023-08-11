@@ -8,7 +8,7 @@ from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
-from .base_diffusion import BaseDiffusion
+from stablefused.diffusion import BaseDiffusion
 
 
 class TextToImageDiffusion(BaseDiffusion):

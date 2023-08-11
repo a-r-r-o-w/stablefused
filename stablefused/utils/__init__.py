@@ -1,3 +1,7 @@
+from .diffusion_utils import (
+    lerp,
+    slerp,
+)
 from .image_utils import (
     denormalize,
     normalize,
