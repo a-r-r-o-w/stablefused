@@ -99,7 +99,6 @@ def test_no_classifier_free_guidance(model: TextToImageDiffusion, config: dict) 
         If the generated image does not have the expected shape.
     """
     dim = config.get("image_dim")
-    image = torch.randn(1, 3, dim, dim)
 
     images = model(
         prompt=config.get("prompt"),

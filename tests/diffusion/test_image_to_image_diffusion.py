@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import pytest
 
-from stablefused import BaseDiffusion, ImageToImageDiffusion
+from stablefused import ImageToImageDiffusion
 
 
 @pytest.fixture
