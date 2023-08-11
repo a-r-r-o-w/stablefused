@@ -127,7 +127,7 @@ class TextToImageDiffusion(BaseDiffusion):
             if return_latent_history:
                 latent_history.append(latent)
 
-        return latent_history if return_latent_history else latent
+        return torch.stack(latent_history) if return_latent_history else latent
 
     @torch.no_grad()
     def __call__(

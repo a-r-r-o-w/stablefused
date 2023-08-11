@@ -311,16 +311,17 @@ class BaseDiffusion(ABC):
         latent: torch.FloatTensor,
         output_type: str,
         return_latent_history: bool,
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+    ) -> Union[torch.Tensor, np.ndarray, Image.Image, List[Image.Image]]:
         if output_type == "latent":
             return latent
 
         if return_latent_history:
-            image: np.ndarray = np.array(
-                [self.latent_to_image(l, output_type) for l in tqdm(latent)]
-            )
-            dims = len(image.shape)
-            image = np.transpose(image, (1, 0, *range(2, dims)))
+            latent = torch.transpose(latent, 0, 1)
+            image = [self.latent_to_image(l, output_type) for l in latent]
+            if output_type == "pt":
+                image = torch.stack(image)
+            elif output_type == "np":
+                image = np.stack(image)
         else:
             image = self.latent_to_image(latent, output_type)
         return image

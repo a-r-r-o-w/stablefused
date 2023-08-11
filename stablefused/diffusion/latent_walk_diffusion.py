@@ -118,7 +118,7 @@ class LatentWalkDiffusion(BaseDiffusion):
             if return_latent_history:
                 latent_history.append(latent)
 
-        return latent_history if return_latent_history else latent
+        return torch.stack(latent_history) if return_latent_history else latent
 
     def interpolate_embedding(
         self,

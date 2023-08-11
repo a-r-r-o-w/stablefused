@@ -83,7 +83,7 @@ def test_return_latent_history(model: ImageToImageDiffusion, config: dict) -> No
         return_latent_history=True,
     )
 
-    assert type(images) is np.ndarray
+    assert type(images) is torch.Tensor
     assert images.shape == (1, history_size, 3, dim, dim)
 
 

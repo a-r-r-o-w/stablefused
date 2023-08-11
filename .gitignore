@@ -4,6 +4,7 @@ __pycache__/
 .ipynb_checkpoints/
 *.model
 *.egg-info
+dist/
 
 # vscode
 .vscode/
