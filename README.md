@@ -69,7 +69,30 @@ These results are generated using the [Text to Image](https://github.com/a-r-r-o
 
 These results are generated using the [Image to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/image_to_image_diffusion.ipynb) notebook.
 
------------- PUT STUFF HERE -------------
+<table>
+<thead>
+  <tr>
+    <th>Source Image</th>
+    <th colspan="2">Denoising Diffusion Process<br></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><a href="https://mspoweruser.com/best-stable-diffusion-prompts/#1_The_Renaissance_Astrounaut" target="_blank" rel="noopener noreferrer">The Renaissance Astronaut</a></td>
+    <td>High quality and colorful photo of Robert J Oppenheimer, father of the atomic bomb, in a spacesuit, galaxy in the background, universe, octane render, realistic, 8k, bright colors</td>
+    <td>Stylistic photorealisic photo of Margot Robbie, playing the role of astronaut, pretty, beautiful, high contrast, high quality, galaxies, intricate detail, colorful, 8k</td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/cb5da9ed-80b3-4cd6-8874-ed3353967042" /></td>
+    <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/a0623f50-308b-40e1-a331-a7073c10281d" controls loop autoplay> Your browser does not support the video tag. </video></td>
+  </tr>
+</tbody>
+</table>
+
+<details>
+  <summary>PS</summary>
+  The results from Image to Image Diffusion don't seem very great from my experimentation. It might be some kind of bug in my implementation, which I'll have to look into later...
+</details>
 
 ### Understanding the effect of Guidance Scale
 
@@ -87,4 +110,29 @@ But... what happens when we set guidance scale to 0? Or negative? Let's find out
 
 When you use a negative value for the guidance scale, the model will try to generate images that are the opposite of what you specify in the prompt. For example, if you prompt the model to generate an image of an astronaut, and you use a negative guidance scale, the model will try to generate an image of everything but an astronaut. This can be a fun way to generate creative and unexpected images (sometimes NSFW or absolute horrendous stuff, if you are not using a safety-checker model - which is the case with StableFused).
 
------------- PUT STUFF HERE -------------
+##### Results
+
+The original images produced are too large to display in high quality here. You can find them in my [Drive](https://drive.google.com/drive/folders/13eZsi7y1LZxUHlaxagGTPS6pLwzBysU6?usp=sharing). These images are compressed from ~30 MB to ~6 MB in order for GitHub to accept uploads.
+
+<details>
+  <summary>
+    Effect of Guidance Scale on Different Prompts
+  </summary>
+
+  | Effect of Guidance Scale on Different Prompts |
+  | --- |
+  | Each row has first column set to the `guidance_scale` value. Each column has the same prompt. <br /> **Column 1:** _Artistic image, very detailed cute cat, cinematic lighting effect, cute, charming, fantasy art, digital painting, photorealistic_ <br /> **Column 2:** _A lion in galaxies, spirals, nebulae, stars, smoke, iridescent, intricate detail, octane render, 8k_ <br /> **Column 3:** _A grand city in the year 2100, atmospheric, hyper realistic, 8k, epic composition, cinematic, octane render_ <br /> **Column 4:** _Starry Night, painting style of Vincent van Gogh, Oil paint on canvas, Landscape with a starry night sky, dreamy, peaceful_ |
+  | <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/56d5f47d-b2c3-4a5a-924a-84edc857ebf3" /> |
+</details>
+
+<details>
+  <summary>
+    Effect of Guidance Scale with increased number of inference steps
+  </summary>
+
+  | Effect of Guidance Scale with increased number of inference steps |
+  | --- |
+  | Each row has first column set to the `guidance_scale` value. Columns have number of inference steps set to 3, 6, 12, 20, 25. <br /> **Prompt:** _Photorealistic illustration of a mystical alien creature, magnificent, strong, atomic, tyrannic, predator, unforgiving, full-body image_ |
+  | <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/eed3882d-b4bb-49b7-98e6-35bbd7faf519" /> |
+</details>
+
