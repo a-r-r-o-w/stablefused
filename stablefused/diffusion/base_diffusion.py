@@ -317,7 +317,7 @@ class BaseDiffusion(ABC):
 
         if return_latent_history:
             latent = torch.transpose(latent, 0, 1)
-            image = [self.latent_to_image(l, output_type) for l in latent]
+            image = [self.latent_to_image(l, output_type) for l in tqdm(latent)]
             if output_type == "pt":
                 image = torch.stack(image)
             elif output_type == "np":

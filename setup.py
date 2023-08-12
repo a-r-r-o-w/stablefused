@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="stablefused",
-    version="0.1.0",
+    version="0.1.1",
     description="StableFused",
     long_description="StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources!",
     long_description_content_type="text/markdown",
