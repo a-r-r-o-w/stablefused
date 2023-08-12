@@ -25,3 +25,6 @@ test/
 
 # datasets
 *.csv
+
+# images and videos to not increase repository size
+resources/results/

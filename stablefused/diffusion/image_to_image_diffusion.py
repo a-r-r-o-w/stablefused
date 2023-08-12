@@ -84,7 +84,7 @@ class ImageToImageDiffusion(BaseDiffusion):
             start_timestep = (
                 self.scheduler.timesteps[start_step].repeat(latent.shape[0]).long()
             )
-            noise = torch.randn(latent.shape).to(self.device)
+            noise = self.random_tensor(latent.shape)
             latent = self.scheduler.add_noise(latent, noise, start_timestep)
 
         timesteps = self.scheduler.timesteps[start_step:]

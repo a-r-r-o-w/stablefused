@@ -87,7 +87,7 @@ class TextToImageDiffusion(BaseDiffusion):
                 image_height // self.vae_scale_factor,
                 image_width // self.vae_scale_factor,
             )
-            latent = torch.randn(shape)
+            latent = self.random_tensor(shape)
         latent = latent.to(self.device)
 
         # Set number of inference steps in scheduler

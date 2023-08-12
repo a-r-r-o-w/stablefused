@@ -47,7 +47,7 @@ def test_image_to_image_diffusion(model: ImageToImageDiffusion, config: dict) ->
         If the generated image does not have the expected shape.
     """
     dim = config.get("image_dim")
-    image = torch.randn(1, 3, dim, dim)
+    image = model.random_tensor((1, 3, dim, dim))
 
     images = model(
         image=image,
@@ -71,7 +71,7 @@ def test_return_latent_history(model: ImageToImageDiffusion, config: dict) -> No
         If the generated image does not have the expected shape.
     """
     dim = config.get("image_dim")
-    image = torch.randn(1, 3, dim, dim)
+    image = model.random_tensor((1, 3, dim, dim))
     history_size = config.get("num_inference_steps") + 1 - config.get("start_step")
 
     images = model(
@@ -101,7 +101,7 @@ def test_no_classifier_free_guidance(
         If the generated image does not have the expected shape.
     """
     dim = config.get("image_dim")
-    image = torch.randn(1, 3, dim, dim)
+    image = model.random_tensor((1, 3, dim, dim))
 
     images = model(
         image=image,

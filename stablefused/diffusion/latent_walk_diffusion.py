@@ -44,7 +44,7 @@ class LatentWalkDiffusion(BaseDiffusion):
     ) -> torch.FloatTensor:
         """Modify latent with strength."""
 
-        noise = torch.randn(latent.shape).to(self.device)
+        noise = self.random_tensor(latent.shape)
         new_latent = (1 - strength) * latent + strength * noise
         new_latent = (new_latent - new_latent.mean()) / new_latent.std()
 

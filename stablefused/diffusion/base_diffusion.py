@@ -7,7 +7,7 @@ from diffusers import AutoencoderKL, SchedulerMixin, UNet2DConditionModel
 from diffusers.schedulers import KarrasDiffusionSchedulers
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from stablefused.utils import (
     cache_model,
@@ -35,6 +35,7 @@ class BaseDiffusion(ABC):
         device="cuda",
     ) -> None:
         self.device = device
+        self.torch_dtype = torch_dtype
 
         if model_id is None:
             if (
@@ -163,6 +164,11 @@ class BaseDiffusion(ABC):
     @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         pass
+
+    def random_tensor(self, shape: Union[List[int], Tuple[int]]) -> torch.FloatTensor:
+        """Generate a random tensor of the specified shape."""
+        rand_tensor = torch.randn(shape, device=self.device, dtype=self.torch_dtype)
+        return rand_tensor
 
     def prompt_to_embedding(
         self,

@@ -57,7 +57,7 @@ def test_latent_walk_diffusion(model: LatentWalkDiffusion, config: dict) -> None
     """
 
     dim = config.get("image_dim")
-    image = torch.randn(1, 3, dim, dim)
+    image = model.random_tensor((1, 3, dim, dim))
     latent = model.image_to_latent(image)
 
     images = model(
@@ -83,7 +83,7 @@ def test_no_classifier_free_guidance(model: LatentWalkDiffusion, config: dict) -
         If the generated image does not have the expected shape.
     """
     dim = config.get("image_dim")
-    image = torch.randn(1, 3, dim, dim)
+    image = model.random_tensor((1, 3, dim, dim))
     latent = model.image_to_latent(image)
 
     images = model(
@@ -112,7 +112,7 @@ def test_interpolate(model: LatentWalkDiffusion, config_interpolate: dict) -> No
     dim = config_interpolate.get("image_dim")
     num_prompts = len(config_interpolate.get("prompt"))
     image_count = config_interpolate.get("interpolation_steps") * (num_prompts - 1)
-    image = torch.randn(num_prompts, 3, dim, dim)
+    image = model.random_tensor((num_prompts, 3, dim, dim))
     latent = model.image_to_latent(image)
 
     images = model.interpolate(
