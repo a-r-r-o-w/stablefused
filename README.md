@@ -47,4 +47,6 @@ The following sources have been very helpful in helping me understand Stable Dif
 
 These results are generated using the [text_to_image](./examples/text_to_image.ipynb) notebook. Refer to the notebook for more details and enjoy the denoising process!
 
-
+<div align="center">
+  <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9528329d-ddc4-461e-9664-cbab3eb97123" />
+</div>
