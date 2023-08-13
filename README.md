@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/stablefused.svg)](https://badge.fury.io/py/stablefused)
 
-StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources!
+StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources! One of the main reasons I'm working on this project is to learn more about Stable Diffusion, and generative models in general. It is my current area of research at university. 
 
 ## Installation
 
@@ -51,47 +51,52 @@ The following sources have been very helpful in helping me understand Stable Dif
 
 ## Results
 
+All of the inference process for below results was done using the [Stable Diffusion v1.5](https://huggingface.co/runwayml/stable-diffusion-v1-5) model.
+
 ### Visualization of diffusion process
 
 Refer to the notebooks for more details and enjoy the denoising process!
 
-##### Text to Image
+<details>
+  <summary> Text to Image </summary>
+  These results are generated using the [Text to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/text_to_image_diffusion.ipynb) notebook.
 
-These results are generated using the [Text to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/text_to_image_diffusion.ipynb) notebook.
-
-<div align="center">
-  <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9528329d-ddc4-461e-9664-cbab3eb97123" controls loop autoplay>
-    Your browser does not support the video tag.
-  </video>
-</div>
-
-##### Image to Image
-
-These results are generated using the [Image to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/image_to_image_diffusion.ipynb) notebook.
-
-<table>
-<thead>
-  <tr>
-    <th>Source Image</th>
-    <th colspan="2">Denoising Diffusion Process<br></th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td><a href="https://mspoweruser.com/best-stable-diffusion-prompts/#1_The_Renaissance_Astrounaut" target="_blank" rel="noopener noreferrer">The Renaissance Astronaut</a></td>
-    <td>High quality and colorful photo of Robert J Oppenheimer, father of the atomic bomb, in a spacesuit, galaxy in the background, universe, octane render, realistic, 8k, bright colors</td>
-    <td>Stylistic photorealisic photo of Margot Robbie, playing the role of astronaut, pretty, beautiful, high contrast, high quality, galaxies, intricate detail, colorful, 8k</td>
-  </tr>
-  <tr>
-    <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/cb5da9ed-80b3-4cd6-8874-ed3353967042" /></td>
-    <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/a0623f50-308b-40e1-a331-a7073c10281d" controls loop autoplay> Your browser does not support the video tag. </video></td>
-  </tr>
-</tbody>
-</table>
+  <div align="center">
+    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9528329d-ddc4-461e-9664-cbab3eb97123" controls loop autoplay>
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</details>
 
 <details>
-  <summary>PS</summary>
-  The results from Image to Image Diffusion don't seem very great from my experimentation. It might be some kind of bug in my implementation, which I'll have to look into later...
+  <summary> Image to Image </summary>
+
+  These results are generated using the [Image to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/image_to_image_diffusion.ipynb) notebook.
+
+  <table>
+  <thead>
+    <tr>
+      <th>Source Image</th>
+      <th colspan="2">Denoising Diffusion Process</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://mspoweruser.com/best-stable-diffusion-prompts/#1_The_Renaissance_Astrounaut" target="_blank" rel="noopener noreferrer">The Renaissance Astronaut</a></td>
+      <td><i>High quality and colorful photo of Robert J Oppenheimer, father of the atomic bomb, in a spacesuit, galaxy in the background, universe, octane render, realistic, 8k, bright colors</i></td>
+      <td><i>Stylistic photorealisic photo of Margot Robbie, playing the role of astronaut, pretty, beautiful, high contrast, high quality, galaxies, intricate detail, colorful, 8k</i></td>
+    </tr>
+    <tr>
+      <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/cb5da9ed-80b3-4cd6-8874-ed3353967042" /></td>
+      <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/a0623f50-308b-40e1-a331-a7073c10281d" controls loop autoplay> Your browser does not support the video tag. </video></td>
+    </tr>
+  </tbody>
+  </table>
+
+  <details>
+    <summary>PS</summary>
+    The results from Image to Image Diffusion don't seem very great from my experimentation. It might be some kind of bug in my implementation, which I'll have to look into later...
+  </details>
 </details>
 
 ### Understanding the effect of Guidance Scale
@@ -132,11 +137,69 @@ The original images produced are too large to display in high quality here. You 
 
   | Effect of Guidance Scale with increased number of inference steps |
   | --- |
-  | Each row has first column set to the `guidance_scale` value. Columns have number of inference steps set to 3, 6, 12, 20, 25. <br /> **Prompt:** _Photorealistic illustration of a mystical alien creature, magnificent, strong, atomic, tyrannic, predator, unforgiving, full-body image_ |
+  | Columns have number of inference steps set to 3, 6, 12, 20, 25. <br /> **Prompt:** _Photorealistic illustration of a mystical alien creature, magnificent, strong, atomic, tyrannic, predator, unforgiving, full-body image_ |
   | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/0b04be90-b16a-4ac0-9968-eccd2e8bbc41" controls loop autoplay> Your browser does not support the video tag. </video></div> |
   | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b10fd3cd-5d21-4a70-9df3-b82b722eae62" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 </details>
-![mechanical-robot-latent-walk](https://github.com/a-r-r-o-w/stablefused/assets/72266394/6861310e-3d6b-4502-be78-c19f67ecb2df)
-![mechanical-robot-base-image](https://github.com/a-r-r-o-w/stablefused/assets/72266394/9ac18556-d52f-4b5d-b563-a4d863451d65)
 
-https://github.com/a-r-r-o-w/stablefused/assets/72266394/d0c28123-cf08-446c-87ed-a71b5519bcf1
+### Latent Walk
+
+Generative models, like the ones used in Stable Diffusion, learn a latent representation of the world. A latent representation is a low-dimensional vector space embedding of the world. In the case of SD, this latent representation is learnt by training on text-image pairs. This representation is used to generate samples given a prompt and a random noise vector. The model tries to predict and remove noise from the random noise vector, while also aligning the vector to the prompt. This results in some interesting properties of the latent space.
+
+Stable Diffusion models (atleast, the models used here) learn two latent representations - one of the NLP space for prompts, and one of the image space. These latent representations are continuous. If we choose two vectors in the latent space to sample from, we get two different/similar images depending on how different the chosen vectors are. This is the basis of latent walking. We can choose two vectors in the latent space, and sample from the latent path between them. This results in a smooth transition between the two images.
+
+<details>
+  <summary> Similar Image Generation by sampling latent space </summary>
+  <table>
+  <thead>
+    <tr>
+      <th>Source Image</th>
+      <th>Latent Walks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="2">
+        <i> Large futuristic mechanical robot in the foreground of a baroque-style battle scene, photorealistic, high quality, 8k </i>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9ac18556-d52f-4b5d-b563-a4d863451d65">
+      </td>
+      <td>
+        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/6861310e-3d6b-4502-be78-c19f67ecb2df">
+      </td>
+    </tr>
+  </tbody>
+</details>
+
+<details>
+  <summary>
+    Generating Latent Walk videos
+  </summary>
+
+  | Generating Latent Walk videos |
+  | :-: |
+  | **Prompt 1:** _A dog chasing a cat in a thrilling backyard scene, high quality and photorealistic_  <br /> **Prompt 2:** _A determined dog in hot pursuit, with stunning realism, octane render_  <br /> **Prompt 3:** _A thrilling chase, dog behind the cat, octane render, exceptional realism and quality_  <br /> **Prompt 4:** _The exciting moment of a cat outmaneuvering a chasing dog, high-quality and photorealistic detail_  <br /> **Prompt 5:** _A clever cat escaping a determined dog and soaring into space, rendered with octane render for stunning realism_  <br /> **Prompt 6:** _The cat's escape into the cosmos, leaving the dog behind in a scene,high quality and photorealistic style_  <br /> |
+  | <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/d0c28123-cf08-446c-87ed-a71b5519bcf1" controls loop autoplay> Your browser does not support the video tag. </video> |
+
+  Note that these results aren't very good. I tried different seeds but for this story, I couldn't make a great video. I did try some other prompts and got better results, but I like this story so I'm sticking with it 🤓
+  You can improve the results by using better prompts and increasing the number of interpolation and inference steps.
+</details>
+
+## Future
+
+At the moment, I'm not sure if I'll continue to expand on this project, but if I do, here are some things I have in mind (in no particular order, and for documentation purposes):
+
+- Add support for more techniques of inference - explore new sampling techniques and optimize diffusion paths
+- Implement and stay up-to-date with the latest papers in the field
+- Removing 🧨 diffusers as a dependency by implementing all required components myself
+- Create user-friendly web demos or GUI tools to make experimentation easier.
+- Add LoRA, training and fine-tuning support
+- Improve codebase, documentation and tests
+- Improve support for not only Stable Diffusion, but other diffusion techniques, involving but not limited to audio, video, etc.
+
+## License
+
+MIT
