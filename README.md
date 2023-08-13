@@ -121,8 +121,8 @@ The original images produced are too large to display in high quality here. You 
 
   | Effect of Guidance Scale on Different Prompts |
   | --- |
-  | Each row has first column set to the `guidance_scale` value. Each column has the same prompt. <br /> **Column 1:** _Artistic image, very detailed cute cat, cinematic lighting effect, cute, charming, fantasy art, digital painting, photorealistic_ <br /> **Column 2:** _A lion in galaxies, spirals, nebulae, stars, smoke, iridescent, intricate detail, octane render, 8k_ <br /> **Column 3:** _A grand city in the year 2100, atmospheric, hyper realistic, 8k, epic composition, cinematic, octane render_ <br /> **Column 4:** _Starry Night, painting style of Vincent van Gogh, Oil paint on canvas, Landscape with a starry night sky, dreamy, peaceful_ |
-  | <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/56d5f47d-b2c3-4a5a-924a-84edc857ebf3" /> |
+  | Each image is sampled with the same prompt and seed to ensure only the guidance scale plays a role. <br /> **Column 1:** _Artistic image, very detailed cute cat, cinematic lighting effect, cute, charming, fantasy art, digital painting, photorealistic_ <br /> **Column 2:** _A lion in galaxies, spirals, nebulae, stars, smoke, iridescent, intricate detail, octane render, 8k_ <br /> **Column 3:** _A grand city in the year 2100, atmospheric, hyper realistic, 8k, epic composition, cinematic, octane render_ <br /> **Column 4:** _Starry Night, painting style of Vincent van Gogh, Oil paint on canvas, Landscape with a starry night sky, dreamy, peaceful_ |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/334e1426-fe75-4e21-bfe2-b0af324ac4df" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 </details>
 
 <details>
@@ -133,6 +133,10 @@ The original images produced are too large to display in high quality here. You 
   | Effect of Guidance Scale with increased number of inference steps |
   | --- |
   | Each row has first column set to the `guidance_scale` value. Columns have number of inference steps set to 3, 6, 12, 20, 25. <br /> **Prompt:** _Photorealistic illustration of a mystical alien creature, magnificent, strong, atomic, tyrannic, predator, unforgiving, full-body image_ |
-  | <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/eed3882d-b4bb-49b7-98e6-35bbd7faf519" /> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/0b04be90-b16a-4ac0-9968-eccd2e8bbc41" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b10fd3cd-5d21-4a70-9df3-b82b722eae62" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 </details>
+![mechanical-robot-latent-walk](https://github.com/a-r-r-o-w/stablefused/assets/72266394/6861310e-3d6b-4502-be78-c19f67ecb2df)
+![mechanical-robot-base-image](https://github.com/a-r-r-o-w/stablefused/assets/72266394/9ac18556-d52f-4b5d-b563-a4d863451d65)
 
+https://github.com/a-r-r-o-w/stablefused/assets/72266394/d0c28123-cf08-446c-87ed-a71b5519bcf1
