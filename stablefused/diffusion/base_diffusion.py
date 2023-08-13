@@ -230,7 +230,7 @@ class BaseDiffusion(ABC):
 
         return embedding
 
-    def do_classifier_free_guidance(
+    def classifier_free_guidance(
         self,
         noise_prediction: torch.FloatTensor,
         guidance_scale: float,

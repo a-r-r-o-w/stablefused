@@ -107,7 +107,7 @@ class LatentWalkDiffusion(BaseDiffusion):
                 return_dict=False,
             )[0]
 
-            noise_prediction = self.do_classifier_free_guidance(
+            noise_prediction = self.classifier_free_guidance(
                 noise_prediction, guidance_scale, guidance_rescale
             )
 
@@ -154,9 +154,17 @@ class LatentWalkDiffusion(BaseDiffusion):
             )
 
         unconditional_embedding, text_embedding = embedding.chunk(2)
-        steps = torch.linspace(
-            0, 1, interpolation_steps, dtype=embedding.dtype, device=embedding.device
-        ).numpy()
+        steps = (
+            torch.linspace(
+                0,
+                1,
+                interpolation_steps,
+                dtype=embedding.dtype,
+                device=embedding.device,
+            )
+            .cpu()
+            .numpy()
+        )
         steps = np.expand_dims(steps, axis=tuple(range(1, text_embedding.ndim)))
         interpolations = []
 
@@ -207,7 +215,9 @@ class LatentWalkDiffusion(BaseDiffusion):
         elif interpolation_type == "slerp":
             interpolation_fn = slerp
 
-        steps = torch.linspace(0, 1, interpolation_steps, dtype=latent.dtype).numpy()
+        steps = (
+            torch.linspace(0, 1, interpolation_steps, dtype=latent.dtype).cpu().numpy()
+        )
         steps = np.expand_dims(steps, axis=tuple(range(1, latent.ndim)))
         interpolations = []
 

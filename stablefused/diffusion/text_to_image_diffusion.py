@@ -115,7 +115,7 @@ class TextToImageDiffusion(BaseDiffusion):
             )[0]
 
             # Perform classifier free guidance
-            noise_prediction = self.do_classifier_free_guidance(
+            noise_prediction = self.classifier_free_guidance(
                 noise_prediction, guidance_scale, guidance_rescale
             )
 

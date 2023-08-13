@@ -103,7 +103,7 @@ class ImageToImageDiffusion(BaseDiffusion):
                 return_dict=False,
             )[0]
 
-            noise_prediction = self.do_classifier_free_guidance(
+            noise_prediction = self.classifier_free_guidance(
                 noise_prediction, guidance_scale, guidance_rescale
             )
 

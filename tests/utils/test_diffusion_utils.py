@@ -84,7 +84,7 @@ def test_slerp(v0, v1, t, expected):
     v1_torch = torch.from_numpy(v1)
 
     result = slerp(v0, v1, t)
-    result_torch = slerp(v0_torch, v1_torch, t).numpy()
+    result_torch = slerp(v0_torch, v1_torch, t).cpu().numpy()
 
     np.testing.assert_allclose(result, expected, rtol=1e-5, atol=1e-8)
     torch.testing.assert_close(result_torch, expected, rtol=1e-5, atol=1e-8)

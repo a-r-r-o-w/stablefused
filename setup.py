@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 setup(
     name="stablefused",
-    version="0.1.2",
+    version="0.1.4",
     description="StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources!",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -46,7 +46,7 @@ setup(
         "Operating System :: Unix",
         "License :: OSI Approved :: MIT License",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    ]
+    ],
 )
 
 # Steps to publish:
