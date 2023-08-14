@@ -128,7 +128,7 @@ The original images produced are too large to display in high quality here. You 
   | Effect of Guidance Scale on Different Prompts |
   | --- |
   | Each image is sampled with the same prompt and seed to ensure only the guidance scale plays a role. <br /> **Column 1:** _Artistic image, very detailed cute cat, cinematic lighting effect, cute, charming, fantasy art, digital painting, photorealistic_ <br /> **Column 2:** _A lion in galaxies, spirals, nebulae, stars, smoke, iridescent, intricate detail, octane render, 8k_ <br /> **Column 3:** _A grand city in the year 2100, atmospheric, hyper realistic, 8k, epic composition, cinematic, octane render_ <br /> **Column 4:** _Starry Night, painting style of Vincent van Gogh, Oil paint on canvas, Landscape with a starry night sky, dreamy, peaceful_ |
-  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/334e1426-fe75-4e21-bfe2-b0af324ac4df" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/eaed82ee-df31-4a37-943a-ea0d1a65ca35" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 </details>
 
 <details>
@@ -139,8 +139,9 @@ The original images produced are too large to display in high quality here. You 
   | Effect of Guidance Scale with increased number of inference steps |
   | --- |
   | Columns have number of inference steps set to 3, 6, 12, 20, 25. <br /> **Prompt:** _Photorealistic illustration of a mystical alien creature, magnificent, strong, atomic, tyrannic, predator, unforgiving, full-body image_ |
-  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/0b04be90-b16a-4ac0-9968-eccd2e8bbc41" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b983a60e-8168-42b5-ba39-8323ab724082" controls loop autoplay> Your browser does not support the video tag. </video></div> |
   | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b10fd3cd-5d21-4a70-9df3-b82b722eae62" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/11786fda-3c7a-45ae-aa3e-128b45cf4ef1" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 </details>
 
 ### Latent Walk
