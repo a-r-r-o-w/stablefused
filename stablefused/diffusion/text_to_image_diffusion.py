@@ -53,7 +53,7 @@ class TextToImageDiffusion(BaseDiffusion):
         Parameters
         ----------
         embedding: torch.FloatTensor
-            CLIP embedding of text prompt.
+            Embedding of text prompt.
         image_height: int
             Height of image to generate.
         image_width: int
@@ -90,7 +90,7 @@ class TextToImageDiffusion(BaseDiffusion):
             latent = self.random_tensor(shape)
         latent = latent.to(self.device)
 
-        # Set number of inference steps in scheduler
+        # Set number of inference steps
         self.scheduler.set_timesteps(num_inference_steps)
         timesteps = self.scheduler.timesteps
 
@@ -143,18 +143,56 @@ class TextToImageDiffusion(BaseDiffusion):
         output_type: str = "pil",
         return_latent_history: bool = False,
     ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
-        """Generate image(s) from prompt(s)."""
+        """
+        Run inference by conditioning on text prompt.
 
+        Parameters
+        ----------
+        prompt: Union[str, List[str]]
+            Text prompt to condition on.
+        image_height: int
+            Height of image to generate.
+        image_width: int
+            Width of image to generate.
+        num_inference_steps: int
+            Number of diffusion steps to run.
+        guidance_scale: float
+            Guidance scale encourages the model to generate images following the prompt
+            closely, albeit at the cost of image quality.
+        guidance_rescale: float
+            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+        negative_prompt: Optional[Union[str, List[str]]]
+            Negative text prompt to uncondition on.
+        latent: Optional[torch.FloatTensor]
+            Latent to start from. If None, latent is generated from noise.
+        output_type: str
+            Type of output to return. One of ["latent", "pil", "pt", "np"].
+        return_latent_history: bool
+            Whether to return the latent history. If True, return list of all latents
+            generated during diffusion steps.
+        
+        Returns
+        -------
+        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+            Generated output based on output_type.
+        """
+
+        # Validate input
         self.validate_input(
             prompt=prompt,
             negative_prompt=negative_prompt,
             image_height=image_height,
             image_width=image_width,
         )
+
+        # Generate embedding to condition on prompt and uncondition on negative prompt
         embedding = self.prompt_to_embedding(
             prompt=prompt,
             negative_prompt=negative_prompt,
         )
+
+        # Run inference
         latent = self.embedding_to_latent(
             embedding=embedding,
             image_height=image_height,

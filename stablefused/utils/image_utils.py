@@ -7,19 +7,55 @@ from typing import List, Union
 
 
 def pt_to_numpy(images: torch.FloatTensor) -> np.ndarray:
-    """Convert pytorch tensor to numpy image."""
+    """
+    Convert pytorch tensor to numpy image.
+
+    Parameters
+    ----------
+    images: torch.FloatTensor
+        Image represented as a pytorch tensor (N, C, H, W).
+    
+    Returns
+    -------
+    np.ndarray
+        Image represented as a numpy array (N, H, W, C).
+    """
     return images.detach().cpu().permute(0, 2, 3, 1).float().numpy()
 
 
 def numpy_to_pt(images: np.ndarray) -> torch.FloatTensor:
-    """Convert numpy image to pytorch tensor."""
+    """
+    Convert numpy image to pytorch tensor.
+
+    Parameters
+    ----------
+    images: np.ndarray
+        Image represented as a numpy array (N, H, W, C).
+    
+    Returns
+    -------
+    torch.FloatTensor
+        Image represented as a pytorch tensor (N, C, H, W).
+    """
     if images.ndim == 3:
         images = images[..., None]
     return torch.from_numpy(images.transpose(0, 3, 1, 2))
 
 
 def numpy_to_pil(images: np.ndarray) -> Image.Image:
-    """Convert numpy image to PIL image."""
+    """
+    Convert numpy image to PIL image.
+
+    Parameters
+    ----------
+    images: np.ndarray
+        Image represented as a numpy array (N, H, W, C).
+    
+    Returns
+    -------
+    Image.Image
+        Image represented as a PIL image.
+    """
     if images.ndim == 3:
         images = images[None, ...]
     images = (images * 255).round().astype("uint8")
@@ -31,7 +67,23 @@ def numpy_to_pil(images: np.ndarray) -> Image.Image:
 
 
 def pil_to_numpy(images: Union[List[Image.Image], Image.Image]) -> np.ndarray:
-    """Convert PIL image to numpy image."""
+    """
+    Convert PIL image to numpy image.
+
+    Parameters
+    ----------
+    images: Union[List[Image.Image], Image.Image]
+        PIL image or list of PIL images.
+    
+    Returns
+    -------
+    np.ndarray
+        Image represented as a numpy array (N, H, W, C).
+    """
+    if not isinstance(images, Image.Image) and not isinstance(images, list):
+        raise ValueError(
+            f"Expected PIL image or list of PIL images, got {type(images)}."
+        )
     if not isinstance(images, list):
         images = [images]
     images = [np.array(image).astype(np.float32) / 255.0 for image in images]
@@ -39,18 +91,53 @@ def pil_to_numpy(images: Union[List[Image.Image], Image.Image]) -> np.ndarray:
     return images
 
 
-def normalize(images: torch.FloatTensor):
-    """Normalize an image array to the range [-1, 1]."""
+def normalize(images: torch.FloatTensor) -> torch.FloatTensor:
+    """
+    Normalize an image array to the range [-1, 1].
+
+    Parameters
+    ----------
+    images: torch.FloatTensor
+        Image represented as a pytorch tensor (N, C, H, W).
+    
+    Returns
+    -------
+    torch.FloatTensor
+        Normalized image as pytorch tensor.
+    """
     return 2.0 * images - 1.0
 
 
-def denormalize(images: torch.FloatTensor):
-    """Denormalize an image array to the range [0.0, 1.0]"""
+def denormalize(images: torch.FloatTensor) -> torch.FloatTensor:
+    """
+    Denormalize an image array to the range [0.0, 1.0].
+
+    Parameters
+    ----------
+    images: torch.FloatTensor
+        Image represented as a pytorch tensor (N, C, H, W).
+    
+    Returns
+    -------
+    torch.FloatTensor
+        Denormalized image as pytorch tensor.
+    """
     return (0.5 + images / 2).clamp(0, 1)
 
 
 def pil_to_video(images: List[Image.Image], filename: str, fps: int = 60) -> None:
-    """Convert a list of PIL images to a video."""
+    """
+    Convert a list of PIL images to a video.
+
+    Parameters
+    ----------
+    images: List[Image.Image]
+        List of PIL images.
+    filename: str
+        Filename to save video to.
+    fps: int
+        Frames per second of video.
+    """
     frames = [np.array(image) for image in images]
     with imageio.get_writer(filename, fps=fps) as video_writer:
         for frame in frames:
@@ -58,7 +145,23 @@ def pil_to_video(images: List[Image.Image], filename: str, fps: int = 60) -> Non
 
 
 def image_grid(images: List[Image.Image], rows: int, cols: int) -> Image.Image:
-    """Create a grid of images."""
+    """
+    Create a grid of images on a single PIL image.
+
+    Parameters
+    ----------
+    images: List[Image.Image]
+        List of PIL images.
+    rows: int
+        Number of rows in grid.
+    cols: int
+        Number of columns in grid.
+    
+    Returns
+    -------
+    Image.Image
+        Grid of images as a PIL image.
+    """
     if len(images) > rows * cols:
         raise ValueError(
             f"Number of images ({len(images)}) exceeds grid size ({rows}x{cols})."

@@ -9,6 +9,24 @@ def lerp(
     v1: Union[torch.Tensor, np.ndarray],
     t: Union[float, torch.Tensor, np.ndarray],
 ) -> Union[torch.Tensor, np.ndarray]:
+    """
+    Linearly interpolate between two vectors/tensors.
+
+    Parameters
+    ----------
+    v0: Union[torch.Tensor, np.ndarray]
+        First vector/tensor.
+    v1: Union[torch.Tensor, np.ndarray]
+        Second vector/tensor.
+    t: Union[float, torch.Tensor, np.ndarray]
+        Interpolation factor. If float, must be between 0 and 1. If np.ndarray or
+        torch.Tensor, must be one dimensional with values between 0 and 1.
+
+    Returns
+    -------
+    Union[torch.Tensor, np.ndarray]
+        Interpolated vector/tensor between v0 and v1.
+    """
     inputs_are_torch = False
     t_is_float = False
 
@@ -62,6 +80,11 @@ def slerp(
         dimensional with values between 0 and 1.
     DOT_THRESHOLD: float
         Threshold for when to use linear interpolation instead of spherical interpolation.
+    
+    Returns
+    -------
+    Union[torch.Tensor, np.ndarray]
+        Interpolated vector/tensor between v0 and v1.
     """
     inputs_are_torch = False
     t_is_float = False

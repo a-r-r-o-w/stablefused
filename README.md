@@ -28,7 +28,7 @@ pip install -e ".[dev]"
 
 ## Usage
 
-Checkout the [examples](./examples) folder for notebooks 🥰
+Checkout the [examples](https://github.com/a-r-r-o-w/stablefused/tree/main/examples) folder for notebooks 🥰
 
 ## Contributing
 
@@ -36,9 +36,9 @@ Contributions are welcome! Note that this project is not a serious implementatio
 
 As I'm not an expert in this field, I will have probably made a lot of mistakes. If you find any, please open an issue or a PR. I'll be happy to learn from you!
 
-## Acknowledgements
+## Acknowledgements/Resources
 
-The following sources have been very helpful in helping me understand Stable Diffusion. I highly recommend you to check them out!
+The following sources have been very helpful to me in understanding Stable Diffusion. I highly recommend you to check them out!
 
 - [🤗 diffusers](https://github.com/huggingface/diffusers)
 - [Karpathy's gist on latent walking](https://gist.github.com/karpathy/00103b0037c5aaea32fe1da1af553355)
@@ -59,6 +59,7 @@ Refer to the notebooks for more details and enjoy the denoising process!
 
 <details>
   <summary> Text to Image </summary>
+
   These results are generated using the [Text to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/text_to_image_diffusion.ipynb) notebook.
 
   <div align="center">
@@ -172,6 +173,7 @@ Stable Diffusion models (atleast, the models used here) learn two latent represe
       </td>
     </tr>
   </tbody>
+  </table>
 </details>
 
 <details>
@@ -180,9 +182,9 @@ Stable Diffusion models (atleast, the models used here) learn two latent represe
   </summary>
 
   | Generating Latent Walk videos |
-  | :-: |
+  | --- |
   | **Prompt 1:** _A dog chasing a cat in a thrilling backyard scene, high quality and photorealistic_  <br /> **Prompt 2:** _A determined dog in hot pursuit, with stunning realism, octane render_  <br /> **Prompt 3:** _A thrilling chase, dog behind the cat, octane render, exceptional realism and quality_  <br /> **Prompt 4:** _The exciting moment of a cat outmaneuvering a chasing dog, high-quality and photorealistic detail_  <br /> **Prompt 5:** _A clever cat escaping a determined dog and soaring into space, rendered with octane render for stunning realism_  <br /> **Prompt 6:** _The cat's escape into the cosmos, leaving the dog behind in a scene,high quality and photorealistic style_  <br /> |
-  | <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/d0c28123-cf08-446c-87ed-a71b5519bcf1" controls loop autoplay> Your browser does not support the video tag. </video> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/d0c28123-cf08-446c-87ed-a71b5519bcf1" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 
   Note that these results aren't very good. I tried different seeds but for this story, I couldn't make a great video. I did try some other prompts and got better results, but I like this story so I'm sticking with it 🤓
   You can improve the results by using better prompts and increasing the number of interpolation and inference steps.

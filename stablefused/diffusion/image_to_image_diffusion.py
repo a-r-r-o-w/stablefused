@@ -52,7 +52,7 @@ class ImageToImageDiffusion(BaseDiffusion):
         Parameters
         ----------
         embedding: torch.FloatTensor
-            CLIP embedding of text prompt.
+            Embedding of text prompt.
         num_inference_steps: int
             Number of diffusion steps to run.
         start_step: int
@@ -78,24 +78,29 @@ class ImageToImageDiffusion(BaseDiffusion):
         """
 
         latent = latent.to(self.device)
+
+        # Set number of inference steps
         self.scheduler.set_timesteps(num_inference_steps)
 
-        if start_step > 0:
-            start_timestep = (
-                self.scheduler.timesteps[start_step].repeat(latent.shape[0]).long()
-            )
-            noise = self.random_tensor(latent.shape)
-            latent = self.scheduler.add_noise(latent, noise, start_timestep)
+        # Add noise to latent based on start step
+        start_timestep = (
+            self.scheduler.timesteps[start_step].repeat(latent.shape[0]).long()
+        )
+        noise = self.random_tensor(latent.shape)
+        latent = self.scheduler.add_noise(latent, noise, start_timestep)
 
         timesteps = self.scheduler.timesteps[start_step:]
         latent_history = [latent]
 
+        # Diffusion inference loop
         for i, timestep in tqdm(list(enumerate(timesteps))):
+            # Duplicate latent to avoid two forward passes to perform classifier free guidance
             latent_model_input = torch.cat([latent] * 2)
             latent_model_input = self.scheduler.scale_model_input(
                 latent_model_input, timestep
             )
 
+            # Predict noise
             noise_prediction = self.unet(
                 latent_model_input,
                 timestep,
@@ -103,10 +108,12 @@ class ImageToImageDiffusion(BaseDiffusion):
                 return_dict=False,
             )[0]
 
+            # Perform classifier free guidance
             noise_prediction = self.classifier_free_guidance(
                 noise_prediction, guidance_scale, guidance_rescale
             )
 
+            # Update latent
             latent = self.scheduler.step(
                 noise_prediction, timestep, latent, return_dict=False
             )[0]
@@ -129,19 +136,58 @@ class ImageToImageDiffusion(BaseDiffusion):
         output_type: str = "pil",
         return_latent_history: bool = False,
     ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
-        """Generate image(s) from image(s)."""
+        """
+        Run inference by conditining on input image and text prompt.
 
+        Parameters
+        ----------
+        image: Image.Image
+            Input image to condition on.
+        prompt: Union[str, List[str]]
+            Text prompt to condition on.
+        num_inference_steps: int
+            Number of diffusion steps to run.
+        start_step: int
+            Step to start diffusion from. The higher the value, the more similar the generated
+            image will be to the input image.
+        guidance_scale: float
+            Guidance scale encourages the model to generate images following the prompt
+            closely, albeit at the cost of image quality.
+        guidance_rescale: float
+            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+        negative_prompt: Optional[Union[str, List[str]]]
+            Negative text prompt to uncondition on.
+        output_type: str
+            Type of output to return. One of ["latent", "pil", "pt", "np"].
+        return_latent_history: bool
+            Whether to return the latent history. If True, return list of all latents
+            generated during diffusion steps.
+        
+        Returns
+        -------
+        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+            Generated output based on output_type.
+        """
+
+        # Validate input
         self.validate_input(
             prompt=prompt,
             negative_prompt=negative_prompt,
             start_step=start_step,
             num_inference_steps=num_inference_steps,
         )
+
+        # Generate embedding to condition on prompt and uncondition on negative prompt
         embedding = self.prompt_to_embedding(
             prompt=prompt,
             negative_prompt=negative_prompt,
         )
+
+        # Generate latent from input image
         image_latent = self.image_to_latent(image)
+
+        # Run inference
         latent = self.embedding_to_latent(
             embedding=embedding,
             num_inference_steps=num_inference_steps,

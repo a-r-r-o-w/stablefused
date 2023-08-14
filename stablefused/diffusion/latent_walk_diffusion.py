@@ -42,12 +42,24 @@ class LatentWalkDiffusion(BaseDiffusion):
         latent: torch.FloatTensor,
         strength: float,
     ) -> torch.FloatTensor:
-        """Modify latent with strength."""
+        """
+        Modify a latent vector by adding noise.
 
+        Parameters
+        ----------
+        latent: torch.FloatTensor
+            The input latent vector to modify.
+        strength: float
+            The strength of the modification, controlling the amount of noise added.
+
+        Returns
+        -------
+        torch.FloatTensor
+            Modified latent vector.
+        """
         noise = self.random_tensor(latent.shape)
         new_latent = (1 - strength) * latent + strength * noise
         new_latent = (new_latent - new_latent.mean()) / new_latent.std()
-
         return new_latent
 
     def embedding_to_latent(
@@ -65,7 +77,7 @@ class LatentWalkDiffusion(BaseDiffusion):
         Parameters
         ----------
         embedding: torch.FloatTensor
-            CLIP embedding of text prompt.
+            Embedding of text prompt.
         num_inference_steps: int
             Number of diffusion steps to run.
         guidance_scale: float
@@ -88,18 +100,24 @@ class LatentWalkDiffusion(BaseDiffusion):
         """
 
         latent = latent.to(self.device)
+
+        # Set number of inference steps
         self.scheduler.set_timesteps(num_inference_steps)
         timesteps = self.scheduler.timesteps
 
+        # Scales the latent noise by the standard deviation required by the scheduler
         latent = latent * self.scheduler.init_noise_sigma
         latent_history = [latent]
 
+        # Diffusion inference loop
         for i, timestep in tqdm(list(enumerate(timesteps))):
+            # Duplicate latent to avoid two forward passes to perform classifier free guidance
             latent_model_input = torch.cat([latent] * 2)
             latent_model_input = self.scheduler.scale_model_input(
                 latent_model_input, timestep
             )
 
+            # Predict noise
             noise_prediction = self.unet(
                 latent_model_input,
                 timestep,
@@ -107,10 +125,12 @@ class LatentWalkDiffusion(BaseDiffusion):
                 return_dict=False,
             )[0]
 
+            # Perform classifier free guidance
             noise_prediction = self.classifier_free_guidance(
                 noise_prediction, guidance_scale, guidance_rescale
             )
 
+            # Update latent
             latent = self.scheduler.step(
                 noise_prediction, timestep, latent, return_dict=False
             )[0]
@@ -127,12 +147,12 @@ class LatentWalkDiffusion(BaseDiffusion):
         interpolation_type: str,
     ) -> torch.FloatTensor:
         """
-        Interpolate embedding.
+        Interpolate based on interpolation type.
 
         Parameters
         ----------
         embedding: torch.FloatTensor
-            CLIP embedding of text prompt.
+            Embedding of text prompt.
         interpolation_steps: Union[int, List[int]]
             Number of interpolation steps to run.
         embedding_interpolation_type: str
@@ -153,21 +173,15 @@ class LatentWalkDiffusion(BaseDiffusion):
                 f"embedding_interpolation_type must be one of ['lerp', 'slerp'], got {interpolation_type}."
             )
 
+        # Split embedding into unconditional and text embeddings
         unconditional_embedding, text_embedding = embedding.chunk(2)
-        steps = (
-            torch.linspace(
-                0,
-                1,
-                interpolation_steps,
-                dtype=embedding.dtype,
-                device=embedding.device,
-            )
-            .cpu()
-            .numpy()
-        )
+        steps = torch.linspace(0, 1, interpolation_steps, dtype=embedding.dtype).cpu().numpy()
         steps = np.expand_dims(steps, axis=tuple(range(1, text_embedding.ndim)))
         interpolations = []
 
+        # Interpolate between text embeddings
+        # TODO: Think of a better way of doing this
+        # See if it can be done parallelly instead
         for i in range(text_embedding.shape[0] - 1):
             interpolations.append(
                 interpolation_fn(
@@ -193,7 +207,7 @@ class LatentWalkDiffusion(BaseDiffusion):
         interpolation_type: str,
     ) -> torch.FloatTensor:
         """
-        Interpolate latent.
+        Interpolate latent based on interpolation type.
 
         Parameters
         ----------
@@ -221,6 +235,9 @@ class LatentWalkDiffusion(BaseDiffusion):
         steps = np.expand_dims(steps, axis=tuple(range(1, latent.ndim)))
         interpolations = []
 
+        # Interpolate between latents
+        # TODO: Think of a better way of doing this
+        # See if it can be done parallelly instead
         for i in range(latent.shape[0] - 1):
             interpolations.append(
                 interpolation_fn(latent[i], latent[i + 1], steps).squeeze(dim=1)
@@ -241,18 +258,56 @@ class LatentWalkDiffusion(BaseDiffusion):
         output_type: str = "pil",
         return_latent_history: bool = False,
     ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
-        """Walk latent space from latent to generate similar image(s)."""
+        """
+        Run inference by conditioning on text prompt starting from provided latent tensor.
 
+        Parameters
+        ----------
+        prompt: Union[str, List[str]]
+            Text prompt to condition on.
+        latent: torch.FloatTensor
+            Latent to start from.
+        strength: float
+            The strength of the latent modification, controlling the amount of noise added.
+        num_inference_steps: int
+            Number of diffusion steps to run.
+        guidance_scale: float
+            Guidance scale encourages the model to generate images following the prompt
+            closely, albeit at the cost of image quality.
+        guidance_rescale: float
+            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+        negative_prompt: Optional[Union[str, List[str]]]
+            Negative text prompt to uncondition on.
+        output_type: str
+            Type of output to return. One of ["latent", "pil", "pt", "np"].
+        return_latent_history: bool
+            Whether to return the latent history. If True, return list of all latents
+            generated during diffusion steps.
+        
+        Returns
+        -------
+        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+            Generated output based on output_type.
+        """
+
+        # Validate input
         self.validate_input(
             prompt=prompt,
             negative_prompt=negative_prompt,
             strength=strength,
         )
+
+        # Generate embedding to condition on prompt and uncondition on negative prompt
         embedding = self.prompt_to_embedding(
             prompt=prompt,
             negative_prompt=negative_prompt,
         )
+
+        # Modify latent
         latent = self.modify_latent(latent, strength)
+
+        # Run inference
         latent = self.embedding_to_latent(
             embedding=embedding,
             num_inference_steps=num_inference_steps,
@@ -274,7 +329,9 @@ class LatentWalkDiffusion(BaseDiffusion):
     def interpolate(
         self,
         prompt: List[str],
-        latent: torch.FloatTensor,
+        latent: Optional[torch.FloatTensor] = None,
+        image_height: Optional[int] = None,
+        image_width: Optional[int] = None,
         num_inference_steps: int = 50,
         interpolation_steps: Union[int, List[int]] = 8,
         guidance_scale: float = 7.5,
@@ -285,11 +342,57 @@ class LatentWalkDiffusion(BaseDiffusion):
         embedding_interpolation_type: str = "lerp",
         latent_interpolation_type: str = "slerp",
     ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+        """
+        Run inference by conditioning on text prompts and interpolating between them.
+
+        Parameters
+        ----------
+        prompt: List[str]
+            List of text prompts to condition on.
+        latent: Optional[torch.FloatTensor]
+            Latents to interpolate between. If None, latents are generated from noise
+            but image_height and image_width must be provided.
+        image_height: Optional[int]
+            Height of image to generate.
+        image_width: Optional[int]
+            Width of image to generate.
+        num_inference_steps: int
+            Number of diffusion steps to run.
+        interpolation_steps: Union[int, List[int]]
+            Number of interpolation steps to run.
+        guidance_scale: float
+            Guidance scale encourages the model to generate images following the prompt
+            closely, albeit at the cost of image quality.
+        guidance_rescale: float
+            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+        negative_prompt: Optional[List[str]]
+            Negative text prompts to uncondition on.
+        output_type: str
+            Type of output to return. One of ["latent", "pil", "pt", "np"].
+        return_latent_history: bool
+            Whether to return the latent history. If True, return list of all latents
+            generated during diffusion steps.
+        embedding_interpolation_type: str
+            Type of interpolation to run for text embeddings. One of ["lerp", "slerp"].
+        latent_interpolation_type: str
+            Type of interpolation to run for latents. One of ["lerp", "slerp"].
+        
+        Returns
+        -------
+        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+            Generated output based on output_type.
+        """
+
+        # Validate input
         self.validate_input(
             prompt=prompt,
             negative_prompt=negative_prompt,
+            image_height=image_height,
+            image_width=image_width,
         )
 
+        # There should be atleast 2 prompts to run interpolation
         if not isinstance(prompt, list):
             raise ValueError(f"prompt must be a list of strings, not {type(prompt)}")
         if len(prompt) < 2:
@@ -311,21 +414,36 @@ class LatentWalkDiffusion(BaseDiffusion):
             raise ValueError(
                 f"interpolation_steps must be an int or list, not {type(interpolation_steps)}"
             )
+        
+        if latent is None:
+            shape = (len(prompt), self.unet.config.in_channels, image_height // self.vae_scale_factor, image_width // self.vae_scale_factor)
+            latent = self.random_tensor(shape)
+        elif len(prompt) != latent.shape[0]:
+            raise ValueError(
+                f"prompt and latent must be of the same length, not {len(prompt)} and {latent.shape[0]}"
+            )
 
+        # Generate embedding to condition on prompt and uncondition on negative prompt
         embedding = self.prompt_to_embedding(
             prompt=prompt,
             negative_prompt=negative_prompt,
         )
+
+        # Interpolate between embeddings
         interpolated_embedding = self.interpolate_embedding(
             embedding=embedding,
             interpolation_steps=interpolation_steps,
             interpolation_type=embedding_interpolation_type,
         )
+
+        # Interpolate between latents
         interpolated_latent = self.interpolate_latent(
             latent=latent,
             interpolation_steps=interpolation_steps,
             interpolation_type=latent_interpolation_type,
         )
+
+        # Run inference
         latent = self.embedding_to_latent(
             embedding=interpolated_embedding,
             num_inference_steps=num_inference_steps,

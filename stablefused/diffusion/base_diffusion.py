@@ -72,6 +72,14 @@ class BaseDiffusion(ABC):
         self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1)
 
     def to(self, device: str) -> None:
+        """
+        Move model to specified compute device.
+        
+        Parameters
+        ----------
+        device: str
+            The device to move the model to. Must be one of `cuda` or `cpu`.
+        """
         self.device = device
         self.text_encoder = self.text_encoder.to(device)
         self.vae = self.vae.to(device)
@@ -130,6 +138,27 @@ class BaseDiffusion(ABC):
         num_inference_steps: int = None,
         strength: float = None,
     ) -> None:
+        """
+        Validate input parameters.
+        TODO: This needs to be removed and improved. More checks need to be added.
+
+        Parameters
+        ----------
+        prompt: str or List[str]
+            The prompt(s) to condition on.
+        negative_prompt: str or List[str]
+            The negative prompt(s) to condition on.
+        image_height: int
+            The height of the image to generate.
+        image_width: int
+            The width of the image to generate.
+        start_step: int
+            The step to start inference from.
+        num_inference_steps: int
+            The number of inference steps to perform.
+        strength: float
+            The strength of the noise mixing when performing LatentWalkDiffusion.
+        """
         if image_height is not None and image_width is not None:
             if image_height % 8 != 0 or image_width % 8 != 0:
                 raise ValueError(
@@ -159,14 +188,35 @@ class BaseDiffusion(ABC):
 
     @abstractmethod
     def embedding_to_latent(self, *args: Any, **kwargs: Any) -> Any:
+        """
+        Abstract method for converting an embedding to a latent vector. This method
+        must be implemented by all subclasses.
+        """
         pass
 
     @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """
+        Abstract method for performing inference. This method must be implemented
+        by all subclasses.
+        """
         pass
 
     def random_tensor(self, shape: Union[List[int], Tuple[int]]) -> torch.FloatTensor:
-        """Generate a random tensor of the specified shape."""
+        """
+        Generate a random tensor of the specified shape.
+
+        Parameters
+        ----------
+        shape: List[int] or Tuple[int]
+            The shape of the random tensor to generate.
+        
+        Returns
+        -------
+        torch.FloatTensor
+            A random tensor of the specified shape on the same device and dtype
+            as model.
+        """
         rand_tensor = torch.randn(shape, device=self.device, dtype=self.torch_dtype)
         return rand_tensor
 
@@ -175,10 +225,28 @@ class BaseDiffusion(ABC):
         prompt: Union[str, List[str]],
         negative_prompt: Optional[Union[str, List[str]]] = None,
     ) -> torch.FloatTensor:
-        """Convert prompt(s) to a CLIP embedding(s)."""
+        """
+        Convert a prompt or a list of prompts into a text embedding.
 
-        if negative_prompt is not None:
-            assert type(prompt) is type(negative_prompt)
+        Parameters
+        ----------
+        prompt: str or List[str]
+            The prompt or a list of prompts to convert into an embedding. Used
+            for conditioning.
+        negative_prompt: str or List[str]
+            A negative prompt or a list of negative prompts, by default None.
+            Use for unconditioning. If not provided, an empty string ('') will
+            be used to generate the unconditional embeddings.
+
+        Returns
+        -------
+        torch.FloatTensor
+            A text embedding generated from the given prompt(s) and, if provided,
+            the negative prompt(s).
+        """
+
+        if negative_prompt is not None and type(negative_prompt) is not type(prompt):
+            raise TypeError(f"`negative_prompt` must have the same type as `prompt` ({type(prompt)}), but found {type(negative_prompt)}")
 
         if isinstance(prompt, str):
             batch_size = 1
@@ -190,6 +258,7 @@ class BaseDiffusion(ABC):
         else:
             raise TypeError("`prompt` must be a string or a list of strings")
 
+        # Tokenize the prompt(s)
         text_input = self.tokenizer(
             prompt,
             padding="max_length",
@@ -198,6 +267,7 @@ class BaseDiffusion(ABC):
             return_tensors="pt",
         )
 
+        # Enable use of attention_mask if the text_encoder supports it
         if (
             hasattr(self.text_encoder.config, "use_attention_mask")
             and self.text_encoder.config.use_attention_mask
@@ -206,15 +276,18 @@ class BaseDiffusion(ABC):
         else:
             attention_mask = None
 
+        # Generate text embedding
         text_embedding = self.text_encoder(
             text_input.input_ids.to(self.device), attention_mask=attention_mask
         )[0]
 
+        # Unconditioning input is an empty string if negative_prompt is not provided
         if negative_prompt is None:
             unconditioning_input = [""] * batch_size
         else:
             unconditioning_input = negative_prompt
 
+        # Tokenize the unconditioning input
         unconditioning_input = self.tokenizer(
             unconditioning_input,
             padding="max_length",
@@ -222,12 +295,15 @@ class BaseDiffusion(ABC):
             truncation=True,
             return_tensors="pt",
         )
+
+        # Generate unconditional embedding
         unconditional_embedding = self.text_encoder(
             unconditioning_input.input_ids.to(self.device),
             attention_mask=attention_mask,
         )[0]
-        embedding = torch.cat([unconditional_embedding, text_embedding])
 
+        # Concatenate unconditional and conditional embeddings
+        embedding = torch.cat([unconditional_embedding, text_embedding])
         return embedding
 
     def classifier_free_guidance(
@@ -236,7 +312,25 @@ class BaseDiffusion(ABC):
         guidance_scale: float,
         guidance_rescale: float,
     ) -> torch.FloatTensor:
-        """Apply classifier-free guidance to noise prediction."""
+        """
+        Apply classifier-free guidance to noise prediction.
+
+        Parameters
+        ----------
+        noise_prediction: torch.FloatTensor
+            The noise prediction tensor to which guidance will be applied.
+        guidance_scale: float
+            The scale factor for applying guidance to the noise prediction.
+        guidance_rescale: float
+            The rescale factor for adjusting the noise prediction based on
+            guidance. Based on findings in Section 3.4  of [Common Diffusion
+            Noise Schedules and Sample Steps are Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+
+        Returns
+        -------
+        torch.FloatTensor
+            The noise prediction tensor after applying classifier-free guidance.
+        """
 
         # Perform guidance
         noise_unconditional, noise_prompt = noise_prediction.chunk(2)
@@ -244,26 +338,40 @@ class BaseDiffusion(ABC):
             noise_prompt - noise_unconditional
         )
 
-        # Rescale noise prediction according to guidance scale
-        # Based on findings in Section 3.4  of [Common Diffusion Noise Schedules and Sample
-        # Steps are Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        std_prompt = noise_prompt.std(
-            dim=list(range(1, noise_prompt.ndim)), keepdim=True
-        )
-        std_prediction = noise_prediction.std(
-            dim=list(range(1, noise_prediction.ndim)), keepdim=True
-        )
-        noise_prediction_rescaled = noise_prediction * (std_prompt / std_prediction)
-        noise_prediction = (
-            noise_prediction * (1 - guidance_rescale)
-            + noise_prediction_rescaled * guidance_rescale
-        )
+        # Skip computing std if guidance_rescale is 0
+        if guidance_rescale > 0:
+            std_prompt = noise_prompt.std(
+                dim=list(range(1, noise_prompt.ndim)), keepdim=True
+            )
+            std_prediction = noise_prediction.std(
+                dim=list(range(1, noise_prediction.ndim)), keepdim=True
+            )
+            noise_prediction_rescaled = noise_prediction * (std_prompt / std_prediction)
+            noise_prediction = (
+                noise_prediction * (1 - guidance_rescale)
+                + noise_prediction_rescaled * guidance_rescale
+            )
 
         return noise_prediction
 
     def latent_to_image(
         self, latent: torch.FloatTensor, output_type: str
     ) -> Union[torch.Tensor, np.ndarray, Image.Image]:
+        """
+        Convert a latent tensor to an image in the specified output format.
+
+        Parameters
+        ----------
+        latent: torch.FloatTensor
+            The latent tensor to convert into an image.
+        output_type: str
+            The desired output format for the image. Should be one of [`pt`, `np`, `pil`].
+
+        Returns
+        -------
+        Union[torch.Tensor, np.ndarray, Image.Image]
+            An image in the specified output format.
+        """
         if output_type not in ["pt", "np", "pil"]:
             raise ValueError("`output_type` must be one of [`pt`, `np`, `pil`]")
 
@@ -285,8 +393,22 @@ class BaseDiffusion(ABC):
 
     def image_to_latent(
         self,
-        image: Union[Image.Image, List[Image.Image]],
+        image: Union[Image.Image, List[Image.Image], np.ndarray, torch.Tensor],
     ) -> torch.FloatTensor:
+        """
+        Convert an image or a list of images into a latent tensor.
+
+        Parameters
+        ----------
+        image: Union[Image.Image, List[Image.Image], np.ndarray, torch.Tensor]
+            The input image(s) to convert into a latent tensor. Supported types are
+            `PIL.Image.Image`, `np.ndarray`, and `torch.Tensor`.
+
+        Returns
+        -------
+        torch.FloatTensor
+            A latent tensor representing the input image(s).
+        """
         if (
             not isinstance(image, Image.Image)
             and not isinstance(image, list)
@@ -318,16 +440,48 @@ class BaseDiffusion(ABC):
         output_type: str,
         return_latent_history: bool,
     ) -> Union[torch.Tensor, np.ndarray, Image.Image, List[Image.Image]]:
+        """
+        Resolve the output from the latent based on the provided output options.
+
+        Parameters
+        ----------
+        latent: torch.FloatTensor
+            The latent tensor representing the content to be resolved.
+        output_type: str
+            The desired output format. Should be one of [`latent`, `pt`, `np`, `pil`].
+        return_latent_history: bool
+            If True, it means that the input latent tensor contains a tensor of latent
+            tensor for each inference step. This requires decoding each latent tensor
+            and returning a list of images. If False, decoding occurs directly.
+
+        Returns
+        -------
+        Union[torch.Tensor, np.ndarray, Image.Image, List[Image.Image]]
+            The resolved output based on the provided latent vector and options.
+        """
+        if output_type not in ["latent", "pt", "np", "pil"]:
+            raise ValueError("`output_type` must be one of [`latent`, `pt`, `np`, `pil`]")
+        
         if output_type == "latent":
             return latent
-
+        
         if return_latent_history:
+            # Transpose latent tensor from [num_steps, batch_size, *latent_dim] to
+            # [batch_size, num_steps, *latent_dim].
+            # This is done so that the history of latent vectors for each prompt
+            # is returned as a row instead of a column. It is what the user would
+            # intuitively expect.
             latent = torch.transpose(latent, 0, 1)
-            image = [self.latent_to_image(l, output_type) for l in tqdm(latent)]
+            image = [self.latent_to_image(l, output_type) for _, l in list(enumerate(tqdm(latent)))]
+            
             if output_type == "pt":
                 image = torch.stack(image)
             elif output_type == "np":
                 image = np.stack(image)
+            else:
+                # output type is "pil" so we can just return as a python list
+                pass
         else:
             image = self.latent_to_image(latent, output_type)
+        
         return image
