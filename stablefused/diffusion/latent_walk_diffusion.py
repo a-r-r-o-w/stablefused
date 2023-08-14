@@ -175,7 +175,11 @@ class LatentWalkDiffusion(BaseDiffusion):
 
         # Split embedding into unconditional and text embeddings
         unconditional_embedding, text_embedding = embedding.chunk(2)
-        steps = torch.linspace(0, 1, interpolation_steps, dtype=embedding.dtype).cpu().numpy()
+        steps = (
+            torch.linspace(0, 1, interpolation_steps, dtype=embedding.dtype)
+            .cpu()
+            .numpy()
+        )
         steps = np.expand_dims(steps, axis=tuple(range(1, text_embedding.ndim)))
         interpolations = []
 
@@ -284,7 +288,7 @@ class LatentWalkDiffusion(BaseDiffusion):
         return_latent_history: bool
             Whether to return the latent history. If True, return list of all latents
             generated during diffusion steps.
-        
+
         Returns
         -------
         Union[torch.Tensor, np.ndarray, List[Image.Image]]
@@ -377,7 +381,7 @@ class LatentWalkDiffusion(BaseDiffusion):
             Type of interpolation to run for text embeddings. One of ["lerp", "slerp"].
         latent_interpolation_type: str
             Type of interpolation to run for latents. One of ["lerp", "slerp"].
-        
+
         Returns
         -------
         Union[torch.Tensor, np.ndarray, List[Image.Image]]
@@ -414,9 +418,14 @@ class LatentWalkDiffusion(BaseDiffusion):
             raise ValueError(
                 f"interpolation_steps must be an int or list, not {type(interpolation_steps)}"
             )
-        
+
         if latent is None:
-            shape = (len(prompt), self.unet.config.in_channels, image_height // self.vae_scale_factor, image_width // self.vae_scale_factor)
+            shape = (
+                len(prompt),
+                self.unet.config.in_channels,
+                image_height // self.vae_scale_factor,
+                image_width // self.vae_scale_factor,
+            )
             latent = self.random_tensor(shape)
         elif len(prompt) != latent.shape[0]:
             raise ValueError(

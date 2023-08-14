@@ -171,7 +171,7 @@ class TextToImageDiffusion(BaseDiffusion):
         return_latent_history: bool
             Whether to return the latent history. If True, return list of all latents
             generated during diffusion steps.
-        
+
         Returns
         -------
         Union[torch.Tensor, np.ndarray, List[Image.Image]]

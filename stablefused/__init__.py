@@ -1,3 +1,7 @@
+"""
+.. include:: ../README.md
+"""
+
 from .diffusion import (
     BaseDiffusion,
     ImageToImageDiffusion,

@@ -74,7 +74,7 @@ class BaseDiffusion(ABC):
     def to(self, device: str) -> None:
         """
         Move model to specified compute device.
-        
+
         Parameters
         ----------
         device: str
@@ -210,7 +210,7 @@ class BaseDiffusion(ABC):
         ----------
         shape: List[int] or Tuple[int]
             The shape of the random tensor to generate.
-        
+
         Returns
         -------
         torch.FloatTensor
@@ -246,7 +246,9 @@ class BaseDiffusion(ABC):
         """
 
         if negative_prompt is not None and type(negative_prompt) is not type(prompt):
-            raise TypeError(f"`negative_prompt` must have the same type as `prompt` ({type(prompt)}), but found {type(negative_prompt)}")
+            raise TypeError(
+                f"`negative_prompt` must have the same type as `prompt` ({type(prompt)}), but found {type(negative_prompt)}"
+            )
 
         if isinstance(prompt, str):
             batch_size = 1
@@ -460,11 +462,13 @@ class BaseDiffusion(ABC):
             The resolved output based on the provided latent vector and options.
         """
         if output_type not in ["latent", "pt", "np", "pil"]:
-            raise ValueError("`output_type` must be one of [`latent`, `pt`, `np`, `pil`]")
-        
+            raise ValueError(
+                "`output_type` must be one of [`latent`, `pt`, `np`, `pil`]"
+            )
+
         if output_type == "latent":
             return latent
-        
+
         if return_latent_history:
             # Transpose latent tensor from [num_steps, batch_size, *latent_dim] to
             # [batch_size, num_steps, *latent_dim].
@@ -472,8 +476,11 @@ class BaseDiffusion(ABC):
             # is returned as a row instead of a column. It is what the user would
             # intuitively expect.
             latent = torch.transpose(latent, 0, 1)
-            image = [self.latent_to_image(l, output_type) for _, l in list(enumerate(tqdm(latent)))]
-            
+            image = [
+                self.latent_to_image(l, output_type)
+                for _, l in list(enumerate(tqdm(latent)))
+            ]
+
             if output_type == "pt":
                 image = torch.stack(image)
             elif output_type == "np":
@@ -483,5 +490,5 @@ class BaseDiffusion(ABC):
                 pass
         else:
             image = self.latent_to_image(latent, output_type)
-        
+
         return image

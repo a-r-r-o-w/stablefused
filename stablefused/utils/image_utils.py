@@ -14,7 +14,7 @@ def pt_to_numpy(images: torch.FloatTensor) -> np.ndarray:
     ----------
     images: torch.FloatTensor
         Image represented as a pytorch tensor (N, C, H, W).
-    
+
     Returns
     -------
     np.ndarray
@@ -31,7 +31,7 @@ def numpy_to_pt(images: np.ndarray) -> torch.FloatTensor:
     ----------
     images: np.ndarray
         Image represented as a numpy array (N, H, W, C).
-    
+
     Returns
     -------
     torch.FloatTensor
@@ -50,7 +50,7 @@ def numpy_to_pil(images: np.ndarray) -> Image.Image:
     ----------
     images: np.ndarray
         Image represented as a numpy array (N, H, W, C).
-    
+
     Returns
     -------
     Image.Image
@@ -74,7 +74,7 @@ def pil_to_numpy(images: Union[List[Image.Image], Image.Image]) -> np.ndarray:
     ----------
     images: Union[List[Image.Image], Image.Image]
         PIL image or list of PIL images.
-    
+
     Returns
     -------
     np.ndarray
@@ -99,7 +99,7 @@ def normalize(images: torch.FloatTensor) -> torch.FloatTensor:
     ----------
     images: torch.FloatTensor
         Image represented as a pytorch tensor (N, C, H, W).
-    
+
     Returns
     -------
     torch.FloatTensor
@@ -116,7 +116,7 @@ def denormalize(images: torch.FloatTensor) -> torch.FloatTensor:
     ----------
     images: torch.FloatTensor
         Image represented as a pytorch tensor (N, C, H, W).
-    
+
     Returns
     -------
     torch.FloatTensor
@@ -156,7 +156,7 @@ def image_grid(images: List[Image.Image], rows: int, cols: int) -> Image.Image:
         Number of rows in grid.
     cols: int
         Number of columns in grid.
-    
+
     Returns
     -------
     Image.Image

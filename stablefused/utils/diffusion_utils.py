@@ -80,7 +80,7 @@ def slerp(
         dimensional with values between 0 and 1.
     DOT_THRESHOLD: float
         Threshold for when to use linear interpolation instead of spherical interpolation.
-    
+
     Returns
     -------
     Union[torch.Tensor, np.ndarray]
