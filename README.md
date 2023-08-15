@@ -63,7 +63,7 @@ Refer to the notebooks for more details and enjoy the denoising process!
   These results are generated using the [Text to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/text_to_image_diffusion.ipynb) notebook.
 
   <div align="center">
-    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9528329d-ddc4-461e-9664-cbab3eb97123" controls loop autoplay>
+    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/dd087a92-7111-4880-b207-0e309ce9aa87" controls loop autoplay>
       Your browser does not support the video tag.
     </video>
   </div>
@@ -88,14 +88,14 @@ Refer to the notebooks for more details and enjoy the denoising process!
       <td><i>Stylistic photorealisic photo of Margot Robbie, playing the role of astronaut, pretty, beautiful, high contrast, high quality, galaxies, intricate detail, colorful, 8k</i></td>
     </tr>
     <tr>
-      <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/cb5da9ed-80b3-4cd6-8874-ed3353967042" /></td>
-      <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/a0623f50-308b-40e1-a331-a7073c10281d" controls loop autoplay> Your browser does not support the video tag. </video></td>
+      <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/03bd14f5-f0d1-460b-8b5b-ad9f0a7f79f5" /></td>
+      <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/285dc6d7-883c-47a2-a89c-2253ded98340" controls loop autoplay> Your browser does not support the video tag. </video></td>
     </tr>
   </tbody>
   </table>
 
   <details>
-    <summary>PS</summary>
+    <summary> PS </summary>
     The results from Image to Image Diffusion don't seem very great from my experimentation. It might be some kind of bug in my implementation, which I'll have to look into later...
   </details>
 </details>
@@ -128,7 +128,7 @@ The original images produced are too large to display in high quality here. You 
   | Effect of Guidance Scale on Different Prompts |
   | --- |
   | Each image is sampled with the same prompt and seed to ensure only the guidance scale plays a role. <br /> **Column 1:** _Artistic image, very detailed cute cat, cinematic lighting effect, cute, charming, fantasy art, digital painting, photorealistic_ <br /> **Column 2:** _A lion in galaxies, spirals, nebulae, stars, smoke, iridescent, intricate detail, octane render, 8k_ <br /> **Column 3:** _A grand city in the year 2100, atmospheric, hyper realistic, 8k, epic composition, cinematic, octane render_ <br /> **Column 4:** _Starry Night, painting style of Vincent van Gogh, Oil paint on canvas, Landscape with a starry night sky, dreamy, peaceful_ |
-  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/eaed82ee-df31-4a37-943a-ea0d1a65ca35" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/546ca306-4e3b-42e3-9816-40ba9a2b060d" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 </details>
 
 <details>
@@ -139,9 +139,8 @@ The original images produced are too large to display in high quality here. You 
   | Effect of Guidance Scale with increased number of inference steps |
   | --- |
   | Columns have number of inference steps set to 3, 6, 12, 20, 25. <br /> **Prompt:** _Photorealistic illustration of a mystical alien creature, magnificent, strong, atomic, tyrannic, predator, unforgiving, full-body image_ |
-  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b983a60e-8168-42b5-ba39-8323ab724082" controls loop autoplay> Your browser does not support the video tag. </video></div> |
-  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b10fd3cd-5d21-4a70-9df3-b82b722eae62" controls loop autoplay> Your browser does not support the video tag. </video></div> |
-  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/11786fda-3c7a-45ae-aa3e-128b45cf4ef1" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/55609d17-df70-4cf8-a19b-a3cd87be912a" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/7a6c507c-2694-433b-a695-5afa4f380718" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 </details>
 
 ### Latent Walk
@@ -152,6 +151,9 @@ Stable Diffusion models (atleast, the models used here) learn two latent represe
 
 <details>
   <summary> Similar Image Generation by sampling latent space </summary>
+  
+  The results below show just how information rich the latent space of these stable diffusion models are.
+  
   <table>
   <thead>
     <tr>
@@ -167,10 +169,10 @@ Stable Diffusion models (atleast, the models used here) learn two latent represe
     </tr>
     <tr>
       <td>
-        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9ac18556-d52f-4b5d-b563-a4d863451d65">
+        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/1dcbf894-4988-45a5-b21f-8ffa4c3fb40e">
       </td>
       <td>
-        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/6861310e-3d6b-4502-be78-c19f67ecb2df">
+        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/07c4354f-1580-4c60-9e46-fbc539dbc716">
       </td>
     </tr>
   </tbody>
@@ -185,7 +187,7 @@ Stable Diffusion models (atleast, the models used here) learn two latent represe
   | Generating Latent Walk videos |
   | --- |
   | **Prompt 1:** _A dog chasing a cat in a thrilling backyard scene, high quality and photorealistic_  <br /> **Prompt 2:** _A determined dog in hot pursuit, with stunning realism, octane render_  <br /> **Prompt 3:** _A thrilling chase, dog behind the cat, octane render, exceptional realism and quality_  <br /> **Prompt 4:** _The exciting moment of a cat outmaneuvering a chasing dog, high-quality and photorealistic detail_  <br /> **Prompt 5:** _A clever cat escaping a determined dog and soaring into space, rendered with octane render for stunning realism_  <br /> **Prompt 6:** _The cat's escape into the cosmos, leaving the dog behind in a scene,high quality and photorealistic style_  <br /> |
-  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/d0c28123-cf08-446c-87ed-a71b5519bcf1" controls loop autoplay> Your browser does not support the video tag. </video></div> |
+  | <div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/5caf4bc3-d615-41d4-959a-38921e9e4516" controls loop autoplay> Your browser does not support the video tag. </video></div> |
 
   Note that these results aren't very good. I tried different seeds but for this story, I couldn't make a great video. I did try some other prompts and got better results, but I like this story so I'm sticking with it 🤓
   You can improve the results by using better prompts and increasing the number of interpolation and inference steps.
