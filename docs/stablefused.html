@@ -126,7 +126,7 @@ pip install -e <span class="s2">&quot;.[dev]&quot;</span>
 <p>These results are generated using the <a href="https://github.com/a-r-r-o-w/stablefused/blob/main/examples/text_to_image_diffusion.ipynb">Text to Image</a> notebook.</p>
 
 <p><div align="center">
-    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9528329d-ddc4-461e-9664-cbab3eb97123" controls loop autoplay>
+    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/dd087a92-7111-4880-b207-0e309ce9aa87" controls loop autoplay>
       Your browser does not support the video tag.
     </video>
   </div>
@@ -151,14 +151,14 @@ pip install -e <span class="s2">&quot;.[dev]&quot;</span>
       <td><i>Stylistic photorealisic photo of Margot Robbie, playing the role of astronaut, pretty, beautiful, high contrast, high quality, galaxies, intricate detail, colorful, 8k</i></td>
     </tr>
     <tr>
-      <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/cb5da9ed-80b3-4cd6-8874-ed3353967042" /></td>
-      <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/a0623f50-308b-40e1-a331-a7073c10281d" controls loop autoplay> Your browser does not support the video tag. </video></td>
+      <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/03bd14f5-f0d1-460b-8b5b-ad9f0a7f79f5" /></td>
+      <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/285dc6d7-883c-47a2-a89c-2253ded98340" controls loop autoplay> Your browser does not support the video tag. </video></td>
     </tr>
   </tbody>
   </table></p>
 
 <p><details>
-    <summary>PS</summary>
+    <summary> PS </summary>
     The results from Image to Image Diffusion don't seem very great from my experimentation. It might be some kind of bug in my implementation, which I'll have to look into later...
   </details>
 </details></p>
@@ -201,7 +201,7 @@ pip install -e <span class="s2">&quot;.[dev]&quot;</span>
   <td>Each image is sampled with the same prompt and seed to ensure only the guidance scale plays a role. <br /> <strong>Column 1:</strong> _Artistic image, very detailed cute cat, cinematic lighting effect, cute, charming, fantasy art, digital painting, photorealistic_ <br /> <strong>Column 2:</strong> _A lion in galaxies, spirals, nebulae, stars, smoke, iridescent, intricate detail, octane render, 8k_ <br /> <strong>Column 3:</strong> _A grand city in the year 2100, atmospheric, hyper realistic, 8k, epic composition, cinematic, octane render_ <br /> <strong>Column 4:</strong> _Starry Night, painting style of Vincent van Gogh, Oil paint on canvas, Landscape with a starry night sky, dreamy, peaceful_</td>
 </tr>
 <tr>
-  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/334e1426-fe75-4e21-bfe2-b0af324ac4df" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
+  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/546ca306-4e3b-42e3-9816-40ba9a2b060d" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
 </tr>
 </tbody>
 </table>
@@ -224,10 +224,10 @@ pip install -e <span class="s2">&quot;.[dev]&quot;</span>
   <td>Columns have number of inference steps set to 3, 6, 12, 20, 25. <br /> <strong>Prompt:</strong> _Photorealistic illustration of a mystical alien creature, magnificent, strong, atomic, tyrannic, predator, unforgiving, full-body image_</td>
 </tr>
 <tr>
-  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/0b04be90-b16a-4ac0-9968-eccd2e8bbc41" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
+  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/55609d17-df70-4cf8-a19b-a3cd87be912a" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
 </tr>
 <tr>
-  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b10fd3cd-5d21-4a70-9df3-b82b722eae62" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
+  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/7a6c507c-2694-433b-a695-5afa4f380718" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
 </tr>
 </tbody>
 </table>
@@ -241,8 +241,11 @@ pip install -e <span class="s2">&quot;.[dev]&quot;</span>
 <p>Stable Diffusion models (atleast, the models used here) learn two latent representations - one of the NLP space for prompts, and one of the image space. These latent representations are continuous. If we choose two vectors in the latent space to sample from, we get two different/similar images depending on how different the chosen vectors are. This is the basis of latent walking. We can choose two vectors in the latent space, and sample from the latent path between them. This results in a smooth transition between the two images.</p>
 
 <p><details>
-  <summary> Similar Image Generation by sampling latent space </summary>
-  <table>
+  <summary> Similar Image Generation by sampling latent space </summary></p>
+
+<p>The results below show just how information rich the latent space of these stable diffusion models are.</p>
+
+<p><table>
   <thead>
     <tr>
       <th>Source Image</th>
@@ -257,10 +260,10 @@ pip install -e <span class="s2">&quot;.[dev]&quot;</span>
     </tr>
     <tr>
       <td>
-        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/9ac18556-d52f-4b5d-b563-a4d863451d65">
+        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/1dcbf894-4988-45a5-b21f-8ffa4c3fb40e">
       </td>
       <td>
-        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/6861310e-3d6b-4502-be78-c19f67ecb2df">
+        <img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/07c4354f-1580-4c60-9e46-fbc539dbc716">
       </td>
     </tr>
   </tbody>
@@ -283,7 +286,7 @@ pip install -e <span class="s2">&quot;.[dev]&quot;</span>
   <td><strong>Prompt 1:</strong> _A dog chasing a cat in a thrilling backyard scene, high quality and photorealistic_  <br /> <strong>Prompt 2:</strong> _A determined dog in hot pursuit, with stunning realism, octane render_  <br /> <strong>Prompt 3:</strong> _A thrilling chase, dog behind the cat, octane render, exceptional realism and quality_  <br /> <strong>Prompt 4:</strong> _The exciting moment of a cat outmaneuvering a chasing dog, high-quality and photorealistic detail_  <br /> <strong>Prompt 5:</strong> _A clever cat escaping a determined dog and soaring into space, rendered with octane render for stunning realism_  <br /> <strong>Prompt 6:</strong> _The cat's escape into the cosmos, leaving the dog behind in a scene,high quality and photorealistic style_  <br /></td>
 </tr>
 <tr>
-  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/d0c28123-cf08-446c-87ed-a71b5519bcf1" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
+  <td><div align="center"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/5caf4bc3-d615-41d4-959a-38921e9e4516" controls loop autoplay> Your browser does not support the video tag. </video></div></td>
 </tr>
 </tbody>
 </table>
