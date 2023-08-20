@@ -12,4 +12,7 @@ from .image_utils import (
     pil_to_video,
     pt_to_numpy,
 )
-from .model_cache import ModelCache, cache_model, load_model
+from .model_cache import (
+    save_model_to_cache,
+    load_model_from_cache,
+)

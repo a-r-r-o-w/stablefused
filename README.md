@@ -1,6 +1,16 @@
 # StableFused
 
-[![PyPI version](https://badge.fury.io/py/stablefused.svg)](https://badge.fury.io/py/stablefused)
+<h4 align="center">
+  
+  <a href="https://pypi.org/project/stablefused/">
+    <img src="https://img.shields.io/pypi/v/stablefused" alt="pypi">
+  </a>
+
+  <a href="https://a-r-r-o-w.github.io/stablefused/">
+    <img src="https://img.shields.io/badge/stablefused-docs-blue" alt="docs">
+  </a>
+
+</h4>
 
 StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources! One of the main reasons I'm working on this project is to learn more about Stable Diffusion, and generative models in general. It is my current area of research at university. 
 
@@ -10,6 +20,7 @@ It is recommended to use a virtual environment. You can use [venv](https://docs.
 
 ```bash
 python -m venv venv
+source venv/bin/activate
 ```
 
 For usage, install the package from PyPI.

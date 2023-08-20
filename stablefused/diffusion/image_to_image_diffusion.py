@@ -20,9 +20,10 @@ class ImageToImageDiffusion(BaseDiffusion):
         vae: AutoencoderKL = None,
         unet: UNet2DConditionModel = None,
         scheduler: KarrasDiffusionSchedulers = None,
-        name: str = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
+        *args,
+        **kwargs
     ) -> None:
         super().__init__(
             model_id=model_id,
@@ -31,9 +32,10 @@ class ImageToImageDiffusion(BaseDiffusion):
             vae=vae,
             unet=unet,
             scheduler=scheduler,
-            name=name,
             torch_dtype=torch_dtype,
             device=device,
+            *args,
+            **kwargs
         )
 
     def embedding_to_latent(
@@ -137,7 +139,7 @@ class ImageToImageDiffusion(BaseDiffusion):
         return_latent_history: bool = False,
     ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
         """
-        Run inference by conditining on input image and text prompt.
+        Run inference by conditioning on input image and text prompt.
 
         Parameters
         ----------
