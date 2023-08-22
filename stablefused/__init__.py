@@ -7,6 +7,7 @@ from .diffusion import (
     ImageToImageDiffusion,
     LatentWalkDiffusion,
     TextToImageDiffusion,
+    TextToVideoDiffusion,
 )
 
 from .typing import (
