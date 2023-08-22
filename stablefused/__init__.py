@@ -9,6 +9,11 @@ from .diffusion import (
     TextToImageDiffusion,
 )
 
+from .typing import (
+    UNet,
+    Scheduler,
+)
+
 from .utils import (
     denormalize,
     image_grid,
