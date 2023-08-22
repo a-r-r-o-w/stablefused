@@ -41,7 +41,7 @@ class BaseDiffusion(ABC):
     ) -> None:
         self.device: str = device
         self.torch_dtype: torch.dtype = torch_dtype
-        self.model_id: model_id = model_id
+        self.model_id: str = model_id
 
         self.tokenizer: CLIPTokenizer
         self.text_encoder: CLIPTextModel
