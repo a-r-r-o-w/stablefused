@@ -1,6 +1,16 @@
 # StableFused
 
-[![PyPI version](https://badge.fury.io/py/stablefused.svg)](https://badge.fury.io/py/stablefused)
+<h4 align="center">
+  
+  <a href="https://pypi.org/project/stablefused/">
+    <img src="https://img.shields.io/pypi/v/stablefused" alt="pypi">
+  </a>
+
+  <a href="https://a-r-r-o-w.github.io/stablefused/">
+    <img src="https://img.shields.io/badge/stablefused-docs-blue" alt="docs">
+  </a>
+
+</h4>
 
 StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources! One of the main reasons I'm working on this project is to learn more about Stable Diffusion, and generative models in general. It is my current area of research at university. 
 
@@ -10,6 +20,7 @@ It is recommended to use a virtual environment. You can use [venv](https://docs.
 
 ```bash
 python -m venv venv
+source venv/bin/activate
 ```
 
 For usage, install the package from PyPI.
@@ -43,6 +54,7 @@ The following sources have been very helpful to me in understanding Stable Diffu
 - [🤗 diffusers](https://github.com/huggingface/diffusers)
 - [Karpathy's gist on latent walking](https://gist.github.com/karpathy/00103b0037c5aaea32fe1da1af553355)
 - [Nateraw's stable-diffusion-videos](https://github.com/nateraw/stable-diffusion-videos)
+- [AnimateDiff](https://github.com/guoyww/AnimateDiff/)
 - [🤗 Annotated Diffusion Blog](https://huggingface.co/blog/annotated-diffusion)
 - [Keras CV](https://github.com/keras-team/keras-cv)
 - [Lillian Weng's Blogs](https://lilianweng.github.io/)
@@ -50,8 +62,6 @@ The following sources have been very helpful to me in understanding Stable Diffu
 - [The AI Summer Diffusion Models Blog](https://theaisummer.com/diffusion-models/)
 
 ## Results
-
-All of the inference process for below results was done using the [Stable Diffusion v1.5](https://huggingface.co/runwayml/stable-diffusion-v1-5) model.
 
 ### Visualization of diffusion process
 
@@ -98,6 +108,29 @@ Refer to the notebooks for more details and enjoy the denoising process!
     <summary> PS </summary>
     The results from Image to Image Diffusion don't seem very great from my experimentation. It might be some kind of bug in my implementation, which I'll have to look into later...
   </details>
+</details>
+
+### Text to Video
+
+There is a lot of ongoing research on the generation of videos from text prompts. It is also my current area of research at university. The implementation here is adapted from [AnimateDiff](https://animatediff.github.io/).
+
+There is immense potential in developing this kind of technology and its possible usecases are unlimited - personalized educational content, marketing and advertising, creativity and art, etc. to name a few. Imagine a world where you have your own personal ChatGPT/Bard like assistants for visual learning - a model that can generate [3Blue1Brown](https://www.youtube.com/c/3blue1brown) style videos explaining science topics, or depict a story! Current models are not that capable yet, but this is where we are headed, I think, and is what me and my team are researching on. The future of this technology will be fascinating to witness!
+
+<details>
+  <summary> Text to Video </summary>
+
+  These results are generated using the [Text to Video](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/text_to_video_diffusion.ipynb) notebook.
+
+  <div align="center">
+  
+  | Text to Video |
+  | :-: |
+  | _An astronaut floating in space, interstellar, black background with stars, photorealistic, high quality, 8k_ |
+  | <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/72a10ec3-ccb2-45db-8e49-8752e705c57d" controls loop autoplay> Your browser does not support the video tag. </video> |
+  | _A mighty pirate ship sailing through the sea, unpleasant, thundering roar, dark night, starry night, high quality, photorealistic, 8k_ |
+  | <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b883e6e3-80b6-4b53-b91c-60edd715941c" controls loop autoplay> Your browser does not support the video tag. </video> |
+
+  </div>
 </details>
 
 ### Understanding the effect of Guidance Scale

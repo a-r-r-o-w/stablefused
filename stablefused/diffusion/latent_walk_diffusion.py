@@ -2,13 +2,13 @@ import numpy as np
 import torch
 
 from PIL import Image
-from diffusers import AutoencoderKL, UNet2DConditionModel
-from diffusers.schedulers import KarrasDiffusionSchedulers
+from diffusers import AutoencoderKL
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
+from stablefused.typing import UNet, Scheduler
 from stablefused.utils import lerp, slerp
 
 
@@ -19,11 +19,12 @@ class LatentWalkDiffusion(BaseDiffusion):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet2DConditionModel = None,
-        scheduler: KarrasDiffusionSchedulers = None,
-        name: str = None,
+        unet: UNet = None,
+        scheduler: Scheduler = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
+        *args,
+        **kwargs,
     ) -> None:
         super().__init__(
             model_id=model_id,
@@ -32,9 +33,10 @@ class LatentWalkDiffusion(BaseDiffusion):
             vae=vae,
             unet=unet,
             scheduler=scheduler,
-            name=name,
             torch_dtype=torch_dtype,
             device=device,
+            *args,
+            **kwargs,
         )
 
     def modify_latent(
@@ -105,7 +107,7 @@ class LatentWalkDiffusion(BaseDiffusion):
         self.scheduler.set_timesteps(num_inference_steps)
         timesteps = self.scheduler.timesteps
 
-        # Scales the latent noise by the standard deviation required by the scheduler
+        # Scale the latent noise by the standard deviation required by the scheduler
         latent = latent * self.scheduler.init_noise_sigma
         latent_history = [latent]
 

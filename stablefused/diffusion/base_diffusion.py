@@ -3,21 +3,24 @@ import torch
 
 from PIL import Image
 from abc import ABC, abstractmethod
-from diffusers import AutoencoderKL, SchedulerMixin, UNet2DConditionModel
-from diffusers.schedulers import KarrasDiffusionSchedulers
+from diffusers import (
+    AutoencoderKL,
+    DiffusionPipeline,
+)
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, List, Optional, Tuple, Union
 
+from stablefused.typing import UNet, Scheduler
 from stablefused.utils import (
-    cache_model,
     denormalize,
-    load_model,
+    load_model_from_cache,
     normalize,
     numpy_to_pil,
     numpy_to_pt,
     pil_to_numpy,
     pt_to_numpy,
+    save_model_to_cache,
 )
 
 
@@ -28,14 +31,24 @@ class BaseDiffusion(ABC):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet2DConditionModel = None,
-        scheduler: KarrasDiffusionSchedulers = None,
-        name: str = None,
+        unet: UNet = None,
+        scheduler: Scheduler = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
+        use_cache=True,
+        *args,
+        **kwargs,
     ) -> None:
-        self.device = device
-        self.torch_dtype = torch_dtype
+        self.device: str = device
+        self.torch_dtype: torch.dtype = torch_dtype
+        self.model_id: str = model_id
+
+        self.tokenizer: CLIPTokenizer
+        self.text_encoder: CLIPTextModel
+        self.vae: AutoencoderKL
+        self.unet: UNet
+        self.scheduler: Scheduler
+        self.vae_scale_factor: int
 
         if model_id is None:
             if (
@@ -44,32 +57,35 @@ class BaseDiffusion(ABC):
                 or vae is None
                 or unet is None
                 or scheduler is None
-                or name is None
             ):
                 raise ValueError(
-                    "Either (`model_id`) or (`tokenizer`, `text_encoder`, `vae`, `unet`, `scheduler`, `name`) must be provided."
+                    "Either (`model_id`) or (`tokenizer`, `text_encoder`, `vae`, `unet`, `scheduler`) must be provided."
                 )
 
-            model = cache_model(
-                name=name,
-                tokenizer=tokenizer,
-                text_encoder=text_encoder,
-                vae=vae,
-                unet=unet,
-                scheduler=scheduler,
-            )
+            self.tokenizer = tokenizer
+            self.text_encoder = text_encoder
+            self.vae = vae
+            self.unet = unet
+            self.scheduler = scheduler
         else:
-            model = load_model(model_id, torch_dtype=torch_dtype)
-
-        self.model_id = model.model_id
-        self.tokenizer: CLIPTokenizer = model.tokenizer
-        self.text_encoder: CLIPTextModel = model.text_encoder
-        self.vae: AutoencoderKL = model.vae
-        self.unet: UNet2DConditionModel = model.unet
-        self.scheduler: SchedulerMixin = model.scheduler
+            model = DiffusionPipeline.from_pretrained(
+                model_id, torch_dtype=torch_dtype, *args, **kwargs
+            )
+            self.tokenizer = model.tokenizer
+            self.text_encoder = model.text_encoder
+            self.vae = model.vae
+            self.unet = model.unet
+            self.scheduler = model.scheduler
 
         self.to(self.device)
         self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1)
+
+        if use_cache and model_id is not None:
+            model = load_model_from_cache(model_id, None)
+            if model is None:
+                save_model_to_cache(self)
+            else:
+                self.share_components_with(model)
 
     def to(self, device: str) -> None:
         """
@@ -84,6 +100,27 @@ class BaseDiffusion(ABC):
         self.text_encoder = self.text_encoder.to(device)
         self.vae = self.vae.to(device)
         self.unet = self.unet.to(device)
+
+    def share_components_with(self, model: "BaseDiffusion") -> None:
+        """
+        Share components with another model. This allows for sharing of the
+        different internal components of the model, such as the text encoder,
+        VAE, and UNet. This is useful for reducing memory usage when using
+        multiple diffusion pipelines with the same checkpoint at the same time.
+
+        Parameters
+        ----------
+        model: BaseDiffusion
+            The model to share components with.
+        """
+        self.device = model.device
+        self.torch_dtype = model.torch_dtype
+        self.tokenizer = model.tokenizer
+        self.text_encoder = model.text_encoder
+        self.vae = model.vae
+        self.unet = model.unet
+        self.scheduler = model.scheduler
+        self.vae_scale_factor = model.vae_scale_factor
 
     def enable_attention_slicing(self, slice_size: Optional[int] = -1) -> None:
         """
