@@ -283,18 +283,15 @@
 
             <div class="docstring"><p>Convert pytorch tensor to numpy image.</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (torch.FloatTensor):
-Image represented as a pytorch tensor (N, C, H, W).</li>
-</ul>
+<p>images: torch.FloatTensor
+    Image represented as a pytorch tensor (N, C, H, W).</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>np.ndarray</strong>: Image represented as a numpy array (N, H, W, C).</li>
-</ul>
+<p>np.ndarray
+    Image represented as a numpy array (N, H, W, C).</p>
 </div>
 
 
@@ -332,18 +329,15 @@ Image represented as a pytorch tensor (N, C, H, W).</li>
 
             <div class="docstring"><p>Convert numpy image to pytorch tensor.</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (np.ndarray):
-Image represented as a numpy array (N, H, W, C).</li>
-</ul>
+<p>images: np.ndarray
+    Image represented as a numpy array (N, H, W, C).</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>torch.FloatTensor</strong>: Image represented as a pytorch tensor (N, C, H, W).</li>
-</ul>
+<p>torch.FloatTensor
+    Image represented as a pytorch tensor (N, C, H, W).</p>
 </div>
 
 
@@ -386,18 +380,15 @@ Image represented as a numpy array (N, H, W, C).</li>
 
             <div class="docstring"><p>Convert numpy image to PIL image.</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (np.ndarray):
-Image represented as a numpy array (N, H, W, C).</li>
-</ul>
+<p>images: np.ndarray
+    Image represented as a numpy array (N, H, W, C).</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>Image.Image</strong>: Image represented as a PIL image.</li>
-</ul>
+<p>Image.Image
+    Image represented as a PIL image.</p>
 </div>
 
 
@@ -441,18 +432,15 @@ Image represented as a numpy array (N, H, W, C).</li>
 
             <div class="docstring"><p>Convert PIL image to numpy image.</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (Union[List[Image.Image], Image.Image]):
-PIL image or list of PIL images.</li>
-</ul>
+<p>images: Union[List[Image.Image], Image.Image]
+    PIL image or list of PIL images.</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>np.ndarray</strong>: Image represented as a numpy array (N, H, W, C).</li>
-</ul>
+<p>np.ndarray
+    Image represented as a numpy array (N, H, W, C).</p>
 </div>
 
 
@@ -488,18 +476,15 @@ PIL image or list of PIL images.</li>
 
             <div class="docstring"><p>Normalize an image array to the range [-1, 1].</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (torch.FloatTensor):
-Image represented as a pytorch tensor (N, C, H, W).</li>
-</ul>
+<p>images: torch.FloatTensor
+    Image represented as a pytorch tensor (N, C, H, W).</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>torch.FloatTensor</strong>: Normalized image as pytorch tensor.</li>
-</ul>
+<p>torch.FloatTensor
+    Normalized image as pytorch tensor.</p>
 </div>
 
 
@@ -535,18 +520,15 @@ Image represented as a pytorch tensor (N, C, H, W).</li>
 
             <div class="docstring"><p>Denormalize an image array to the range [0.0, 1.0].</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (torch.FloatTensor):
-Image represented as a pytorch tensor (N, C, H, W).</li>
-</ul>
+<p>images: torch.FloatTensor
+    Image represented as a pytorch tensor (N, C, H, W).</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>torch.FloatTensor</strong>: Denormalized image as pytorch tensor.</li>
-</ul>
+<p>torch.FloatTensor
+    Denormalized image as pytorch tensor.</p>
 </div>
 
 
@@ -584,16 +566,14 @@ Image represented as a pytorch tensor (N, C, H, W).</li>
 
             <div class="docstring"><p>Convert a list of PIL images to a video.</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (List[Image.Image]):
-List of PIL images.</li>
-<li><strong>filename</strong> (str):
-Filename to save video to.</li>
-<li><strong>fps</strong> (int):
-Frames per second of video.</li>
-</ul>
+<p>images: List[Image.Image]
+    List of PIL images.
+filename: str
+    Filename to save video to.
+fps: int
+    Frames per second of video.</p>
 </div>
 
 
@@ -641,22 +621,19 @@ Frames per second of video.</li>
 
             <div class="docstring"><p>Create a grid of images on a single PIL image.</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>images</strong> (List[Image.Image]):
-List of PIL images.</li>
-<li><strong>rows</strong> (int):
-Number of rows in grid.</li>
-<li><strong>cols</strong> (int):
-Number of columns in grid.</li>
-</ul>
+<p>images: List[Image.Image]
+    List of PIL images.
+rows: int
+    Number of rows in grid.
+cols: int
+    Number of columns in grid.</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>Image.Image</strong>: Grid of images as a PIL image.</li>
-</ul>
+<p>Image.Image
+    Grid of images as a PIL image.</p>
 </div>
 
 
