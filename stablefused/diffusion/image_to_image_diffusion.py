@@ -2,13 +2,13 @@ import numpy as np
 import torch
 
 from PIL import Image
-from diffusers import AutoencoderKL, UNet2DConditionModel
-from diffusers.schedulers import KarrasDiffusionSchedulers
+from diffusers import AutoencoderKL
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
+from stablefused.typing import UNet, Scheduler
 
 
 class ImageToImageDiffusion(BaseDiffusion):
@@ -18,8 +18,8 @@ class ImageToImageDiffusion(BaseDiffusion):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet2DConditionModel = None,
-        scheduler: KarrasDiffusionSchedulers = None,
+        unet: UNet = None,
+        scheduler: Scheduler = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         *args,

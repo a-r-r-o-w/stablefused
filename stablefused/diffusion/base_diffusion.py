@@ -6,14 +6,12 @@ from abc import ABC, abstractmethod
 from diffusers import (
     AutoencoderKL,
     DiffusionPipeline,
-    UNet2DConditionModel,
-    UNet3DConditionModel,
 )
-from diffusers.schedulers import KarrasDiffusionSchedulers
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, List, Optional, Tuple, Union
 
+from stablefused.typing import UNet, Scheduler
 from stablefused.utils import (
     denormalize,
     load_model_from_cache,
@@ -33,11 +31,8 @@ class BaseDiffusion(ABC):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: Union[
-            UNet2DConditionModel,
-            UNet3DConditionModel,
-        ] = None,
-        scheduler: KarrasDiffusionSchedulers = None,
+        unet: UNet = None,
+        scheduler: Scheduler = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         use_cache=True,
@@ -51,11 +46,8 @@ class BaseDiffusion(ABC):
         self.tokenizer: CLIPTokenizer
         self.text_encoder: CLIPTextModel
         self.vae: AutoencoderKL
-        self.unet: Union[
-            UNet2DConditionModel,
-            UNet3DConditionModel,
-        ]
-        self.scheduler: KarrasDiffusionSchedulers
+        self.unet: UNet
+        self.scheduler: Scheduler
         self.vae_scale_factor: int
 
         if model_id is None:
@@ -129,22 +121,6 @@ class BaseDiffusion(ABC):
         self.unet = model.unet
         self.scheduler = model.scheduler
         self.vae_scale_factor = model.vae_scale_factor
-
-    @staticmethod
-    def empty_cache(model_id: Optional[str] = None) -> None:
-        """
-        Empty the model cache. This will remove all models from the cache.
-
-        Parameters
-        ----------
-        model_id: str
-            The model id to remove from the cache. If None, all models will be
-            removed from the cache.
-        """
-        if model_id is None:
-            _model_cache.clear()
-        else:
-            _model_cache.pop(model_id, None)
 
     def enable_attention_slicing(self, slice_size: Optional[int] = -1) -> None:
         """
