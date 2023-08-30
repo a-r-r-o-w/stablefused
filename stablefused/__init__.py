@@ -5,14 +5,18 @@
 from .diffusion import (
     BaseDiffusion,
     ImageToImageDiffusion,
+    InpaintDiffusion,
     LatentWalkDiffusion,
     TextToImageDiffusion,
     TextToVideoDiffusion,
 )
 
 from .typing import (
-    UNet,
-    Scheduler,
+    ImageType,
+    OutputType,
+    PromptType,
+    SchedulerType,
+    UNetType,
 )
 
 from .utils import (

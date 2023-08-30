@@ -1,3 +1,7 @@
+import numpy as np
+import torch
+
+from PIL import Image
 from diffusers.models import UNet2DConditionModel, UNet3DConditionModel
 from diffusers.schedulers import (
     DDIMScheduler,
@@ -10,12 +14,16 @@ from diffusers.schedulers import (
     LMSDiscreteScheduler,
     PNDMScheduler,
 )
-from typing import Union
+from typing import List, Union
 
 
-UNet = Union[UNet2DConditionModel, UNet3DConditionModel]
+ImageType = Union[torch.Tensor, np.ndarray, Image.Image, List[Image.Image]]
 
-Scheduler = Union[
+OutputType = Union[torch.Tensor, np.ndarray, List[Image.Image]]
+
+PromptType = Union[str, List[str]]
+
+SchedulerType = Union[
     DDIMScheduler,
     DDPMScheduler,
     DPMSolverMultistepScheduler,
@@ -26,3 +34,5 @@ Scheduler = Union[
     LMSDiscreteScheduler,
     PNDMScheduler,
 ]
+
+UNetType = Union[UNet2DConditionModel, UNet3DConditionModel]

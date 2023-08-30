@@ -8,7 +8,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
-from stablefused.typing import UNet, Scheduler
+from stablefused.typing import UNetType, SchedulerType
 from stablefused.utils import lerp, slerp
 
 
@@ -19,8 +19,8 @@ class LatentWalkDiffusion(BaseDiffusion):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet = None,
-        scheduler: Scheduler = None,
+        unet: UNetType = None,
+        scheduler: SchedulerType = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         *args,

@@ -11,7 +11,7 @@ from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, List, Optional, Tuple, Union
 
-from stablefused.typing import UNet, Scheduler
+from stablefused.typing import UNetType, SchedulerType
 from stablefused.utils import (
     denormalize,
     load_model_from_cache,
@@ -31,8 +31,8 @@ class BaseDiffusion(ABC):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet = None,
-        scheduler: Scheduler = None,
+        unet: UNetType = None,
+        scheduler: SchedulerType = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         use_cache=True,
@@ -46,8 +46,8 @@ class BaseDiffusion(ABC):
         self.tokenizer: CLIPTokenizer
         self.text_encoder: CLIPTextModel
         self.vae: AutoencoderKL
-        self.unet: UNet
-        self.scheduler: Scheduler
+        self.unet: UNetType
+        self.scheduler: SchedulerType
         self.vae_scale_factor: int
 
         if model_id is None:
@@ -87,7 +87,7 @@ class BaseDiffusion(ABC):
             else:
                 self.share_components_with(model)
 
-    def to(self, device: str) -> None:
+    def to(self, device: str) -> "BaseDiffusion":
         """
         Move model to specified compute device.
 
@@ -100,6 +100,7 @@ class BaseDiffusion(ABC):
         self.text_encoder = self.text_encoder.to(device)
         self.vae = self.vae.to(device)
         self.unet = self.unet.to(device)
+        return self
 
     def share_components_with(self, model: "BaseDiffusion") -> None:
         """
