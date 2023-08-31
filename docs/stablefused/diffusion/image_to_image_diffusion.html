@@ -76,7 +76,7 @@
 </span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="kn">from</span> <span class="nn">stablefused.diffusion</span> <span class="kn">import</span> <span class="n">BaseDiffusion</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="kn">from</span> <span class="nn">stablefused.typing</span> <span class="kn">import</span> <span class="n">UNet</span><span class="p">,</span> <span class="n">Scheduler</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="kn">from</span> <span class="nn">stablefused.typing</span> <span class="kn">import</span> <span class="n">PromptType</span><span class="p">,</span> <span class="n">OutputType</span><span class="p">,</span> <span class="n">SchedulerType</span><span class="p">,</span> <span class="n">UNetType</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="k">class</span> <span class="nc">ImageToImageDiffusion</span><span class="p">(</span><span class="n">BaseDiffusion</span><span class="p">):</span>
@@ -86,8 +86,8 @@
 </span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a>        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>        <span class="n">text_encoder</span><span class="p">:</span> <span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>        <span class="n">vae</span><span class="p">:</span> <span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">Scheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNetType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">SchedulerType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>        <span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 </span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 </span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -197,15 +197,15 @@
 </span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
 </span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        <span class="bp">self</span><span class="p">,</span>
 </span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">PromptType</span><span class="p">,</span>
 </span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>        <span class="n">num_inference_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 </span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>        <span class="n">start_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 </span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>        <span class="n">guidance_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.5</span><span class="p">,</span>
 </span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>        <span class="n">guidance_rescale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PromptType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>        <span class="n">output_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pil&quot;</span><span class="p">,</span>
 </span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="sd">        Run inference by conditioning on input image and text prompt.</span>
 </span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>
@@ -213,7 +213,7 @@
 </span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="sd">        ----------</span>
 </span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a><span class="sd">        image: Image.Image</span>
 </span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">            Input image to condition on.</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">        prompt: Union[str, List[str]]</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">        prompt: PromptType</span>
 </span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a><span class="sd">            Text prompt to condition on.</span>
 </span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">        num_inference_steps: int</span>
 </span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a><span class="sd">            Number of diffusion steps to run.</span>
@@ -226,7 +226,7 @@
 </span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="sd">        guidance_rescale: float</span>
 </span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a><span class="sd">            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are</span>
 </span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a><span class="sd">            Flawed](https://arxiv.org/pdf/2305.08891.pdf).</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a><span class="sd">        negative_prompt: Optional[Union[str, List[str]]]</span>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a><span class="sd">        negative_prompt: Optional[PromptType]</span>
 </span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a><span class="sd">            Negative text prompt to uncondition on.</span>
 </span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a><span class="sd">        output_type: str</span>
 </span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a><span class="sd">            Type of output to return. One of [&quot;latent&quot;, &quot;pil&quot;, &quot;pt&quot;, &quot;np&quot;].</span>
@@ -236,7 +236,7 @@
 </span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>
 </span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="sd">        Returns</span>
 </span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a><span class="sd">        -------</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="sd">        OutputType</span>
 </span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>
@@ -297,8 +297,8 @@
 </span><span id="ImageToImageDiffusion-19"><a href="#ImageToImageDiffusion-19"><span class="linenos"> 19</span></a>        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-20"><a href="#ImageToImageDiffusion-20"><span class="linenos"> 20</span></a>        <span class="n">text_encoder</span><span class="p">:</span> <span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-21"><a href="#ImageToImageDiffusion-21"><span class="linenos"> 21</span></a>        <span class="n">vae</span><span class="p">:</span> <span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion-22"><a href="#ImageToImageDiffusion-22"><span class="linenos"> 22</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion-23"><a href="#ImageToImageDiffusion-23"><span class="linenos"> 23</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">Scheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ImageToImageDiffusion-22"><a href="#ImageToImageDiffusion-22"><span class="linenos"> 22</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNetType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ImageToImageDiffusion-23"><a href="#ImageToImageDiffusion-23"><span class="linenos"> 23</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">SchedulerType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-24"><a href="#ImageToImageDiffusion-24"><span class="linenos"> 24</span></a>        <span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-25"><a href="#ImageToImageDiffusion-25"><span class="linenos"> 25</span></a>        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-26"><a href="#ImageToImageDiffusion-26"><span class="linenos"> 26</span></a>        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -408,15 +408,15 @@
 </span><span id="ImageToImageDiffusion-130"><a href="#ImageToImageDiffusion-130"><span class="linenos">130</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
 </span><span id="ImageToImageDiffusion-131"><a href="#ImageToImageDiffusion-131"><span class="linenos">131</span></a>        <span class="bp">self</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-132"><a href="#ImageToImageDiffusion-132"><span class="linenos">132</span></a>        <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion-133"><a href="#ImageToImageDiffusion-133"><span class="linenos">133</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="ImageToImageDiffusion-133"><a href="#ImageToImageDiffusion-133"><span class="linenos">133</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">PromptType</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-134"><a href="#ImageToImageDiffusion-134"><span class="linenos">134</span></a>        <span class="n">num_inference_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-135"><a href="#ImageToImageDiffusion-135"><span class="linenos">135</span></a>        <span class="n">start_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-136"><a href="#ImageToImageDiffusion-136"><span class="linenos">136</span></a>        <span class="n">guidance_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.5</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-137"><a href="#ImageToImageDiffusion-137"><span class="linenos">137</span></a>        <span class="n">guidance_rescale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion-138"><a href="#ImageToImageDiffusion-138"><span class="linenos">138</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ImageToImageDiffusion-138"><a href="#ImageToImageDiffusion-138"><span class="linenos">138</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PromptType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-139"><a href="#ImageToImageDiffusion-139"><span class="linenos">139</span></a>        <span class="n">output_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pil&quot;</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion-140"><a href="#ImageToImageDiffusion-140"><span class="linenos">140</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion-141"><a href="#ImageToImageDiffusion-141"><span class="linenos">141</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="ImageToImageDiffusion-141"><a href="#ImageToImageDiffusion-141"><span class="linenos">141</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="ImageToImageDiffusion-142"><a href="#ImageToImageDiffusion-142"><span class="linenos">142</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ImageToImageDiffusion-143"><a href="#ImageToImageDiffusion-143"><span class="linenos">143</span></a><span class="sd">        Run inference by conditioning on input image and text prompt.</span>
 </span><span id="ImageToImageDiffusion-144"><a href="#ImageToImageDiffusion-144"><span class="linenos">144</span></a>
@@ -424,7 +424,7 @@
 </span><span id="ImageToImageDiffusion-146"><a href="#ImageToImageDiffusion-146"><span class="linenos">146</span></a><span class="sd">        ----------</span>
 </span><span id="ImageToImageDiffusion-147"><a href="#ImageToImageDiffusion-147"><span class="linenos">147</span></a><span class="sd">        image: Image.Image</span>
 </span><span id="ImageToImageDiffusion-148"><a href="#ImageToImageDiffusion-148"><span class="linenos">148</span></a><span class="sd">            Input image to condition on.</span>
-</span><span id="ImageToImageDiffusion-149"><a href="#ImageToImageDiffusion-149"><span class="linenos">149</span></a><span class="sd">        prompt: Union[str, List[str]]</span>
+</span><span id="ImageToImageDiffusion-149"><a href="#ImageToImageDiffusion-149"><span class="linenos">149</span></a><span class="sd">        prompt: PromptType</span>
 </span><span id="ImageToImageDiffusion-150"><a href="#ImageToImageDiffusion-150"><span class="linenos">150</span></a><span class="sd">            Text prompt to condition on.</span>
 </span><span id="ImageToImageDiffusion-151"><a href="#ImageToImageDiffusion-151"><span class="linenos">151</span></a><span class="sd">        num_inference_steps: int</span>
 </span><span id="ImageToImageDiffusion-152"><a href="#ImageToImageDiffusion-152"><span class="linenos">152</span></a><span class="sd">            Number of diffusion steps to run.</span>
@@ -437,7 +437,7 @@
 </span><span id="ImageToImageDiffusion-159"><a href="#ImageToImageDiffusion-159"><span class="linenos">159</span></a><span class="sd">        guidance_rescale: float</span>
 </span><span id="ImageToImageDiffusion-160"><a href="#ImageToImageDiffusion-160"><span class="linenos">160</span></a><span class="sd">            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are</span>
 </span><span id="ImageToImageDiffusion-161"><a href="#ImageToImageDiffusion-161"><span class="linenos">161</span></a><span class="sd">            Flawed](https://arxiv.org/pdf/2305.08891.pdf).</span>
-</span><span id="ImageToImageDiffusion-162"><a href="#ImageToImageDiffusion-162"><span class="linenos">162</span></a><span class="sd">        negative_prompt: Optional[Union[str, List[str]]]</span>
+</span><span id="ImageToImageDiffusion-162"><a href="#ImageToImageDiffusion-162"><span class="linenos">162</span></a><span class="sd">        negative_prompt: Optional[PromptType]</span>
 </span><span id="ImageToImageDiffusion-163"><a href="#ImageToImageDiffusion-163"><span class="linenos">163</span></a><span class="sd">            Negative text prompt to uncondition on.</span>
 </span><span id="ImageToImageDiffusion-164"><a href="#ImageToImageDiffusion-164"><span class="linenos">164</span></a><span class="sd">        output_type: str</span>
 </span><span id="ImageToImageDiffusion-165"><a href="#ImageToImageDiffusion-165"><span class="linenos">165</span></a><span class="sd">            Type of output to return. One of [&quot;latent&quot;, &quot;pil&quot;, &quot;pt&quot;, &quot;np&quot;].</span>
@@ -447,7 +447,7 @@
 </span><span id="ImageToImageDiffusion-169"><a href="#ImageToImageDiffusion-169"><span class="linenos">169</span></a>
 </span><span id="ImageToImageDiffusion-170"><a href="#ImageToImageDiffusion-170"><span class="linenos">170</span></a><span class="sd">        Returns</span>
 </span><span id="ImageToImageDiffusion-171"><a href="#ImageToImageDiffusion-171"><span class="linenos">171</span></a><span class="sd">        -------</span>
-</span><span id="ImageToImageDiffusion-172"><a href="#ImageToImageDiffusion-172"><span class="linenos">172</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="ImageToImageDiffusion-172"><a href="#ImageToImageDiffusion-172"><span class="linenos">172</span></a><span class="sd">        OutputType</span>
 </span><span id="ImageToImageDiffusion-173"><a href="#ImageToImageDiffusion-173"><span class="linenos">173</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="ImageToImageDiffusion-174"><a href="#ImageToImageDiffusion-174"><span class="linenos">174</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="ImageToImageDiffusion-175"><a href="#ImageToImageDiffusion-175"><span class="linenos">175</span></a>
@@ -510,8 +510,8 @@ inheritance.</p>
 </span><span id="ImageToImageDiffusion.__init__-19"><a href="#ImageToImageDiffusion.__init__-19"><span class="linenos">19</span></a>        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.__init__-20"><a href="#ImageToImageDiffusion.__init__-20"><span class="linenos">20</span></a>        <span class="n">text_encoder</span><span class="p">:</span> <span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.__init__-21"><a href="#ImageToImageDiffusion.__init__-21"><span class="linenos">21</span></a>        <span class="n">vae</span><span class="p">:</span> <span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion.__init__-22"><a href="#ImageToImageDiffusion.__init__-22"><span class="linenos">22</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion.__init__-23"><a href="#ImageToImageDiffusion.__init__-23"><span class="linenos">23</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">Scheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ImageToImageDiffusion.__init__-22"><a href="#ImageToImageDiffusion.__init__-22"><span class="linenos">22</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNetType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ImageToImageDiffusion.__init__-23"><a href="#ImageToImageDiffusion.__init__-23"><span class="linenos">23</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">SchedulerType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.__init__-24"><a href="#ImageToImageDiffusion.__init__-24"><span class="linenos">24</span></a>        <span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.__init__-25"><a href="#ImageToImageDiffusion.__init__-25"><span class="linenos">25</span></a>        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.__init__-26"><a href="#ImageToImageDiffusion.__init__-26"><span class="linenos">26</span></a>        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -683,15 +683,15 @@ return_latent_history: bool
 </span><span id="ImageToImageDiffusion.generate-130"><a href="#ImageToImageDiffusion.generate-130"><span class="linenos">130</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
 </span><span id="ImageToImageDiffusion.generate-131"><a href="#ImageToImageDiffusion.generate-131"><span class="linenos">131</span></a>        <span class="bp">self</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.generate-132"><a href="#ImageToImageDiffusion.generate-132"><span class="linenos">132</span></a>        <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion.generate-133"><a href="#ImageToImageDiffusion.generate-133"><span class="linenos">133</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="ImageToImageDiffusion.generate-133"><a href="#ImageToImageDiffusion.generate-133"><span class="linenos">133</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">PromptType</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.generate-134"><a href="#ImageToImageDiffusion.generate-134"><span class="linenos">134</span></a>        <span class="n">num_inference_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.generate-135"><a href="#ImageToImageDiffusion.generate-135"><span class="linenos">135</span></a>        <span class="n">start_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.generate-136"><a href="#ImageToImageDiffusion.generate-136"><span class="linenos">136</span></a>        <span class="n">guidance_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.5</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.generate-137"><a href="#ImageToImageDiffusion.generate-137"><span class="linenos">137</span></a>        <span class="n">guidance_rescale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion.generate-138"><a href="#ImageToImageDiffusion.generate-138"><span class="linenos">138</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ImageToImageDiffusion.generate-138"><a href="#ImageToImageDiffusion.generate-138"><span class="linenos">138</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PromptType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.generate-139"><a href="#ImageToImageDiffusion.generate-139"><span class="linenos">139</span></a>        <span class="n">output_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pil&quot;</span><span class="p">,</span>
 </span><span id="ImageToImageDiffusion.generate-140"><a href="#ImageToImageDiffusion.generate-140"><span class="linenos">140</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="ImageToImageDiffusion.generate-141"><a href="#ImageToImageDiffusion.generate-141"><span class="linenos">141</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="ImageToImageDiffusion.generate-141"><a href="#ImageToImageDiffusion.generate-141"><span class="linenos">141</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="ImageToImageDiffusion.generate-142"><a href="#ImageToImageDiffusion.generate-142"><span class="linenos">142</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ImageToImageDiffusion.generate-143"><a href="#ImageToImageDiffusion.generate-143"><span class="linenos">143</span></a><span class="sd">        Run inference by conditioning on input image and text prompt.</span>
 </span><span id="ImageToImageDiffusion.generate-144"><a href="#ImageToImageDiffusion.generate-144"><span class="linenos">144</span></a>
@@ -699,7 +699,7 @@ return_latent_history: bool
 </span><span id="ImageToImageDiffusion.generate-146"><a href="#ImageToImageDiffusion.generate-146"><span class="linenos">146</span></a><span class="sd">        ----------</span>
 </span><span id="ImageToImageDiffusion.generate-147"><a href="#ImageToImageDiffusion.generate-147"><span class="linenos">147</span></a><span class="sd">        image: Image.Image</span>
 </span><span id="ImageToImageDiffusion.generate-148"><a href="#ImageToImageDiffusion.generate-148"><span class="linenos">148</span></a><span class="sd">            Input image to condition on.</span>
-</span><span id="ImageToImageDiffusion.generate-149"><a href="#ImageToImageDiffusion.generate-149"><span class="linenos">149</span></a><span class="sd">        prompt: Union[str, List[str]]</span>
+</span><span id="ImageToImageDiffusion.generate-149"><a href="#ImageToImageDiffusion.generate-149"><span class="linenos">149</span></a><span class="sd">        prompt: PromptType</span>
 </span><span id="ImageToImageDiffusion.generate-150"><a href="#ImageToImageDiffusion.generate-150"><span class="linenos">150</span></a><span class="sd">            Text prompt to condition on.</span>
 </span><span id="ImageToImageDiffusion.generate-151"><a href="#ImageToImageDiffusion.generate-151"><span class="linenos">151</span></a><span class="sd">        num_inference_steps: int</span>
 </span><span id="ImageToImageDiffusion.generate-152"><a href="#ImageToImageDiffusion.generate-152"><span class="linenos">152</span></a><span class="sd">            Number of diffusion steps to run.</span>
@@ -712,7 +712,7 @@ return_latent_history: bool
 </span><span id="ImageToImageDiffusion.generate-159"><a href="#ImageToImageDiffusion.generate-159"><span class="linenos">159</span></a><span class="sd">        guidance_rescale: float</span>
 </span><span id="ImageToImageDiffusion.generate-160"><a href="#ImageToImageDiffusion.generate-160"><span class="linenos">160</span></a><span class="sd">            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are</span>
 </span><span id="ImageToImageDiffusion.generate-161"><a href="#ImageToImageDiffusion.generate-161"><span class="linenos">161</span></a><span class="sd">            Flawed](https://arxiv.org/pdf/2305.08891.pdf).</span>
-</span><span id="ImageToImageDiffusion.generate-162"><a href="#ImageToImageDiffusion.generate-162"><span class="linenos">162</span></a><span class="sd">        negative_prompt: Optional[Union[str, List[str]]]</span>
+</span><span id="ImageToImageDiffusion.generate-162"><a href="#ImageToImageDiffusion.generate-162"><span class="linenos">162</span></a><span class="sd">        negative_prompt: Optional[PromptType]</span>
 </span><span id="ImageToImageDiffusion.generate-163"><a href="#ImageToImageDiffusion.generate-163"><span class="linenos">163</span></a><span class="sd">            Negative text prompt to uncondition on.</span>
 </span><span id="ImageToImageDiffusion.generate-164"><a href="#ImageToImageDiffusion.generate-164"><span class="linenos">164</span></a><span class="sd">        output_type: str</span>
 </span><span id="ImageToImageDiffusion.generate-165"><a href="#ImageToImageDiffusion.generate-165"><span class="linenos">165</span></a><span class="sd">            Type of output to return. One of [&quot;latent&quot;, &quot;pil&quot;, &quot;pt&quot;, &quot;np&quot;].</span>
@@ -722,7 +722,7 @@ return_latent_history: bool
 </span><span id="ImageToImageDiffusion.generate-169"><a href="#ImageToImageDiffusion.generate-169"><span class="linenos">169</span></a>
 </span><span id="ImageToImageDiffusion.generate-170"><a href="#ImageToImageDiffusion.generate-170"><span class="linenos">170</span></a><span class="sd">        Returns</span>
 </span><span id="ImageToImageDiffusion.generate-171"><a href="#ImageToImageDiffusion.generate-171"><span class="linenos">171</span></a><span class="sd">        -------</span>
-</span><span id="ImageToImageDiffusion.generate-172"><a href="#ImageToImageDiffusion.generate-172"><span class="linenos">172</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="ImageToImageDiffusion.generate-172"><a href="#ImageToImageDiffusion.generate-172"><span class="linenos">172</span></a><span class="sd">        OutputType</span>
 </span><span id="ImageToImageDiffusion.generate-173"><a href="#ImageToImageDiffusion.generate-173"><span class="linenos">173</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="ImageToImageDiffusion.generate-174"><a href="#ImageToImageDiffusion.generate-174"><span class="linenos">174</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="ImageToImageDiffusion.generate-175"><a href="#ImageToImageDiffusion.generate-175"><span class="linenos">175</span></a>
@@ -768,7 +768,7 @@ return_latent_history: bool
 
 <p>image: Image.Image
     Input image to condition on.
-prompt: Union[str, List[str]]
+prompt: PromptType
     Text prompt to condition on.
 num_inference_steps: int
     Number of diffusion steps to run.
@@ -781,7 +781,7 @@ guidance_scale: float
 guidance_rescale: float
     Guidance rescale from <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion Noise Schedules and Sample Steps are
     Flawed</a>.
-negative_prompt: Optional[Union[str, List[str]]]
+negative_prompt: Optional[PromptType]
     Negative text prompt to uncondition on.
 output_type: str
     Type of output to return. One of ["latent", "pil", "pt", "np"].
@@ -791,7 +791,7 @@ return_latent_history: bool
 
 <h2 id="returns">Returns</h2>
 
-<p>Union[torch.Tensor, np.ndarray, List[Image.Image]]
+<p>OutputType
     Generated output based on output_type.</p>
 </div>
 
