@@ -8,7 +8,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
-from stablefused.typing import UNetType, SchedulerType
+from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
 
 
 class TextToVideoDiffusion(BaseDiffusion):
@@ -129,7 +129,7 @@ class TextToVideoDiffusion(BaseDiffusion):
         self,
         latent: torch.FloatTensor,
         output_type: str,
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+    ) -> OutputType:
         """
         Resolve output type from latent.
 
@@ -142,7 +142,7 @@ class TextToVideoDiffusion(BaseDiffusion):
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+        OutputType
             The resolved output based on the provided latent vector and options.
         """
 
@@ -175,23 +175,23 @@ class TextToVideoDiffusion(BaseDiffusion):
     @torch.no_grad()
     def __call__(
         self,
-        prompt: Union[str, List[str]],
+        prompt: PromptType,
         video_height: int = 512,
         video_width: int = 512,
         video_frames: int = 24,
         num_inference_steps: int = 50,
         guidance_scale: float = 7.5,
         guidance_rescale: float = 0.7,
-        negative_prompt: Optional[Union[str, List[str]]] = None,
+        negative_prompt: Optional[PromptType] = None,
         latent: Optional[torch.FloatTensor] = None,
         output_type: str = "pil",
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+    ) -> OutputType:
         """
         Run inference by conditioning on text prompt.
 
         Parameters
         ----------
-        prompt: Union[str, List[str]]
+        prompt: PromptType
             Text prompt to condition on.
         video_height: int
             Height of video to generate.
@@ -207,7 +207,7 @@ class TextToVideoDiffusion(BaseDiffusion):
         guidance_rescale: float
             Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
             Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[Union[str, List[str]]]
+        negative_prompt: Optional[PromptType]
             Negative text prompt to uncondition on.
         latent: Optional[torch.FloatTensor]
             Latent to start from. If None, latent is generated from noise.
@@ -216,7 +216,7 @@ class TextToVideoDiffusion(BaseDiffusion):
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+        OutputType
             Generated output based on output_type.
         """
 

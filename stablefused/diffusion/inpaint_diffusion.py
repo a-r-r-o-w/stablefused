@@ -201,8 +201,6 @@ class InpaintDiffusion(BaseDiffusion):
         self,
         image: np.ndarray,
         mask: np.ndarray,
-        image_height: int,
-        image_width: int,
     ) -> Tuple[torch.FloatTensor, torch.FloatTensor, torch.FloatTensor]:
         """
         Helper function to preprocess numpy arrays representing images. Note that
@@ -250,7 +248,7 @@ class InpaintDiffusion(BaseDiffusion):
         image = np.array(image)
         mask = np.array(mask).reshape(-1, image_height, image_width, 1)
 
-        return self._handle_preprocess_numpy(image, mask, image_height, image_width)
+        return self._handle_preprocess_numpy(image, mask)
 
     def preprocess_image_and_mask(
         self,
@@ -297,9 +295,7 @@ class InpaintDiffusion(BaseDiffusion):
         if isinstance(image, torch.Tensor):
             image, mask, masked_image = self._handle_preprocess_tensor(image, mask)
         elif isinstance(image, np.ndarray):
-            image, mask, masked_image = self._handle_preprocess_numpy(
-                image, mask, image_height, image_width
-            )
+            image, mask, masked_image = self._handle_preprocess_numpy(image, mask)
         else:
             image, mask, masked_image = self._handle_preprocess_pil(
                 image, mask, image_height, image_width
