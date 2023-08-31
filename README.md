@@ -55,6 +55,7 @@ The following sources have been very helpful to me in understanding Stable Diffu
 - [Karpathy's gist on latent walking](https://gist.github.com/karpathy/00103b0037c5aaea32fe1da1af553355)
 - [Nateraw's stable-diffusion-videos](https://github.com/nateraw/stable-diffusion-videos)
 - [AnimateDiff](https://github.com/guoyww/AnimateDiff/)
+- [RunwayML StableDiffusion](https://github.com/runwayml/stable-diffusion)
 - [🤗 Annotated Diffusion Blog](https://huggingface.co/blog/annotated-diffusion)
 - [Keras CV](https://github.com/keras-team/keras-cv)
 - [Lillian Weng's Blogs](https://lilianweng.github.io/)

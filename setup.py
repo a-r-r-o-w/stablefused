@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 setup(
     name="stablefused",
-    version="0.1.7",
+    version="0.1.8",
     description="StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources!",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,7 +23,7 @@ setup(
         "torch==2.0.1",
         "transformers==4.31.0",
         "matplotlib==3.7.2",
-        "numpy==1.25.2",
+        "numpy==1.23.5",
         "scipy==1.11.1",
     ],
     extras_require={
