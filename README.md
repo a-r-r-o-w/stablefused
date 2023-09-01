@@ -18,9 +18,16 @@ StableFused is a toy library to experiment with Stable Diffusion inspired by ðŸ¤
 
 It is recommended to use a virtual environment. You can use [venv](https://docs.python.org/3/library/venv.html) or [conda](https://docs.conda.io/en/latest/) to create one.
 
+Unix:
 ```bash
 python -m venv venv
 source venv/bin/activate
+```
+
+Windows:
+```PowerShell
+python -m venv venv
+venv\Scripts\activate
 ```
 
 For usage, install the package from PyPI.
