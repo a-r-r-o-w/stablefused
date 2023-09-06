@@ -12,6 +12,7 @@ from .diffusion import (
 )
 
 from .typing import (
+    InpaintWalkType,
     ImageType,
     OutputType,
     PromptType,
@@ -29,6 +30,7 @@ from .utils import (
     numpy_to_pt,
     pil_to_numpy,
     pil_to_video,
+    pil_to_gif,
     pt_to_numpy,
     save_model_to_cache,
     slerp,

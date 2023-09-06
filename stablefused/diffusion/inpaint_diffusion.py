@@ -10,6 +10,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 from stablefused.diffusion import BaseDiffusion
 from stablefused.typing import (
+    InpaintWalkType,
     ImageType,
     OutputType,
     PromptType,
@@ -102,7 +103,10 @@ class InpaintDiffusion(BaseDiffusion):
             self.scheduler.timesteps[start_step].repeat(latent.shape[0]).long()
         )
         noise = self.random_tensor(latent.shape)
-        latent = self.scheduler.add_noise(latent, noise, start_timestep)
+        if start_step > 0:
+            latent = self.scheduler.add_noise(latent, noise, start_timestep)
+        else:
+            latent = noise * self.scheduler.init_noise_sigma
 
         timesteps = self.scheduler.timesteps[start_step:]
         latent_history = [latent]
@@ -178,14 +182,17 @@ class InpaintDiffusion(BaseDiffusion):
             raise ValueError(
                 f"image and mask must have same height and width, got {image.shape[2:]} and {mask.shape[2:]}"
             )
-        if image.min() < -1 or image.max() > 1:
+        if image.min() < 0 or image.max() > 255:
             raise ValueError(
-                f"image must have values between -1 and 1, got {image.min()} and {image.max()}"
+                f"image must have values between 0 and 255, got {image.min()} and {image.max()}"
             )
-        if mask.min() < 0 or mask.max() > 1:
+        if mask.min() < 0 or mask.max() > 255:
             raise ValueError(
-                f"mask must have values between 0 and 1, got {mask.min()} and {mask.max()}"
+                f"mask must have values between 0 and 255, got {mask.min()} and {mask.max()}"
             )
+
+        image = (image / 255.0) * 2 - 1
+        mask = mask / 255.0
 
         mask[mask < 0.5] = 0
         mask[mask >= 0.5] = 1
@@ -217,9 +224,6 @@ class InpaintDiffusion(BaseDiffusion):
                 f"image and mask must have 4 dimensions, got {image.ndim} and {mask.ndim}"
             )
 
-        image = (image / 255.0) * 2 - 1
-        mask = mask / 255.0
-
         image = image.transpose(0, 3, 1, 2)
         image = torch.from_numpy(image).to(device=self.device, dtype=self.torch_dtype)
 
@@ -249,6 +253,227 @@ class InpaintDiffusion(BaseDiffusion):
         mask = np.array(mask).reshape(-1, image_height, image_width, 1)
 
         return self._handle_preprocess_numpy(image, mask)
+
+    @staticmethod
+    def _calculate_translation_per_frame(
+        translation: int,
+        translation_frames: int,
+    ) -> List[int]:
+        step_size = translation // translation_frames
+        remainder = translation % translation_frames
+        values = [step_size + (i < remainder) for i in range(translation_frames)]
+        return values
+
+    @staticmethod
+    def _translate_image_and_mask(
+        image: Image.Image,
+        walk_type: InpaintWalkType,
+        translation: Union[int, Tuple[int, int]],
+        mask: Optional[np.ndarray] = None,
+    ) -> Tuple[Image.Image, Image.Image]:
+        if walk_type == InpaintWalkType.UP:
+            if mask is not None:
+                mask[:translation, :] = 255
+            new_image = image.transform(
+                (image.width, image.height),
+                Image.AFFINE,
+                (1, 0, 0, 0, 1, -translation),
+                resample=Image.BICUBIC,
+            )
+
+        elif walk_type == InpaintWalkType.DOWN:
+            if mask is not None:
+                mask[-translation:, :] = 255
+            new_image = image.transform(
+                (image.width, image.height),
+                Image.AFFINE,
+                (1, 0, 0, 0, 1, translation),
+                resample=Image.BICUBIC,
+            )
+
+        elif walk_type == InpaintWalkType.LEFT:
+            if mask is not None:
+                mask[:, :translation] = 255
+            new_image = image.transform(
+                (image.width, image.height),
+                Image.AFFINE,
+                (1, 0, -translation, 0, 1, 0),
+                resample=Image.BICUBIC,
+            )
+
+        elif walk_type == InpaintWalkType.RIGHT:
+            if mask is not None:
+                mask[:, -translation:] = 255
+            new_image = image.transform(
+                (image.width, image.height),
+                Image.AFFINE,
+                (1, 0, translation, 0, 1, 0),
+                resample=Image.BICUBIC,
+            )
+
+        elif (
+            walk_type == InpaintWalkType.FORWARD
+            or walk_type == InpaintWalkType.BACKWARD
+        ):
+            tw, th = translation
+            top = th // 2
+            bottom = th - top
+            left = tw // 2
+            right = tw - left
+
+            if mask is not None:
+                mask[:top, :] = 255
+                mask[-bottom:, :] = 255
+                mask[:, :left] = 255
+                mask[:, -right:] = 255
+            downsampled_image = image.resize(
+                (image.width - tw, image.height - th), resample=Image.LANCZOS
+            )
+            new_image = Image.new("RGB", (image.width, image.height))
+            new_image.paste(downsampled_image, (left, top))
+
+        return new_image, Image.fromarray(mask) if mask is not None else None
+
+    @staticmethod
+    def _generate_filler_frames(
+        start_image: Image.Image,
+        end_image: Image.Image,
+        walk_type: InpaintWalkType,
+        actual_translation: Union[int, Tuple[int, int]],
+        filler_translations: Union[int, List[int]],
+    ) -> List[Image.Image]:
+        if (
+            walk_type == InpaintWalkType.FORWARD
+            or walk_type == InpaintWalkType.BACKWARD
+        ):
+            if not isinstance(filler_translations, int):
+                raise ValueError(
+                    f"filler_translations must be of type int for InpaintWalkType.FORWARD or InpaintWalkType.BACKWARD, got {type(filler_translations)}"
+                )
+        else:
+            if not isinstance(filler_translations, list):
+                raise ValueError(
+                    f"filler_translations must be of type list for InpaintWalkType.UP, InpaintWalkType.DOWN, InpaintWalkType.LEFT or InpaintWalkType.RIGHT, got {type(filler_translations)}"
+                )
+
+        frames = []
+        width = start_image.width
+        height = start_image.height
+
+        if walk_type == InpaintWalkType.UP:
+            for filler_translation in filler_translations:
+                a = start_image.crop((0, 0, width, height - filler_translation))
+                b = end_image.crop(
+                    (
+                        0,
+                        actual_translation - filler_translation,
+                        width,
+                        actual_translation,
+                    )
+                )
+                result_img = Image.new("RGB", (width, height))
+                result_img.paste(b, (0, 0))
+                result_img.paste(a, (0, b.height))
+                frames.append(result_img)
+
+        elif walk_type == InpaintWalkType.DOWN:
+            for filler_translation in filler_translations:
+                a = start_image.crop((0, filler_translation, width, height))
+                b = end_image.crop(
+                    (
+                        0,
+                        height - actual_translation,
+                        width,
+                        height - actual_translation + filler_translation,
+                    )
+                )
+                result_img = Image.new("RGB", (width, height))
+                result_img.paste(a, (0, 0))
+                result_img.paste(b, (0, a.height))
+                frames.append(result_img)
+
+        elif walk_type == InpaintWalkType.LEFT:
+            for filler_translation in filler_translations:
+                a = start_image.crop((0, 0, width - filler_translation, height))
+                b = end_image.crop(
+                    (
+                        actual_translation - filler_translation,
+                        0,
+                        actual_translation,
+                        height,
+                    )
+                )
+                result_img = Image.new("RGB", (width, height))
+                result_img.paste(b, (0, 0))
+                result_img.paste(a, (b.width, 0))
+                frames.append(result_img)
+
+        elif walk_type == InpaintWalkType.RIGHT:
+            for filler_translation in filler_translations:
+                a = start_image.crop((filler_translation, 0, width, height))
+                b = end_image.crop(
+                    (
+                        width - actual_translation,
+                        0,
+                        width - actual_translation + filler_translation,
+                        height,
+                    )
+                )
+                result_img = Image.new("RGB", (width, height))
+                result_img.paste(a, (0, 0))
+                result_img.paste(b, (a.width, 0))
+                frames.append(result_img)
+
+        elif (
+            walk_type == InpaintWalkType.FORWARD
+            or walk_type == InpaintWalkType.BACKWARD
+        ):
+            aw, ah = actual_translation
+            width_factor = 1 - 2 * aw / width
+            height_factor = 1 - 2 * ah / height
+            width_crop_factor = width - 2 * aw
+            height_crop_factor = height - 2 * ah
+
+            translated_image = InpaintDiffusion._translate_image_and_mask(
+                start_image, walk_type, actual_translation, mask=None
+            )[0].convert("RGBA")
+            end_image.paste(translated_image, mask=translated_image)
+
+            for i in range(filler_translations - 1):
+                translation_factor = 1 - (i + 1) / filler_translations
+                interpolation_image = end_image
+                interpolation_width = round(
+                    (1 - width_factor**translation_factor) * width / 2
+                )
+                interpolation_height = round(
+                    (1 - height_factor**translation_factor) * height / 2
+                )
+
+                interpolation_image = interpolation_image.crop(
+                    (
+                        interpolation_width,
+                        interpolation_height,
+                        width - interpolation_width,
+                        height - interpolation_height,
+                    )
+                ).resize((width, height), resample=Image.LANCZOS)
+
+                w = width - 2 * interpolation_width
+                h = height - 2 * interpolation_height
+                crop_fix_width = round((1 - width_crop_factor / w) * width / 2)
+                crop_fix_height = round((1 - height_crop_factor / h) * height / 2)
+                start_image_crop_fix = InpaintDiffusion._translate_image_and_mask(
+                    start_image, walk_type, (crop_fix_width, crop_fix_height), mask=None
+                )[0].convert("RGBA")
+
+                interpolation_image.paste(
+                    start_image_crop_fix, mask=start_image_crop_fix
+                )
+                frames.append(interpolation_image)
+
+            frames.append(end_image)
+
+        return frames
 
     def preprocess_image_and_mask(
         self,
@@ -311,7 +536,7 @@ class InpaintDiffusion(BaseDiffusion):
         mask: ImageType,
         image_height: int = 512,
         image_width: int = 512,
-        num_inference_steps: int = 0,
+        num_inference_steps: int = 50,
         start_step: int = 0,
         guidance_scale: float = 7.5,
         guidance_rescale: float = 0.7,
@@ -383,16 +608,16 @@ class InpaintDiffusion(BaseDiffusion):
             image_width=image_width,
         )
 
+        # Generate latent from input image and masked_image. Mask is down/up-scaled to match latent shape
+        image_latent = self.image_to_latent(image)
+        mask = F.interpolate(mask, size=(image_latent.shape[2], image_latent.shape[3]))
+        masked_image_latent = self.image_to_latent(masked_image)
+
         # Generate embedding to condition on prompt and uncondition on negative prompt
         embedding = self.prompt_to_embedding(
             prompt=prompt,
             negative_prompt=negative_prompt,
         )
-
-        # Generate latent from input image and masked_image. Mask is down/up-scaled to match latent shape
-        image_latent = self.image_to_latent(image)
-        mask = F.interpolate(mask, size=(image_latent.shape[2], image_latent.shape[3]))
-        masked_image_latent = self.image_to_latent(masked_image)
 
         # Run inference
         latent = self.embedding_to_latent(
@@ -414,3 +639,139 @@ class InpaintDiffusion(BaseDiffusion):
         )
 
     generate = __call__
+
+    def walk(
+        self,
+        prompt: PromptType,
+        image: Image.Image,
+        walk_type: Union[InpaintWalkType, List[InpaintWalkType]],
+        image_height: int = 512,
+        image_width: int = 512,
+        height_translation_per_step: int = 512,
+        width_translation_per_step: int = 512,
+        translation_factor: Optional[float] = None,
+        num_inpainting_steps: int = 4,
+        interpolation_steps: int = 60,
+        num_inference_steps: int = 50,
+        guidance_scale: float = 7.5,
+        guidance_rescale: float = 0.7,
+        negative_prompt: Optional[PromptType] = None,
+    ) -> OutputType:
+        self.validate_input(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            image_height=image_height,
+            image_width=image_width,
+            num_inference_steps=num_inference_steps,
+        )
+
+        # TODO: Make validate input handle this
+        if isinstance(walk_type, InpaintWalkType):
+            walk_type = [walk_type]
+        if isinstance(prompt, str):
+            prompt = [prompt]
+        if isinstance(negative_prompt, str):
+            negative_prompt = [negative_prompt]
+        if translation_factor is not None:
+            if translation_factor < 0 or translation_factor > 1:
+                raise ValueError(
+                    f"translation_factor must be between 0 and 1, got {translation_factor}"
+                )
+            height_translation_per_step = image_height * translation_factor
+            width_translation_per_step = image_width * translation_factor
+
+        if not isinstance(walk_type, list):
+            raise TypeError(
+                f"walk_type must be of type InpaintWalkType or List[InpaintWalkType], got {type(walk_type)}"
+            )
+
+        if len(walk_type) == 1:
+            walk_type = walk_type * num_inpainting_steps
+        if len(walk_type) != num_inpainting_steps:
+            raise ValueError(
+                f"walk_type must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
+            )
+
+        if len(prompt) == 1:
+            prompt = prompt * num_inpainting_steps
+        if len(prompt) != num_inpainting_steps:
+            raise ValueError(
+                f"prompt must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
+            )
+
+        if len(negative_prompt) == 1:
+            negative_prompt = negative_prompt * num_inpainting_steps
+        if len(negative_prompt) != num_inpainting_steps:
+            raise ValueError(
+                f"negative_prompt must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
+            )
+
+        height_filler_translations = self._calculate_translation_per_frame(
+            translation=height_translation_per_step,
+            translation_frames=interpolation_steps,
+        )
+        width_filler_translations = self._calculate_translation_per_frame(
+            translation=width_translation_per_step,
+            translation_frames=interpolation_steps,
+        )
+
+        for i in range(1, interpolation_steps):
+            height_filler_translations[i] += height_filler_translations[i - 1]
+            width_filler_translations[i] += width_filler_translations[i - 1]
+
+        assert height_filler_translations[-1] == height_translation_per_step
+        assert width_filler_translations[-1] == width_translation_per_step
+
+        base_mask = np.zeros((image_height, image_width), dtype=np.uint8)
+        prev_image = image
+        frames = []
+
+        for prompt, negative_prompt, walk in zip(prompt, negative_prompt, walk_type):
+            if walk == InpaintWalkType.LEFT or walk == InpaintWalkType.RIGHT:
+                translation = width_translation_per_step
+                filler_translations = width_filler_translations
+            elif walk == InpaintWalkType.UP or walk == InpaintWalkType.DOWN:
+                translation = height_translation_per_step
+                filler_translations = height_filler_translations
+            elif walk == InpaintWalkType.BACKWARD or walk == InpaintWalkType.FORWARD:
+                raise ValueError(
+                    f"InpaintWalkType {walk} is not supported yet. Use walk_type LEFT, RIGHT, UP or DOWN instead."
+                )
+                translation = (width_translation_per_step, height_translation_per_step)
+                filler_translations = interpolation_steps
+            else:
+                raise ValueError(f"Invalid Inpaint Walk Type: {walk}")
+
+            image, mask = self._translate_image_and_mask(
+                prev_image, walk, translation, mask=base_mask.copy()
+            )
+            generated_image = self.generate(
+                prompt=prompt,
+                image=image,
+                mask=mask,
+                image_height=image_height,
+                image_width=image_width,
+                num_inference_steps=num_inference_steps,
+                start_step=0,
+                guidance_scale=guidance_scale,
+                guidance_rescale=guidance_rescale,
+                negative_prompt=negative_prompt,
+                output_type="pil",
+                return_latent_history=False,
+            )[0]
+
+            filler_frames_list = self._generate_filler_frames(
+                start_image=prev_image,
+                end_image=generated_image,
+                walk_type=walk,
+                actual_translation=translation,
+                filler_translations=filler_translations,
+            )
+
+            if walk == InpaintWalkType.FORWARD:
+                filler_frames_list = filler_frames_list[::-1]
+
+            frames.extend(filler_frames_list)
+            prev_image = generated_image
+
+        return frames
