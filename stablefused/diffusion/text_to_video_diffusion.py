@@ -129,6 +129,7 @@ class TextToVideoDiffusion(BaseDiffusion):
         self,
         latent: torch.FloatTensor,
         output_type: str,
+        decode_batch_size: int,
     ) -> OutputType:
         """
         Resolve output type from latent.
@@ -139,6 +140,8 @@ class TextToVideoDiffusion(BaseDiffusion):
             Latent to resolve output from.
         output_type: str
             Output type to resolve. Must be one of [`latent`, `pt`, `np`, `pil`].
+        decode_batch_size: int
+            Batch size to use when decoding latent to image.
 
         Returns
         -------
@@ -158,12 +161,12 @@ class TextToVideoDiffusion(BaseDiffusion):
         latent = latent.permute(0, 2, 1, 3, 4)
         video = []
 
-        # Decode each batch
-        # TODO: There can be many frames in a video, so this is not memory efficient
-        #       and should be improved. There should be batching here, when processing
-        #       the batches.
         for i in tqdm(range(latent.shape[0])):
-            video.append(self.latent_to_image(latent[i], output_type))
+            batched_output = []
+            for j in tqdm(range(0, latent.shape[1], decode_batch_size)):
+                current_latent = latent[i, j : j + decode_batch_size]
+                batched_output.extend(self.latent_to_image(current_latent, output_type))
+            video.append(batched_output)
 
         if output_type == "pt":
             video = torch.stack(video)
@@ -185,6 +188,7 @@ class TextToVideoDiffusion(BaseDiffusion):
         negative_prompt: Optional[PromptType] = None,
         latent: Optional[torch.FloatTensor] = None,
         output_type: str = "pil",
+        decode_batch_size: int = 4,
     ) -> OutputType:
         """
         Run inference by conditioning on text prompt.
@@ -213,6 +217,8 @@ class TextToVideoDiffusion(BaseDiffusion):
             Latent to start from. If None, latent is generated from noise.
         output_type: str
             Type of output to return. One of ["latent", "pil", "pt", "np"].
+        decode_batch_size: int
+            Batch size to use when decoding latent to image.
 
         Returns
         -------
@@ -250,6 +256,7 @@ class TextToVideoDiffusion(BaseDiffusion):
         return self.resolve_output(
             latent=latent,
             output_type=output_type,
+            decode_batch_size=decode_batch_size,
         )
 
     generate = __call__
