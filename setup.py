@@ -20,10 +20,11 @@ setup(
         "diffusers==0.19.3",
         "ftfy==6.1.1",
         "imageio==2.31.1",
+        "imageio-ffmpeg==0.4.8",
         "torch==2.0.1",
         "transformers==4.31.0",
         "matplotlib==3.7.2",
-        "numpy==1.23.5",
+        "numpy==1.25.2",
         "scipy==1.11.1",
     ],
     extras_require={
