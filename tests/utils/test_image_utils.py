@@ -78,7 +78,7 @@ def test_image_grid(random_images, num_images):
 
 def test_pil_to_gif(random_images, temporary_gif_file):
     """Test that PIL images are converted to GIF correctly."""
-    
+
     pil_to_gif(random_images, temporary_gif_file, fps=1)
 
     assert os.path.isfile(temporary_gif_file)
