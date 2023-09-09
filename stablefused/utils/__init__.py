@@ -1,5 +1,6 @@
 from .diffusion_utils import (
     lerp,
+    resolve_scheduler,
     slerp,
 )
 from .image_utils import (

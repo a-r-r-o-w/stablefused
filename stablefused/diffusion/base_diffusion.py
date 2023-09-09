@@ -11,7 +11,13 @@ from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, List, Optional, Tuple, Union
 
-from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
+from stablefused.typing import (
+    PromptType,
+    OutputType,
+    Scheduler,
+    SchedulerType,
+    UNetType,
+)
 from stablefused.utils import (
     denormalize,
     load_model_from_cache,
@@ -20,6 +26,7 @@ from stablefused.utils import (
     numpy_to_pt,
     pil_to_numpy,
     pt_to_numpy,
+    resolve_scheduler,
     save_model_to_cache,
 )
 
@@ -122,6 +129,17 @@ class BaseDiffusion(ABC):
         self.unet = model.unet
         self.scheduler = model.scheduler
         self.vae_scale_factor = model.vae_scale_factor
+
+    def set_scheduler(self, scheduler: Scheduler) -> None:
+        """
+        Set the scheduler for the diffusion pipeline.
+
+        Parameters
+        ----------
+        scheduler: SchedulerType
+            The scheduler to use for the diffusion pipeline.
+        """
+        self.scheduler = resolve_scheduler(scheduler, self.scheduler.config)
 
     def enable_attention_slicing(self, slice_size: Optional[int] = -1) -> None:
         """

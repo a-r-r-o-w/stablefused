@@ -13,6 +13,7 @@ from .diffusion import (
 
 from .typing import (
     InpaintWalkType,
+    Scheduler,
     ImageType,
     OutputType,
     PromptType,
@@ -32,6 +33,7 @@ from .utils import (
     pil_to_video,
     pil_to_gif,
     pt_to_numpy,
+    resolve_scheduler,
     save_model_to_cache,
     slerp,
 )
