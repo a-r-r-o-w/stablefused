@@ -52,6 +52,9 @@
                     <a class="function" href="#pil_to_video">pil_to_video</a>
             </li>
             <li>
+                    <a class="function" href="#pil_to_gif">pil_to_gif</a>
+            </li>
+            <li>
                     <a class="function" href="#image_grid">image_grid</a>
             </li>
     </ul>
@@ -221,33 +224,55 @@
 </span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>            <span class="n">video_writer</span><span class="o">.</span><span class="n">append_data</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>
 </span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="k">def</span> <span class="nf">image_grid</span><span class="p">(</span><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="k">def</span> <span class="nf">pil_to_gif</span><span class="p">(</span><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a><span class="sd">    Create a grid of images on a single PIL image.</span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a><span class="sd">    Convert a list of PIL images to a GIF.</span>
 </span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>
 </span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a><span class="sd">    Parameters</span>
 </span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a><span class="sd">    ----------</span>
 </span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">    images: List[Image.Image]</span>
 </span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a><span class="sd">        List of PIL images.</span>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a><span class="sd">    rows: int</span>
-</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a><span class="sd">        Number of rows in grid.</span>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a><span class="sd">    cols: int</span>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="sd">        Number of columns in grid.</span>
-</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a><span class="sd">    Returns</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a><span class="sd">    -------</span>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a><span class="sd">    Image.Image</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a><span class="sd">        Grid of images as a PIL image.</span>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span><span class="p">:</span>
-</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>            <span class="sa">f</span><span class="s2">&quot;Number of images (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span><span class="si">}</span><span class="s2">) exceeds grid size (</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">cols</span><span class="si">}</span><span class="s2">).&quot;</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>        <span class="p">)</span>
-</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
-</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>    <span class="n">grid</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
-</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>        <span class="n">grid</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">i</span> <span class="o">//</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
-</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>    <span class="k">return</span> <span class="n">grid</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a><span class="sd">    filename: str</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a><span class="sd">        Filename to save GIF to.</span>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a><span class="sd">    fps: int</span>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="sd">        Frames per second of GIF.</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>    <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>        <span class="n">filename</span><span class="p">,</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>        <span class="n">save_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>        <span class="n">append_images</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>        <span class="n">duration</span><span class="o">=</span><span class="mi">1000</span> <span class="o">//</span> <span class="n">fps</span><span class="p">,</span>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>        <span class="n">loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>    <span class="p">)</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>
+</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="k">def</span> <span class="nf">image_grid</span><span class="p">(</span><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="sd">    Create a grid of images on a single PIL image.</span>
+</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>
+</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a><span class="sd">    Parameters</span>
+</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a><span class="sd">    ----------</span>
+</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a><span class="sd">    images: List[Image.Image]</span>
+</span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a><span class="sd">        List of PIL images.</span>
+</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a><span class="sd">    rows: int</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">        Number of rows in grid.</span>
+</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="sd">    cols: int</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a><span class="sd">        Number of columns in grid.</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="sd">    Returns</span>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a><span class="sd">    -------</span>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a><span class="sd">    Image.Image</span>
+</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a><span class="sd">        Grid of images as a PIL image.</span>
+</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span><span class="p">:</span>
+</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>            <span class="sa">f</span><span class="s2">&quot;Number of images (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span><span class="si">}</span><span class="s2">) exceeds grid size (</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">cols</span><span class="si">}</span><span class="s2">).&quot;</span>
+</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>        <span class="p">)</span>
+</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>    <span class="n">grid</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
+</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>        <span class="n">grid</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">i</span> <span class="o">//</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a>    <span class="k">return</span> <span class="n">grid</span>
 </span></pre></div>
 
 
@@ -578,6 +603,54 @@ fps: int
 
 
                 </section>
+                <section id="pil_to_gif">
+                            <input id="pil_to_gif-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">pil_to_gif</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]</span>, </span><span class="param"><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">fps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+                <label class="view-source-button" for="pil_to_gif-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#pil_to_gif"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="pil_to_gif-148"><a href="#pil_to_gif-148"><span class="linenos">148</span></a><span class="k">def</span> <span class="nf">pil_to_gif</span><span class="p">(</span><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="pil_to_gif-149"><a href="#pil_to_gif-149"><span class="linenos">149</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="pil_to_gif-150"><a href="#pil_to_gif-150"><span class="linenos">150</span></a><span class="sd">    Convert a list of PIL images to a GIF.</span>
+</span><span id="pil_to_gif-151"><a href="#pil_to_gif-151"><span class="linenos">151</span></a>
+</span><span id="pil_to_gif-152"><a href="#pil_to_gif-152"><span class="linenos">152</span></a><span class="sd">    Parameters</span>
+</span><span id="pil_to_gif-153"><a href="#pil_to_gif-153"><span class="linenos">153</span></a><span class="sd">    ----------</span>
+</span><span id="pil_to_gif-154"><a href="#pil_to_gif-154"><span class="linenos">154</span></a><span class="sd">    images: List[Image.Image]</span>
+</span><span id="pil_to_gif-155"><a href="#pil_to_gif-155"><span class="linenos">155</span></a><span class="sd">        List of PIL images.</span>
+</span><span id="pil_to_gif-156"><a href="#pil_to_gif-156"><span class="linenos">156</span></a><span class="sd">    filename: str</span>
+</span><span id="pil_to_gif-157"><a href="#pil_to_gif-157"><span class="linenos">157</span></a><span class="sd">        Filename to save GIF to.</span>
+</span><span id="pil_to_gif-158"><a href="#pil_to_gif-158"><span class="linenos">158</span></a><span class="sd">    fps: int</span>
+</span><span id="pil_to_gif-159"><a href="#pil_to_gif-159"><span class="linenos">159</span></a><span class="sd">        Frames per second of GIF.</span>
+</span><span id="pil_to_gif-160"><a href="#pil_to_gif-160"><span class="linenos">160</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="pil_to_gif-161"><a href="#pil_to_gif-161"><span class="linenos">161</span></a>    <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+</span><span id="pil_to_gif-162"><a href="#pil_to_gif-162"><span class="linenos">162</span></a>        <span class="n">filename</span><span class="p">,</span>
+</span><span id="pil_to_gif-163"><a href="#pil_to_gif-163"><span class="linenos">163</span></a>        <span class="n">save_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="pil_to_gif-164"><a href="#pil_to_gif-164"><span class="linenos">164</span></a>        <span class="n">append_images</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+</span><span id="pil_to_gif-165"><a href="#pil_to_gif-165"><span class="linenos">165</span></a>        <span class="n">duration</span><span class="o">=</span><span class="mi">1000</span> <span class="o">//</span> <span class="n">fps</span><span class="p">,</span>
+</span><span id="pil_to_gif-166"><a href="#pil_to_gif-166"><span class="linenos">166</span></a>        <span class="n">loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="pil_to_gif-167"><a href="#pil_to_gif-167"><span class="linenos">167</span></a>    <span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Convert a list of PIL images to a GIF.</p>
+
+<h2 id="parameters">Parameters</h2>
+
+<p>images: List[Image.Image]
+    List of PIL images.
+filename: str
+    Filename to save GIF to.
+fps: int
+    Frames per second of GIF.</p>
+</div>
+
+
+                </section>
                 <section id="image_grid">
                             <input id="image_grid-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
@@ -589,33 +662,33 @@ fps: int
 
     </div>
     <a class="headerlink" href="#image_grid"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="image_grid-148"><a href="#image_grid-148"><span class="linenos">148</span></a><span class="k">def</span> <span class="nf">image_grid</span><span class="p">(</span><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
-</span><span id="image_grid-149"><a href="#image_grid-149"><span class="linenos">149</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="image_grid-150"><a href="#image_grid-150"><span class="linenos">150</span></a><span class="sd">    Create a grid of images on a single PIL image.</span>
-</span><span id="image_grid-151"><a href="#image_grid-151"><span class="linenos">151</span></a>
-</span><span id="image_grid-152"><a href="#image_grid-152"><span class="linenos">152</span></a><span class="sd">    Parameters</span>
-</span><span id="image_grid-153"><a href="#image_grid-153"><span class="linenos">153</span></a><span class="sd">    ----------</span>
-</span><span id="image_grid-154"><a href="#image_grid-154"><span class="linenos">154</span></a><span class="sd">    images: List[Image.Image]</span>
-</span><span id="image_grid-155"><a href="#image_grid-155"><span class="linenos">155</span></a><span class="sd">        List of PIL images.</span>
-</span><span id="image_grid-156"><a href="#image_grid-156"><span class="linenos">156</span></a><span class="sd">    rows: int</span>
-</span><span id="image_grid-157"><a href="#image_grid-157"><span class="linenos">157</span></a><span class="sd">        Number of rows in grid.</span>
-</span><span id="image_grid-158"><a href="#image_grid-158"><span class="linenos">158</span></a><span class="sd">    cols: int</span>
-</span><span id="image_grid-159"><a href="#image_grid-159"><span class="linenos">159</span></a><span class="sd">        Number of columns in grid.</span>
-</span><span id="image_grid-160"><a href="#image_grid-160"><span class="linenos">160</span></a>
-</span><span id="image_grid-161"><a href="#image_grid-161"><span class="linenos">161</span></a><span class="sd">    Returns</span>
-</span><span id="image_grid-162"><a href="#image_grid-162"><span class="linenos">162</span></a><span class="sd">    -------</span>
-</span><span id="image_grid-163"><a href="#image_grid-163"><span class="linenos">163</span></a><span class="sd">    Image.Image</span>
-</span><span id="image_grid-164"><a href="#image_grid-164"><span class="linenos">164</span></a><span class="sd">        Grid of images as a PIL image.</span>
-</span><span id="image_grid-165"><a href="#image_grid-165"><span class="linenos">165</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="image_grid-166"><a href="#image_grid-166"><span class="linenos">166</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span><span class="p">:</span>
-</span><span id="image_grid-167"><a href="#image_grid-167"><span class="linenos">167</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="image_grid-168"><a href="#image_grid-168"><span class="linenos">168</span></a>            <span class="sa">f</span><span class="s2">&quot;Number of images (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span><span class="si">}</span><span class="s2">) exceeds grid size (</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">cols</span><span class="si">}</span><span class="s2">).&quot;</span>
-</span><span id="image_grid-169"><a href="#image_grid-169"><span class="linenos">169</span></a>        <span class="p">)</span>
-</span><span id="image_grid-170"><a href="#image_grid-170"><span class="linenos">170</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
-</span><span id="image_grid-171"><a href="#image_grid-171"><span class="linenos">171</span></a>    <span class="n">grid</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
-</span><span id="image_grid-172"><a href="#image_grid-172"><span class="linenos">172</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
-</span><span id="image_grid-173"><a href="#image_grid-173"><span class="linenos">173</span></a>        <span class="n">grid</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">i</span> <span class="o">//</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
-</span><span id="image_grid-174"><a href="#image_grid-174"><span class="linenos">174</span></a>    <span class="k">return</span> <span class="n">grid</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="image_grid-170"><a href="#image_grid-170"><span class="linenos">170</span></a><span class="k">def</span> <span class="nf">image_grid</span><span class="p">(</span><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">:</span>
+</span><span id="image_grid-171"><a href="#image_grid-171"><span class="linenos">171</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="image_grid-172"><a href="#image_grid-172"><span class="linenos">172</span></a><span class="sd">    Create a grid of images on a single PIL image.</span>
+</span><span id="image_grid-173"><a href="#image_grid-173"><span class="linenos">173</span></a>
+</span><span id="image_grid-174"><a href="#image_grid-174"><span class="linenos">174</span></a><span class="sd">    Parameters</span>
+</span><span id="image_grid-175"><a href="#image_grid-175"><span class="linenos">175</span></a><span class="sd">    ----------</span>
+</span><span id="image_grid-176"><a href="#image_grid-176"><span class="linenos">176</span></a><span class="sd">    images: List[Image.Image]</span>
+</span><span id="image_grid-177"><a href="#image_grid-177"><span class="linenos">177</span></a><span class="sd">        List of PIL images.</span>
+</span><span id="image_grid-178"><a href="#image_grid-178"><span class="linenos">178</span></a><span class="sd">    rows: int</span>
+</span><span id="image_grid-179"><a href="#image_grid-179"><span class="linenos">179</span></a><span class="sd">        Number of rows in grid.</span>
+</span><span id="image_grid-180"><a href="#image_grid-180"><span class="linenos">180</span></a><span class="sd">    cols: int</span>
+</span><span id="image_grid-181"><a href="#image_grid-181"><span class="linenos">181</span></a><span class="sd">        Number of columns in grid.</span>
+</span><span id="image_grid-182"><a href="#image_grid-182"><span class="linenos">182</span></a>
+</span><span id="image_grid-183"><a href="#image_grid-183"><span class="linenos">183</span></a><span class="sd">    Returns</span>
+</span><span id="image_grid-184"><a href="#image_grid-184"><span class="linenos">184</span></a><span class="sd">    -------</span>
+</span><span id="image_grid-185"><a href="#image_grid-185"><span class="linenos">185</span></a><span class="sd">    Image.Image</span>
+</span><span id="image_grid-186"><a href="#image_grid-186"><span class="linenos">186</span></a><span class="sd">        Grid of images as a PIL image.</span>
+</span><span id="image_grid-187"><a href="#image_grid-187"><span class="linenos">187</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="image_grid-188"><a href="#image_grid-188"><span class="linenos">188</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span><span class="p">:</span>
+</span><span id="image_grid-189"><a href="#image_grid-189"><span class="linenos">189</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="image_grid-190"><a href="#image_grid-190"><span class="linenos">190</span></a>            <span class="sa">f</span><span class="s2">&quot;Number of images (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span><span class="si">}</span><span class="s2">) exceeds grid size (</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">cols</span><span class="si">}</span><span class="s2">).&quot;</span>
+</span><span id="image_grid-191"><a href="#image_grid-191"><span class="linenos">191</span></a>        <span class="p">)</span>
+</span><span id="image_grid-192"><a href="#image_grid-192"><span class="linenos">192</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+</span><span id="image_grid-193"><a href="#image_grid-193"><span class="linenos">193</span></a>    <span class="n">grid</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+</span><span id="image_grid-194"><a href="#image_grid-194"><span class="linenos">194</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
+</span><span id="image_grid-195"><a href="#image_grid-195"><span class="linenos">195</span></a>        <span class="n">grid</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">i</span> <span class="o">//</span> <span class="n">cols</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+</span><span id="image_grid-196"><a href="#image_grid-196"><span class="linenos">196</span></a>    <span class="k">return</span> <span class="n">grid</span>
 </span></pre></div>
 
 
