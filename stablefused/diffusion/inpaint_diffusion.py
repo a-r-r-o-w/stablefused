@@ -316,21 +316,17 @@ class InpaintDiffusion(BaseDiffusion):
             or walk_type == InpaintWalkType.BACKWARD
         ):
             tw, th = translation
-            top = th // 2
-            bottom = th - top
-            left = tw // 2
-            right = tw - left
 
             if mask is not None:
-                mask[:top, :] = 255
-                mask[-bottom:, :] = 255
-                mask[:, :left] = 255
-                mask[:, -right:] = 255
+                mask[:th, :] = 255
+                mask[-th:, :] = 255
+                mask[:, :tw] = 255
+                mask[:, -tw:] = 255
             downsampled_image = image.resize(
-                (image.width - tw, image.height - th), resample=Image.LANCZOS
+                (image.width - 2 * tw, image.height - 2 * th), resample=Image.LANCZOS
             )
             new_image = Image.new("RGB", (image.width, image.height))
-            new_image.paste(downsampled_image, (left, top))
+            new_image.paste(downsampled_image, (tw, th))
 
         return new_image, Image.fromarray(mask) if mask is not None else None
 
@@ -434,9 +430,17 @@ class InpaintDiffusion(BaseDiffusion):
             width_crop_factor = width - 2 * aw
             height_crop_factor = height - 2 * ah
 
-            translated_image = InpaintDiffusion._translate_image_and_mask(
+            translated_image, _ = InpaintDiffusion._translate_image_and_mask(
                 start_image, walk_type, actual_translation, mask=None
-            )[0].convert("RGBA")
+            )
+            translated_image = translated_image.convert("RGBA")
+            translated_image = np.array(translated_image)
+            translated_image[:ah, :, 3] = 0
+            translated_image[-ah:, :, 3] = 0
+            translated_image[:, :aw, 3] = 0
+            translated_image[:, -aw:, 3] = 0
+            translated_image = Image.fromarray(translated_image)
+
             end_image.paste(translated_image, mask=translated_image)
 
             for i in range(filler_translations - 1):
@@ -462,9 +466,17 @@ class InpaintDiffusion(BaseDiffusion):
                 h = height - 2 * interpolation_height
                 crop_fix_width = round((1 - width_crop_factor / w) * width / 2)
                 crop_fix_height = round((1 - height_crop_factor / h) * height / 2)
-                start_image_crop_fix = InpaintDiffusion._translate_image_and_mask(
+
+                start_image_crop_fix, _ = InpaintDiffusion._translate_image_and_mask(
                     start_image, walk_type, (crop_fix_width, crop_fix_height), mask=None
-                )[0].convert("RGBA")
+                )
+                start_image_crop_fix = start_image_crop_fix.convert("RGBA")
+                start_image_crop_fix = np.array(start_image_crop_fix)
+                start_image_crop_fix[:crop_fix_height, :, 3] = 0
+                start_image_crop_fix[-crop_fix_height:, :, 3] = 0
+                start_image_crop_fix[:, :crop_fix_width, 3] = 0
+                start_image_crop_fix[:, -crop_fix_width:, 3] = 0
+                start_image_crop_fix = Image.fromarray(start_image_crop_fix)
 
                 interpolation_image.paste(
                     start_image_crop_fix, mask=start_image_crop_fix
@@ -722,7 +734,11 @@ class InpaintDiffusion(BaseDiffusion):
         assert height_filler_translations[-1] == height_translation_per_step
         assert width_filler_translations[-1] == width_translation_per_step
 
-        base_mask = np.zeros((image_height, image_width), dtype=np.uint8)
+        image = image.resize(
+            (image_height, image_width), resample=Image.LANCZOS
+        ).convert("RGB")
+
+        base_mask = np.zeros((image_width, image_height), dtype=np.uint8)
         prev_image = image
         frames = []
 
@@ -733,12 +749,13 @@ class InpaintDiffusion(BaseDiffusion):
             elif walk == InpaintWalkType.UP or walk == InpaintWalkType.DOWN:
                 translation = height_translation_per_step
                 filler_translations = height_filler_translations
-            elif walk == InpaintWalkType.BACKWARD or walk == InpaintWalkType.FORWARD:
-                raise ValueError(
-                    f"InpaintWalkType {walk} is not supported yet. Use walk_type LEFT, RIGHT, UP or DOWN instead."
-                )
+            elif walk == InpaintWalkType.BACKWARD:
                 translation = (width_translation_per_step, height_translation_per_step)
                 filler_translations = interpolation_steps
+            elif walk == InpaintWalkType.FORWARD:
+                raise ValueError(
+                    "InpaintWalkType.FORWARD is not supported yet. If you would like to do this, reverse the sequence of images generated using InpaintWalkType.BACKWARD"
+                )
             else:
                 raise ValueError(f"Invalid Inpaint Walk Type: {walk}")
 
@@ -768,10 +785,11 @@ class InpaintDiffusion(BaseDiffusion):
                 filler_translations=filler_translations,
             )
 
+            prev_image = filler_frames_list[-1].copy()
+
             if walk == InpaintWalkType.FORWARD:
                 filler_frames_list = filler_frames_list[::-1]
 
             frames.extend(filler_frames_list)
-            prev_image = generated_image
 
         return frames
