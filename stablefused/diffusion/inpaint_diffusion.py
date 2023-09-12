@@ -259,6 +259,7 @@ class InpaintDiffusion(BaseDiffusion):
         translation: int,
         translation_frames: int,
     ) -> List[int]:
+        """Helper function to calculate translation per frame."""
         step_size = translation // translation_frames
         remainder = translation % translation_frames
         values = [step_size + (i < remainder) for i in range(translation_frames)]
@@ -271,45 +272,35 @@ class InpaintDiffusion(BaseDiffusion):
         translation: Union[int, Tuple[int, int]],
         mask: Optional[np.ndarray] = None,
     ) -> Tuple[Image.Image, Image.Image]:
+        """Helper function to translate image and mask in given direction by specified translation."""
+
+        def apply_translation(dx: int, dy: int) -> Image.Image:
+            return image.transform(
+                (image.width, image.height),
+                Image.AFFINE,
+                (1, 0, dx, 0, 1, dy),
+                resample=Image.BICUBIC,
+            )
+
         if walk_type == InpaintWalkType.UP:
             if mask is not None:
                 mask[:translation, :] = 255
-            new_image = image.transform(
-                (image.width, image.height),
-                Image.AFFINE,
-                (1, 0, 0, 0, 1, -translation),
-                resample=Image.BICUBIC,
-            )
+            new_image = apply_translation(0, -translation)
 
         elif walk_type == InpaintWalkType.DOWN:
             if mask is not None:
                 mask[-translation:, :] = 255
-            new_image = image.transform(
-                (image.width, image.height),
-                Image.AFFINE,
-                (1, 0, 0, 0, 1, translation),
-                resample=Image.BICUBIC,
-            )
+            new_image = apply_translation(0, translation)
 
         elif walk_type == InpaintWalkType.LEFT:
             if mask is not None:
                 mask[:, :translation] = 255
-            new_image = image.transform(
-                (image.width, image.height),
-                Image.AFFINE,
-                (1, 0, -translation, 0, 1, 0),
-                resample=Image.BICUBIC,
-            )
+            new_image = apply_translation(-translation, 0)
 
         elif walk_type == InpaintWalkType.RIGHT:
             if mask is not None:
                 mask[:, -translation:] = 255
-            new_image = image.transform(
-                (image.width, image.height),
-                Image.AFFINE,
-                (1, 0, translation, 0, 1, 0),
-                resample=Image.BICUBIC,
-            )
+            new_image = apply_translation(translation, 0)
 
         elif (
             walk_type == InpaintWalkType.FORWARD
@@ -338,6 +329,8 @@ class InpaintDiffusion(BaseDiffusion):
         actual_translation: Union[int, Tuple[int, int]],
         filler_translations: Union[int, List[int]],
     ) -> List[Image.Image]:
+        """Helper function to generate filler frames for given walk type."""
+
         if (
             walk_type == InpaintWalkType.FORWARD
             or walk_type == InpaintWalkType.BACKWARD
@@ -659,16 +652,66 @@ class InpaintDiffusion(BaseDiffusion):
         walk_type: Union[InpaintWalkType, List[InpaintWalkType]],
         image_height: int = 512,
         image_width: int = 512,
-        height_translation_per_step: int = 512,
-        width_translation_per_step: int = 512,
+        height_translation_per_step: int = 64,
+        width_translation_per_step: int = 64,
         translation_factor: Optional[float] = None,
         num_inpainting_steps: int = 4,
         interpolation_steps: int = 60,
         num_inference_steps: int = 50,
+        start_step: int = 0,
         guidance_scale: float = 7.5,
         guidance_rescale: float = 0.7,
         negative_prompt: Optional[PromptType] = None,
     ) -> OutputType:
+        """
+        Inpaint image by walking in direction(s) of choice.
+
+        Parameters
+        ----------
+        prompt: PromptType
+            Text prompt to condition on.
+        image: Image.Image
+            Input image to condition on for inpainting.
+        walk_type: Union[InpaintWalkType, List[InpaintWalkType]]
+            Type of walk to perform. If List[InpaintWalkType], must have length of
+            num_inpainting_steps.
+        image_height: int
+            Height of image to generate. If height of provided image and image_height
+            do not match, image will be resized to image_height using PIL Lanczos method.
+        image_width: int
+            Width of image to generate. If width of provided image and image_width
+            do not match, image will be resized to image_width using PIL Lanczos method.
+        height_translation_per_step: int
+            Number of pixels to translate image up/down per step.
+        width_translation_per_step: int
+            Number of pixels to translate image left/right per step.
+        translation_factor: Optional[float]
+            Factor to translate image by. If provided, overrides height_translation_per_step
+            and width_translation_per_step. Must be between 0 and 1.
+        num_inpainting_steps: int
+            Number of inpainting steps to run.
+        interpolation_steps: int
+            Number of interpolation steps to run between inpainting steps.
+        num_inference_steps: int
+            Number of diffusion steps to run.
+        start_step: int
+            Step to start diffusion from. The higher the value, the more similar the generated
+            image will be to the input image.
+        guidance_scale: float
+            Guidance scale encourages the model to generate images following the prompt
+            closely, albeit at the cost of image quality.
+        guidance_rescale: float
+            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+        negative_prompt: Optional[PromptType]
+            Negative text prompt to uncondition on.
+
+        Returns
+        -------
+        OutputType
+            Generated output based on output_type.
+        """
+
         self.validate_input(
             prompt=prompt,
             negative_prompt=negative_prompt,
@@ -678,20 +721,16 @@ class InpaintDiffusion(BaseDiffusion):
         )
 
         # TODO: Make validate input handle this
-        if isinstance(walk_type, InpaintWalkType):
-            walk_type = [walk_type]
-        if isinstance(prompt, str):
-            prompt = [prompt]
-        if isinstance(negative_prompt, str):
-            negative_prompt = [negative_prompt]
         if translation_factor is not None:
             if translation_factor < 0 or translation_factor > 1:
                 raise ValueError(
                     f"translation_factor must be between 0 and 1, got {translation_factor}"
                 )
-            height_translation_per_step = image_height * translation_factor
-            width_translation_per_step = image_width * translation_factor
+            height_translation_per_step = int(image_height * translation_factor)
+            width_translation_per_step = int(image_width * translation_factor)
 
+        if isinstance(walk_type, InpaintWalkType):
+            walk_type = [walk_type]
         if not isinstance(walk_type, list):
             raise TypeError(
                 f"walk_type must be of type InpaintWalkType or List[InpaintWalkType], got {type(walk_type)}"
@@ -704,19 +743,46 @@ class InpaintDiffusion(BaseDiffusion):
                 f"walk_type must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
             )
 
-        if len(prompt) == 1:
-            prompt = prompt * num_inpainting_steps
-        if len(prompt) != num_inpainting_steps:
-            raise ValueError(
-                f"prompt must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
-            )
+        if prompt is not None:
+            if isinstance(prompt, str):
+                prompt = [prompt]
+            if len(prompt) == 1:
+                prompt = prompt * num_inpainting_steps
+            if len(prompt) != num_inpainting_steps:
+                raise ValueError(
+                    f"prompt must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
+                )
 
-        if len(negative_prompt) == 1:
-            negative_prompt = negative_prompt * num_inpainting_steps
-        if len(negative_prompt) != num_inpainting_steps:
-            raise ValueError(
-                f"negative_prompt must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
-            )
+        if negative_prompt is not None:
+            if isinstance(negative_prompt, str):
+                negative_prompt = [negative_prompt]
+            if len(negative_prompt) == 1:
+                negative_prompt = negative_prompt * num_inpainting_steps
+            if len(negative_prompt) != num_inpainting_steps:
+                raise ValueError(
+                    f"negative_prompt must have length of num_inpainting_steps, got {len(walk_type)} and {num_inpainting_steps}"
+                )
+
+        walk_has_backward = InpaintWalkType.BACKWARD in walk_type
+        walk_has_forward = InpaintWalkType.FORWARD in walk_type
+        if walk_has_backward or walk_has_forward:
+            if height_translation_per_step * 2 > image_height:
+                raise ValueError(
+                    f"height_translation_per_step must be less than half of image_height, got {height_translation_per_step} and {image_height}"
+                )
+            if width_translation_per_step * 2 > image_width:
+                raise ValueError(
+                    f"width_translation_per_step must be less than half of image_width, got {width_translation_per_step} and {image_width}"
+                )
+        else:
+            if height_translation_per_step >= image_height:
+                raise ValueError(
+                    f"height_translation_per_step must be less than image_height, got {height_translation_per_step} and {image_height}"
+                )
+            if width_translation_per_step >= image_width:
+                raise ValueError(
+                    f"width_translation_per_step must be less than image_width, got {width_translation_per_step} and {image_width}"
+                )
 
         height_filler_translations = self._calculate_translation_per_frame(
             translation=height_translation_per_step,
@@ -742,7 +808,9 @@ class InpaintDiffusion(BaseDiffusion):
         prev_image = image
         frames = []
 
-        for prompt, negative_prompt, walk in zip(prompt, negative_prompt, walk_type):
+        for prompt, negative_prompt, walk in tqdm(
+            zip(prompt, negative_prompt, walk_type)
+        ):
             if walk == InpaintWalkType.LEFT or walk == InpaintWalkType.RIGHT:
                 translation = width_translation_per_step
                 filler_translations = width_filler_translations
@@ -769,7 +837,7 @@ class InpaintDiffusion(BaseDiffusion):
                 image_height=image_height,
                 image_width=image_width,
                 num_inference_steps=num_inference_steps,
-                start_step=0,
+                start_step=start_step,
                 guidance_scale=guidance_scale,
                 guidance_rescale=guidance_rescale,
                 negative_prompt=negative_prompt,
