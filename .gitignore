@@ -20,6 +20,7 @@ training_checkpoints/
 
 # local test files
 test/
+tmp/
 
 # environment files
 .env
