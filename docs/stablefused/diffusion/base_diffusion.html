@@ -1354,10 +1354,12 @@ inheritance.</p>
 
             <div class="docstring"><p>Move model to specified compute device.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>device: str
-    The device to move the model to. Must be one of <code>cuda</code> or <code>cpu</code>.</p>
+<ul>
+<li><strong>device</strong> (str):
+The device to move the model to. Must be one of <code>cuda</code> or <code>cpu</code>.</li>
+</ul>
 </div>
 
 
@@ -1401,10 +1403,12 @@ different internal components of the model, such as the text encoder,
 VAE, and UNet. This is useful for reducing memory usage when using
 multiple diffusion pipelines with the same checkpoint at the same time.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>model: BaseDiffusion
-    The model to share components with.</p>
+<ul>
+<li><strong>model</strong> (BaseDiffusion):
+The model to share components with.</li>
+</ul>
 </div>
 
 
@@ -1435,10 +1439,12 @@ multiple diffusion pipelines with the same checkpoint at the same time.</p>
 
             <div class="docstring"><p>Set the scheduler for the diffusion pipeline.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>scheduler: SchedulerType
-    The scheduler to use for the diffusion pipeline.</p>
+<ul>
+<li><strong>scheduler</strong> (SchedulerType):
+The scheduler to use for the diffusion pipeline.</li>
+</ul>
 </div>
 
 
@@ -1474,11 +1480,13 @@ multiple diffusion pipelines with the same checkpoint at the same time.</p>
             <div class="docstring"><p>Enable attention slicing. By default, the attention head is sliced in half.
 This is a good tradeoff between memory and performance.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>slice_size: int
-    The size of the attention slice. If -1, the attention head is sliced in
-    half. If None, attention slicing is disabled.</p>
+<ul>
+<li><strong>slice_size</strong> (int):
+The size of the attention slice. If -1, the attention head is sliced in
+half. If None, attention slicing is disabled.</li>
+</ul>
 </div>
 
 
@@ -1680,22 +1688,24 @@ amount of memory and allow processing larger images, but will affect performance
             <div class="docstring"><p>Validate input parameters.
 TODO: This needs to be removed and improved. More checks need to be added.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>prompt: PromptType
-    The prompt(s) to condition on.
-negative_prompt: PromptType
-    The negative prompt(s) to condition on.
-image_height: int
-    The height of the image to generate.
-image_width: int
-    The width of the image to generate.
-start_step: int
-    The step to start inference from.
-num_inference_steps: int
-    The number of inference steps to perform.
-strength: float
-    The strength of the noise mixing when performing LatentWalkDiffusion.</p>
+<ul>
+<li><strong>prompt</strong> (PromptType):
+The prompt(s) to condition on.</li>
+<li><strong>negative_prompt</strong> (PromptType):
+The negative prompt(s) to condition on.</li>
+<li><strong>image_height</strong> (int):
+The height of the image to generate.</li>
+<li><strong>image_width</strong> (int):
+The width of the image to generate.</li>
+<li><strong>start_step</strong> (int):
+The step to start inference from.</li>
+<li><strong>num_inference_steps</strong> (int):
+The number of inference steps to perform.</li>
+<li><strong>strength</strong> (float):
+The strength of the noise mixing when performing LatentWalkDiffusion.</li>
+</ul>
 </div>
 
 
@@ -1761,16 +1771,19 @@ must be implemented by all subclasses.</p>
 
             <div class="docstring"><p>Generate a random tensor of the specified shape.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>shape: List[int] or Tuple[int]
-    The shape of the random tensor to generate.</p>
+<ul>
+<li><strong>shape</strong> (List[int] or Tuple[int]):
+The shape of the random tensor to generate.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.FloatTensor
-    A random tensor of the specified shape on the same device and dtype
-    as model.</p>
+<ul>
+<li><strong>torch.FloatTensor</strong>: A random tensor of the specified shape on the same device and dtype
+as model.</li>
+</ul>
 </div>
 
 
@@ -1878,21 +1891,24 @@ must be implemented by all subclasses.</p>
 
             <div class="docstring"><p>Convert a prompt or a list of prompts into a text embedding.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>prompt: PromptType
-    The prompt or a list of prompts to convert into an embedding. Used
-    for conditioning.
-negative_prompt: Optional[PromptType]
-    A negative prompt or a list of negative prompts, by default None.
-    Use for unconditioning. If not provided, an empty string ('') will
-    be used to generate the unconditional embeddings.</p>
+<ul>
+<li><strong>prompt</strong> (PromptType):
+The prompt or a list of prompts to convert into an embedding. Used
+for conditioning.</li>
+<li><strong>negative_prompt</strong> (Optional[PromptType]):
+A negative prompt or a list of negative prompts, by default None.
+Use for unconditioning. If not provided, an empty string ('') will
+be used to generate the unconditional embeddings.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.FloatTensor
-    A text embedding generated from the given prompt(s) and, if provided,
-    the negative prompt(s).</p>
+<ul>
+<li><strong>torch.FloatTensor</strong>: A text embedding generated from the given prompt(s) and, if provided,
+the negative prompt(s).</li>
+</ul>
 </div>
 
 
@@ -1960,21 +1976,24 @@ negative_prompt: Optional[PromptType]
 
             <div class="docstring"><p>Apply classifier-free guidance to noise prediction.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>noise_prediction: torch.FloatTensor
-    The noise prediction tensor to which guidance will be applied.
-guidance_scale: float
-    The scale factor for applying guidance to the noise prediction.
-guidance_rescale: float
-    The rescale factor for adjusting the noise prediction based on
-    guidance. Based on findings in Section 3.4  of <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion
-    Noise Schedules and Sample Steps are Flawed</a>.</p>
+<ul>
+<li><strong>noise_prediction</strong> (torch.FloatTensor):
+The noise prediction tensor to which guidance will be applied.</li>
+<li><strong>guidance_scale</strong> (float):
+The scale factor for applying guidance to the noise prediction.</li>
+<li><strong>guidance_rescale</strong> (float):
+The rescale factor for adjusting the noise prediction based on
+guidance. Based on findings in Section 3.4  of <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion
+Noise Schedules and Sample Steps are Flawed</a>.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.FloatTensor
-    The noise prediction tensor after applying classifier-free guidance.</p>
+<ul>
+<li><strong>torch.FloatTensor</strong>: The noise prediction tensor after applying classifier-free guidance.</li>
+</ul>
 </div>
 
 
@@ -2031,17 +2050,20 @@ guidance_rescale: float
 
             <div class="docstring"><p>Convert a latent tensor to an image in the specified output format.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>latent: torch.FloatTensor
-    The latent tensor to convert into an image.
-output_type: str
-    The desired output format for the image. Should be one of [<code>pt</code>, <code>np</code>, <code>pil</code>].</p>
+<ul>
+<li><strong>latent</strong> (torch.FloatTensor):
+The latent tensor to convert into an image.</li>
+<li><strong>output_type</strong> (str):
+The desired output format for the image. Should be one of [<code>pt</code>, <code>np</code>, <code>pil</code>].</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>OutputType
-    An image in the specified output format.</p>
+<ul>
+<li><strong>OutputType</strong>: An image in the specified output format.</li>
+</ul>
 </div>
 
 
@@ -2104,16 +2126,19 @@ output_type: str
 
             <div class="docstring"><p>Convert an image or a list of images into a latent tensor.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>image: Union[Image.Image, List[Image.Image], np.ndarray, torch.Tensor]
-    The input image(s) to convert into a latent tensor. Supported types are
-    <code>PIL.Image.Image</code>, <code>np.ndarray</code>, and <code>torch.Tensor</code>.</p>
+<ul>
+<li><strong>image</strong> (Union[Image.Image, List[Image.Image], np.ndarray, torch.Tensor]):
+The input image(s) to convert into a latent tensor. Supported types are
+<code>PIL.Image.Image</code>, <code>np.ndarray</code>, and <code>torch.Tensor</code>.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.FloatTensor
-    A latent tensor representing the input image(s).</p>
+<ul>
+<li><strong>torch.FloatTensor</strong>: A latent tensor representing the input image(s).</li>
+</ul>
 </div>
 
 
@@ -2190,21 +2215,24 @@ output_type: str
 
             <div class="docstring"><p>Resolve the output from the latent based on the provided output options.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>latent: torch.FloatTensor
-    The latent tensor representing the content to be resolved.
-output_type: str
-    The desired output format. Should be one of [<code>latent</code>, <code>pt</code>, <code>np</code>, <code>pil</code>].
-return_latent_history: bool
-    If True, it means that the input latent tensor contains a tensor of latent
-    tensor for each inference step. This requires decoding each latent tensor
-    and returning a list of images. If False, decoding occurs directly.</p>
+<ul>
+<li><strong>latent</strong> (torch.FloatTensor):
+The latent tensor representing the content to be resolved.</li>
+<li><strong>output_type</strong> (str):
+The desired output format. Should be one of [<code>latent</code>, <code>pt</code>, <code>np</code>, <code>pil</code>].</li>
+<li><strong>return_latent_history</strong> (bool):
+If True, it means that the input latent tensor contains a tensor of latent
+tensor for each inference step. This requires decoding each latent tensor
+and returning a list of images. If False, decoding occurs directly.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>Union[OutputType, List[OutputType]]
-    The resolved output based on the provided latent vector and options.</p>
+<ul>
+<li><strong>Union[OutputType, List[OutputType]]</strong>: The resolved output based on the provided latent vector and options.</li>
+</ul>
 </div>
 
 
