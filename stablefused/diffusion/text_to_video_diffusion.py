@@ -8,7 +8,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
-from stablefused.typing import UNet, Scheduler
+from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
 
 
 class TextToVideoDiffusion(BaseDiffusion):
@@ -18,8 +18,8 @@ class TextToVideoDiffusion(BaseDiffusion):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet = None,
-        scheduler: Scheduler = None,
+        unet: UNetType = None,
+        scheduler: SchedulerType = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         *args,
@@ -129,7 +129,8 @@ class TextToVideoDiffusion(BaseDiffusion):
         self,
         latent: torch.FloatTensor,
         output_type: str,
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+        decode_batch_size: int,
+    ) -> OutputType:
         """
         Resolve output type from latent.
 
@@ -139,10 +140,12 @@ class TextToVideoDiffusion(BaseDiffusion):
             Latent to resolve output from.
         output_type: str
             Output type to resolve. Must be one of [`latent`, `pt`, `np`, `pil`].
+        decode_batch_size: int
+            Batch size to use when decoding latent to image.
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+        OutputType
             The resolved output based on the provided latent vector and options.
         """
 
@@ -158,12 +161,12 @@ class TextToVideoDiffusion(BaseDiffusion):
         latent = latent.permute(0, 2, 1, 3, 4)
         video = []
 
-        # Decode each batch
-        # TODO: There can be many frames in a video, so this is not memory efficient
-        #       and should be improved. There should be batching here, when processing
-        #       the batches.
         for i in tqdm(range(latent.shape[0])):
-            video.append(self.latent_to_image(latent[i], output_type))
+            batched_output = []
+            for j in tqdm(range(0, latent.shape[1], decode_batch_size)):
+                current_latent = latent[i, j : j + decode_batch_size]
+                batched_output.extend(self.latent_to_image(current_latent, output_type))
+            video.append(batched_output)
 
         if output_type == "pt":
             video = torch.stack(video)
@@ -175,23 +178,24 @@ class TextToVideoDiffusion(BaseDiffusion):
     @torch.no_grad()
     def __call__(
         self,
-        prompt: Union[str, List[str]],
+        prompt: PromptType,
         video_height: int = 512,
         video_width: int = 512,
         video_frames: int = 24,
         num_inference_steps: int = 50,
         guidance_scale: float = 7.5,
         guidance_rescale: float = 0.7,
-        negative_prompt: Optional[Union[str, List[str]]] = None,
+        negative_prompt: Optional[PromptType] = None,
         latent: Optional[torch.FloatTensor] = None,
         output_type: str = "pil",
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+        decode_batch_size: int = 4,
+    ) -> OutputType:
         """
         Run inference by conditioning on text prompt.
 
         Parameters
         ----------
-        prompt: Union[str, List[str]]
+        prompt: PromptType
             Text prompt to condition on.
         video_height: int
             Height of video to generate.
@@ -207,16 +211,18 @@ class TextToVideoDiffusion(BaseDiffusion):
         guidance_rescale: float
             Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
             Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[Union[str, List[str]]]
+        negative_prompt: Optional[PromptType]
             Negative text prompt to uncondition on.
         latent: Optional[torch.FloatTensor]
             Latent to start from. If None, latent is generated from noise.
         output_type: str
             Type of output to return. One of ["latent", "pil", "pt", "np"].
+        decode_batch_size: int
+            Batch size to use when decoding latent to image.
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+        OutputType
             Generated output based on output_type.
         """
 
@@ -250,6 +256,7 @@ class TextToVideoDiffusion(BaseDiffusion):
         return self.resolve_output(
             latent=latent,
             output_type=output_type,
+            decode_batch_size=decode_batch_size,
         )
 
     generate = __call__

@@ -1,7 +1,24 @@
 import numpy as np
 import torch
 
-from typing import Union
+from diffusers.schedulers import (
+    DEISMultistepScheduler,
+    DDIMScheduler,
+    DDPMScheduler,
+    DPMSolverSDEScheduler,
+    DPMSolverMultistepScheduler,
+    DPMSolverSinglestepScheduler,
+    EulerAncestralDiscreteScheduler,
+    EulerDiscreteScheduler,
+    HeunDiscreteScheduler,
+    KDPM2DiscreteScheduler,
+    KDPM2AncestralDiscreteScheduler,
+    LMSDiscreteScheduler,
+    PNDMScheduler,
+    UniPCMultistepScheduler,
+)
+from typing import Any, Dict, Union
+from stablefused.typing import Scheduler, SchedulerType
 
 
 def lerp(
@@ -130,3 +147,58 @@ def slerp(
         v2 = torch.from_numpy(v2).to(input_device)
 
     return v2
+
+
+def resolve_scheduler(
+    scheduler_type: Scheduler, config: Dict[str, Any]
+) -> SchedulerType:
+    if scheduler_type == Scheduler.DEIS:
+        return DEISMultistepScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DDIM:
+        return DDIMScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DDPM:
+        return DDPMScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DPM2_KARRAS:
+        return KDPM2DiscreteScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DPM2_KARRAS_ANCESTRAL:
+        return KDPM2AncestralDiscreteScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DPM_SDE:
+        return DPMSolverSDEScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DPM_SDE_KARRAS:
+        return DPMSolverSDEScheduler.from_config(config, use_karras_sigmas=True)
+
+    elif scheduler_type == Scheduler.DPM_MULTISTEP:
+        return DPMSolverMultistepScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DPM_MULTISTEP_KARRAS:
+        return DPMSolverMultistepScheduler.from_config(config, use_karras_sigmas=True)
+
+    elif scheduler_type == Scheduler.DPM_SINGLESTEP:
+        return DPMSolverSinglestepScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.DPM_SINGLESTEP_KARRAS:
+        return DPMSolverSinglestepScheduler.from_config(config, use_karras_sigmas=True)
+
+    elif scheduler_type == Scheduler.EULER:
+        return EulerDiscreteScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.EULER_ANCESTRAL:
+        return EulerAncestralDiscreteScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.HEUN:
+        return HeunDiscreteScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.LINEAR_MULTISTEP:
+        return LMSDiscreteScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.PNDM:
+        return PNDMScheduler.from_config(config)
+
+    elif scheduler_type == Scheduler.UNIPC:
+        return UniPCMultistepScheduler.from_config(config)

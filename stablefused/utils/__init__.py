@@ -1,5 +1,6 @@
 from .diffusion_utils import (
     lerp,
+    resolve_scheduler,
     slerp,
 )
 from .image_utils import (
@@ -10,6 +11,7 @@ from .image_utils import (
     numpy_to_pt,
     pil_to_numpy,
     pil_to_video,
+    pil_to_gif,
     pt_to_numpy,
 )
 from .model_cache import (

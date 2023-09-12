@@ -144,6 +144,28 @@ def pil_to_video(images: List[Image.Image], filename: str, fps: int = 60) -> Non
             video_writer.append_data(frame)
 
 
+def pil_to_gif(images: List[Image.Image], filename: str, fps: int = 60) -> None:
+    """
+    Convert a list of PIL images to a GIF.
+
+    Parameters
+    ----------
+    images: List[Image.Image]
+        List of PIL images.
+    filename: str
+        Filename to save GIF to.
+    fps: int
+        Frames per second of GIF.
+    """
+    images[0].save(
+        filename,
+        save_all=True,
+        append_images=images[1:],
+        duration=1000 // fps,
+        loop=0,
+    )
+
+
 def image_grid(images: List[Image.Image], rows: int, cols: int) -> Image.Image:
     """
     Create a grid of images on a single PIL image.

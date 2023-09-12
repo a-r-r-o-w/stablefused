@@ -18,9 +18,16 @@ StableFused is a toy library to experiment with Stable Diffusion inspired by ðŸ¤
 
 It is recommended to use a virtual environment. You can use [venv](https://docs.python.org/3/library/venv.html) or [conda](https://docs.conda.io/en/latest/) to create one.
 
+Unix:
 ```bash
 python -m venv venv
 source venv/bin/activate
+```
+
+Windows:
+```PowerShell
+python -m venv venv
+venv\Scripts\activate
 ```
 
 For usage, install the package from PyPI.
@@ -55,6 +62,7 @@ The following sources have been very helpful to me in understanding Stable Diffu
 - [Karpathy's gist on latent walking](https://gist.github.com/karpathy/00103b0037c5aaea32fe1da1af553355)
 - [Nateraw's stable-diffusion-videos](https://github.com/nateraw/stable-diffusion-videos)
 - [AnimateDiff](https://github.com/guoyww/AnimateDiff/)
+- [RunwayML StableDiffusion](https://github.com/runwayml/stable-diffusion)
 - [ðŸ¤— Annotated Diffusion Blog](https://huggingface.co/blog/annotated-diffusion)
 - [Keras CV](https://github.com/keras-team/keras-cv)
 - [Lillian Weng's Blogs](https://lilianweng.github.io/)
@@ -85,23 +93,23 @@ Refer to the notebooks for more details and enjoy the denoising process!
   These results are generated using the [Image to Image](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/image_to_image_diffusion.ipynb) notebook.
 
   <table>
-  <thead>
-    <tr>
-      <th>Source Image</th>
-      <th colspan="2">Denoising Diffusion Process</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><a href="https://mspoweruser.com/best-stable-diffusion-prompts/#1_The_Renaissance_Astrounaut" target="_blank" rel="noopener noreferrer">The Renaissance Astronaut</a></td>
-      <td><i>High quality and colorful photo of Robert J Oppenheimer, father of the atomic bomb, in a spacesuit, galaxy in the background, universe, octane render, realistic, 8k, bright colors</i></td>
-      <td><i>Stylistic photorealisic photo of Margot Robbie, playing the role of astronaut, pretty, beautiful, high contrast, high quality, galaxies, intricate detail, colorful, 8k</i></td>
-    </tr>
-    <tr>
-      <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/03bd14f5-f0d1-460b-8b5b-ad9f0a7f79f5" /></td>
-      <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/285dc6d7-883c-47a2-a89c-2253ded98340" controls loop autoplay> Your browser does not support the video tag. </video></td>
-    </tr>
-  </tbody>
+    <thead>
+      <tr>
+        <th>Source Image</th>
+        <th colspan="2">Denoising Diffusion Process</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="https://mspoweruser.com/best-stable-diffusion-prompts/#1_The_Renaissance_Astrounaut" target="_blank" rel="noopener noreferrer">The Renaissance Astronaut</a></td>
+        <td><i>High quality and colorful photo of Robert J Oppenheimer, father of the atomic bomb, in a spacesuit, galaxy in the background, universe, octane render, realistic, 8k, bright colors</i></td>
+        <td><i>Stylistic photorealisic photo of Margot Robbie, playing the role of astronaut, pretty, beautiful, high contrast, high quality, galaxies, intricate detail, colorful, 8k</i></td>
+      </tr>
+      <tr>
+        <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/03bd14f5-f0d1-460b-8b5b-ad9f0a7f79f5" /></td>
+        <td colspan="2"><video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/285dc6d7-883c-47a2-a89c-2253ded98340" controls loop autoplay> Your browser does not support the video tag. </video></td>
+      </tr>
+    </tbody>
   </table>
 
   <details>
@@ -130,6 +138,62 @@ There is immense potential in developing this kind of technology and its possibl
   | _A mighty pirate ship sailing through the sea, unpleasant, thundering roar, dark night, starry night, high quality, photorealistic, 8k_ |
   | <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/b883e6e3-80b6-4b53-b91c-60edd715941c" controls loop autoplay> Your browser does not support the video tag. </video> |
 
+  </div>
+</details>
+
+### Inpainting
+
+Image inpainting is a technique that aims to fill in missing or damaged parts of an image. It is used to restore or repair images by extrapolating the surrounding information to recreate the missing regions seamlessly.
+
+These results are generated using the [Inpainting](https://github.com/a-r-r-o-w/stablefused/blob/main/examples/inpaint_diffusion.ipynb) notebook.
+
+<details>
+  <summary> Inpainting using a fixed mask and different prompts </summary>
+
+  <div align="center">
+    <table>
+      <thead>
+        <th colspan="2">Inpainting</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="2">
+            <p><strong>Prompt 1:</strong> <em>Digital illustration of a mythical creature, high quality, realistic, 8k</em>  <br /> <strong>Prompt 2:</strong> <em>Digital illustration of a mythical creature, high quality, realistic, 8k</em>  <br /> <strong>Prompt 3:</strong> <em>Digital illustration of a dragon, high quality, realistic, octane render, 8k</em>  <br /> <strong>Prompt 4:</strong> <em>Digital illustration of a ferocious lion, high quality, realistic, octane render, 8k</em>  <br /> <strong>Prompt 5:</strong> <em>Digital illustration of an evil white rabbit, high quality, realistic, 8k</em>  <br /> <strong>Prompt 6:</strong> <em>Digital illustration of samurai with a moon-like object in the background, high quality, realistic, octane render, 8k</em></p>
+          </td>
+        </tr>
+        <tr>
+          <td> Image </td>
+          <td> Mask </td>
+        </tr>
+        <tr>
+          <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/1cc2c825-8c3b-4015-8e17-aef1690fd12c"></td>
+          <td><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/eb5292f3-a28a-4160-b700-1a9c380797ab"></td>
+        </tr>
+        <tr>
+          <td colspan="2"><img src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/8d58f069-05a8-4cc3-8d4d-c5bce7865eaa"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<details>
+  <summary> Infinite Zoom In </summary>
+
+  **Prompt:** _A painting of a cat, in the style of Vincent Van Gogh, hanging in a room_
+
+  <div align="center">
+    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/a71fd7ed-5ac6-49b1-812b-73c50d6ef851" controls loop autoplay> Your browser does not support the video tag. </video>
+  </div>
+</details>
+
+<details>
+  <summary> Pan and Zoom Out </summary>
+
+  **Prompt:** _Post-apocalyptic world with ruins, overgrown vegetation, and a lone survivor_
+
+  <div align="center">
+    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/4aa47d20-3c95-498b-a8e7-8a341834bc13" controls loop autoplay> Your browser does not support the video tag. </video>
   </div>
 </details>
 

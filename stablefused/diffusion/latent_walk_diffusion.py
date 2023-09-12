@@ -8,7 +8,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
-from stablefused.typing import UNet, Scheduler
+from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
 from stablefused.utils import lerp, slerp
 
 
@@ -19,8 +19,8 @@ class LatentWalkDiffusion(BaseDiffusion):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet = None,
-        scheduler: Scheduler = None,
+        unet: UNetType = None,
+        scheduler: SchedulerType = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         *args,
@@ -254,22 +254,22 @@ class LatentWalkDiffusion(BaseDiffusion):
     @torch.no_grad()
     def __call__(
         self,
-        prompt: Union[str, List[str]],
+        prompt: PromptType,
         latent: torch.FloatTensor,
         strength: float = 0.2,
         num_inference_steps: int = 50,
         guidance_scale: float = 7.5,
         guidance_rescale: float = 0.7,
-        negative_prompt: Optional[Union[str, List[str]]] = None,
+        negative_prompt: Optional[PromptType] = None,
         output_type: str = "pil",
         return_latent_history: bool = False,
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+    ) -> OutputType:
         """
         Run inference by conditioning on text prompt starting from provided latent tensor.
 
         Parameters
         ----------
-        prompt: Union[str, List[str]]
+        prompt: PromptType
             Text prompt to condition on.
         latent: torch.FloatTensor
             Latent to start from.
@@ -283,7 +283,7 @@ class LatentWalkDiffusion(BaseDiffusion):
         guidance_rescale: float
             Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
             Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[Union[str, List[str]]]
+        negative_prompt: Optional[PromptType]
             Negative text prompt to uncondition on.
         output_type: str
             Type of output to return. One of ["latent", "pil", "pt", "np"].
@@ -293,7 +293,7 @@ class LatentWalkDiffusion(BaseDiffusion):
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+        OutputType
             Generated output based on output_type.
         """
 
@@ -347,7 +347,7 @@ class LatentWalkDiffusion(BaseDiffusion):
         return_latent_history: bool = False,
         embedding_interpolation_type: str = "lerp",
         latent_interpolation_type: str = "slerp",
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+    ) -> OutputType:
         """
         Run inference by conditioning on text prompts and interpolating between them.
 
@@ -386,7 +386,7 @@ class LatentWalkDiffusion(BaseDiffusion):
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+        OutputType
             Generated output based on output_type.
         """
 

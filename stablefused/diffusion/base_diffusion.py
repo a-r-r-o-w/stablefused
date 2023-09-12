@@ -11,7 +11,13 @@ from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from typing import Any, List, Optional, Tuple, Union
 
-from stablefused.typing import UNet, Scheduler
+from stablefused.typing import (
+    PromptType,
+    OutputType,
+    Scheduler,
+    SchedulerType,
+    UNetType,
+)
 from stablefused.utils import (
     denormalize,
     load_model_from_cache,
@@ -20,6 +26,7 @@ from stablefused.utils import (
     numpy_to_pt,
     pil_to_numpy,
     pt_to_numpy,
+    resolve_scheduler,
     save_model_to_cache,
 )
 
@@ -31,8 +38,8 @@ class BaseDiffusion(ABC):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet = None,
-        scheduler: Scheduler = None,
+        unet: UNetType = None,
+        scheduler: SchedulerType = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         use_cache=True,
@@ -46,8 +53,8 @@ class BaseDiffusion(ABC):
         self.tokenizer: CLIPTokenizer
         self.text_encoder: CLIPTextModel
         self.vae: AutoencoderKL
-        self.unet: UNet
-        self.scheduler: Scheduler
+        self.unet: UNetType
+        self.scheduler: SchedulerType
         self.vae_scale_factor: int
 
         if model_id is None:
@@ -87,7 +94,7 @@ class BaseDiffusion(ABC):
             else:
                 self.share_components_with(model)
 
-    def to(self, device: str) -> None:
+    def to(self, device: str) -> "BaseDiffusion":
         """
         Move model to specified compute device.
 
@@ -100,6 +107,7 @@ class BaseDiffusion(ABC):
         self.text_encoder = self.text_encoder.to(device)
         self.vae = self.vae.to(device)
         self.unet = self.unet.to(device)
+        return self
 
     def share_components_with(self, model: "BaseDiffusion") -> None:
         """
@@ -121,6 +129,17 @@ class BaseDiffusion(ABC):
         self.unet = model.unet
         self.scheduler = model.scheduler
         self.vae_scale_factor = model.vae_scale_factor
+
+    def set_scheduler(self, scheduler: Scheduler) -> None:
+        """
+        Set the scheduler for the diffusion pipeline.
+
+        Parameters
+        ----------
+        scheduler: SchedulerType
+            The scheduler to use for the diffusion pipeline.
+        """
+        self.scheduler = resolve_scheduler(scheduler, self.scheduler.config)
 
     def enable_attention_slicing(self, slice_size: Optional[int] = -1) -> None:
         """
@@ -167,8 +186,8 @@ class BaseDiffusion(ABC):
 
     @staticmethod
     def validate_input(
-        prompt: Union[str, List[str]] = None,
-        negative_prompt: Union[str, List[str]] = None,
+        prompt: PromptType = None,
+        negative_prompt: PromptType = None,
         image_height: int = None,
         image_width: int = None,
         start_step: int = None,
@@ -181,9 +200,9 @@ class BaseDiffusion(ABC):
 
         Parameters
         ----------
-        prompt: str or List[str]
+        prompt: PromptType
             The prompt(s) to condition on.
-        negative_prompt: str or List[str]
+        negative_prompt: PromptType
             The negative prompt(s) to condition on.
         image_height: int
             The height of the image to generate.
@@ -259,18 +278,18 @@ class BaseDiffusion(ABC):
 
     def prompt_to_embedding(
         self,
-        prompt: Union[str, List[str]],
-        negative_prompt: Optional[Union[str, List[str]]] = None,
+        prompt: PromptType,
+        negative_prompt: Optional[PromptType] = None,
     ) -> torch.FloatTensor:
         """
         Convert a prompt or a list of prompts into a text embedding.
 
         Parameters
         ----------
-        prompt: str or List[str]
+        prompt: PromptType
             The prompt or a list of prompts to convert into an embedding. Used
             for conditioning.
-        negative_prompt: str or List[str]
+        negative_prompt: Optional[PromptType]
             A negative prompt or a list of negative prompts, by default None.
             Use for unconditioning. If not provided, an empty string ('') will
             be used to generate the unconditional embeddings.
@@ -395,7 +414,7 @@ class BaseDiffusion(ABC):
 
     def latent_to_image(
         self, latent: torch.FloatTensor, output_type: str
-    ) -> Union[torch.Tensor, np.ndarray, Image.Image]:
+    ) -> OutputType:
         """
         Convert a latent tensor to an image in the specified output format.
 
@@ -408,7 +427,7 @@ class BaseDiffusion(ABC):
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, Image.Image]
+        OutputType
             An image in the specified output format.
         """
         if output_type not in ["pt", "np", "pil"]:
@@ -478,7 +497,7 @@ class BaseDiffusion(ABC):
         latent: torch.FloatTensor,
         output_type: str,
         return_latent_history: bool,
-    ) -> Union[torch.Tensor, np.ndarray, Image.Image, List[Image.Image]]:
+    ) -> Union[OutputType, List[OutputType]]:
         """
         Resolve the output from the latent based on the provided output options.
 
@@ -495,7 +514,7 @@ class BaseDiffusion(ABC):
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, Image.Image, List[Image.Image]]
+        Union[OutputType, List[OutputType]]
             The resolved output based on the provided latent vector and options.
         """
         if output_type not in ["latent", "pt", "np", "pil"]:

@@ -1,5 +1,6 @@
 # python directories
 .venv/
+venv/
 __pycache__/
 .ipynb_checkpoints/
 *.model
@@ -19,6 +20,7 @@ training_checkpoints/
 
 # local test files
 test/
+tmp/
 
 # environment files
 .env

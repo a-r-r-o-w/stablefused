@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 
 from PIL import Image
@@ -8,7 +7,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
-from stablefused.typing import UNet, Scheduler
+from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
 
 
 class TextToImageDiffusion(BaseDiffusion):
@@ -18,8 +17,8 @@ class TextToImageDiffusion(BaseDiffusion):
         tokenizer: CLIPTokenizer = None,
         text_encoder: CLIPTextModel = None,
         vae: AutoencoderKL = None,
-        unet: UNet = None,
-        scheduler: Scheduler = None,
+        unet: UNetType = None,
+        scheduler: SchedulerType = None,
         torch_dtype: torch.dtype = torch.float32,
         device="cuda",
         *args,
@@ -134,23 +133,23 @@ class TextToImageDiffusion(BaseDiffusion):
     @torch.no_grad()
     def __call__(
         self,
-        prompt: Union[str, List[str]],
+        prompt: PromptType,
         image_height: int = 512,
         image_width: int = 512,
         num_inference_steps: int = 50,
         guidance_scale: float = 7.5,
         guidance_rescale: float = 0.7,
-        negative_prompt=None,
+        negative_prompt: Optional[PromptType] = None,
         latent: Optional[torch.FloatTensor] = None,
         output_type: str = "pil",
         return_latent_history: bool = False,
-    ) -> Union[torch.Tensor, np.ndarray, List[Image.Image]]:
+    ) -> OutputType:
         """
         Run inference by conditioning on text prompt.
 
         Parameters
         ----------
-        prompt: Union[str, List[str]]
+        prompt: PromptType
             Text prompt to condition on.
         image_height: int
             Height of image to generate.
@@ -164,7 +163,7 @@ class TextToImageDiffusion(BaseDiffusion):
         guidance_rescale: float
             Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
             Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[Union[str, List[str]]]
+        negative_prompt: Optional[PromptType]
             Negative text prompt to uncondition on.
         latent: Optional[torch.FloatTensor]
             Latent to start from. If None, latent is generated from noise.
@@ -176,7 +175,7 @@ class TextToImageDiffusion(BaseDiffusion):
 
         Returns
         -------
-        Union[torch.Tensor, np.ndarray, List[Image.Image]]
+        OutputType
             Generated output based on output_type.
         """
 

@@ -88,7 +88,7 @@
 </span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="kn">from</span> <span class="nn">stablefused.diffusion</span> <span class="kn">import</span> <span class="n">BaseDiffusion</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="kn">from</span> <span class="nn">stablefused.typing</span> <span class="kn">import</span> <span class="n">UNet</span><span class="p">,</span> <span class="n">Scheduler</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="kn">from</span> <span class="nn">stablefused.typing</span> <span class="kn">import</span> <span class="n">PromptType</span><span class="p">,</span> <span class="n">OutputType</span><span class="p">,</span> <span class="n">SchedulerType</span><span class="p">,</span> <span class="n">UNetType</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="kn">from</span> <span class="nn">stablefused.utils</span> <span class="kn">import</span> <span class="n">lerp</span><span class="p">,</span> <span class="n">slerp</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a>
@@ -99,8 +99,8 @@
 </span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>        <span class="n">text_encoder</span><span class="p">:</span> <span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a>        <span class="n">vae</span><span class="p">:</span> <span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">Scheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNetType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">SchedulerType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>        <span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 </span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -334,22 +334,22 @@
 </span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a>    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
 </span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
 </span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">PromptType</span><span class="p">,</span>
 </span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a>        <span class="n">latent</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">,</span>
 </span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a>        <span class="n">strength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
 </span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a>        <span class="n">num_inference_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 </span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a>        <span class="n">guidance_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.5</span><span class="p">,</span>
 </span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a>        <span class="n">guidance_rescale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
-</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PromptType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a>        <span class="n">output_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pil&quot;</span><span class="p">,</span>
 </span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a><span class="sd">        Run inference by conditioning on text prompt starting from provided latent tensor.</span>
 </span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a>
 </span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a><span class="sd">        Parameters</span>
 </span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a><span class="sd">        ----------</span>
-</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">        prompt: Union[str, List[str]]</span>
+</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">        prompt: PromptType</span>
 </span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a><span class="sd">            Text prompt to condition on.</span>
 </span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a><span class="sd">        latent: torch.FloatTensor</span>
 </span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a><span class="sd">            Latent to start from.</span>
@@ -363,7 +363,7 @@
 </span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a><span class="sd">        guidance_rescale: float</span>
 </span><span id="L-284"><a href="#L-284"><span class="linenos">284</span></a><span class="sd">            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are</span>
 </span><span id="L-285"><a href="#L-285"><span class="linenos">285</span></a><span class="sd">            Flawed](https://arxiv.org/pdf/2305.08891.pdf).</span>
-</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a><span class="sd">        negative_prompt: Optional[Union[str, List[str]]]</span>
+</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a><span class="sd">        negative_prompt: Optional[PromptType]</span>
 </span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a><span class="sd">            Negative text prompt to uncondition on.</span>
 </span><span id="L-288"><a href="#L-288"><span class="linenos">288</span></a><span class="sd">        output_type: str</span>
 </span><span id="L-289"><a href="#L-289"><span class="linenos">289</span></a><span class="sd">            Type of output to return. One of [&quot;latent&quot;, &quot;pil&quot;, &quot;pt&quot;, &quot;np&quot;].</span>
@@ -373,7 +373,7 @@
 </span><span id="L-293"><a href="#L-293"><span class="linenos">293</span></a>
 </span><span id="L-294"><a href="#L-294"><span class="linenos">294</span></a><span class="sd">        Returns</span>
 </span><span id="L-295"><a href="#L-295"><span class="linenos">295</span></a><span class="sd">        -------</span>
-</span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a><span class="sd">        OutputType</span>
 </span><span id="L-297"><a href="#L-297"><span class="linenos">297</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="L-298"><a href="#L-298"><span class="linenos">298</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-299"><a href="#L-299"><span class="linenos">299</span></a>
@@ -427,7 +427,7 @@
 </span><span id="L-347"><a href="#L-347"><span class="linenos">347</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 </span><span id="L-348"><a href="#L-348"><span class="linenos">348</span></a>        <span class="n">embedding_interpolation_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lerp&quot;</span><span class="p">,</span>
 </span><span id="L-349"><a href="#L-349"><span class="linenos">349</span></a>        <span class="n">latent_interpolation_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;slerp&quot;</span><span class="p">,</span>
-</span><span id="L-350"><a href="#L-350"><span class="linenos">350</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="L-350"><a href="#L-350"><span class="linenos">350</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="L-351"><a href="#L-351"><span class="linenos">351</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-352"><a href="#L-352"><span class="linenos">352</span></a><span class="sd">        Run inference by conditioning on text prompts and interpolating between them.</span>
 </span><span id="L-353"><a href="#L-353"><span class="linenos">353</span></a>
@@ -466,7 +466,7 @@
 </span><span id="L-386"><a href="#L-386"><span class="linenos">386</span></a>
 </span><span id="L-387"><a href="#L-387"><span class="linenos">387</span></a><span class="sd">        Returns</span>
 </span><span id="L-388"><a href="#L-388"><span class="linenos">388</span></a><span class="sd">        -------</span>
-</span><span id="L-389"><a href="#L-389"><span class="linenos">389</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="L-389"><a href="#L-389"><span class="linenos">389</span></a><span class="sd">        OutputType</span>
 </span><span id="L-390"><a href="#L-390"><span class="linenos">390</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="L-391"><a href="#L-391"><span class="linenos">391</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-392"><a href="#L-392"><span class="linenos">392</span></a>
@@ -571,8 +571,8 @@
 </span><span id="LatentWalkDiffusion-20"><a href="#LatentWalkDiffusion-20"><span class="linenos"> 20</span></a>        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-21"><a href="#LatentWalkDiffusion-21"><span class="linenos"> 21</span></a>        <span class="n">text_encoder</span><span class="p">:</span> <span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-22"><a href="#LatentWalkDiffusion-22"><span class="linenos"> 22</span></a>        <span class="n">vae</span><span class="p">:</span> <span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion-23"><a href="#LatentWalkDiffusion-23"><span class="linenos"> 23</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion-24"><a href="#LatentWalkDiffusion-24"><span class="linenos"> 24</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">Scheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="LatentWalkDiffusion-23"><a href="#LatentWalkDiffusion-23"><span class="linenos"> 23</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNetType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="LatentWalkDiffusion-24"><a href="#LatentWalkDiffusion-24"><span class="linenos"> 24</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">SchedulerType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-25"><a href="#LatentWalkDiffusion-25"><span class="linenos"> 25</span></a>        <span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-26"><a href="#LatentWalkDiffusion-26"><span class="linenos"> 26</span></a>        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-27"><a href="#LatentWalkDiffusion-27"><span class="linenos"> 27</span></a>        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -806,22 +806,22 @@
 </span><span id="LatentWalkDiffusion-255"><a href="#LatentWalkDiffusion-255"><span class="linenos">255</span></a>    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
 </span><span id="LatentWalkDiffusion-256"><a href="#LatentWalkDiffusion-256"><span class="linenos">256</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
 </span><span id="LatentWalkDiffusion-257"><a href="#LatentWalkDiffusion-257"><span class="linenos">257</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion-258"><a href="#LatentWalkDiffusion-258"><span class="linenos">258</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="LatentWalkDiffusion-258"><a href="#LatentWalkDiffusion-258"><span class="linenos">258</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">PromptType</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-259"><a href="#LatentWalkDiffusion-259"><span class="linenos">259</span></a>        <span class="n">latent</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-260"><a href="#LatentWalkDiffusion-260"><span class="linenos">260</span></a>        <span class="n">strength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-261"><a href="#LatentWalkDiffusion-261"><span class="linenos">261</span></a>        <span class="n">num_inference_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-262"><a href="#LatentWalkDiffusion-262"><span class="linenos">262</span></a>        <span class="n">guidance_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.5</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-263"><a href="#LatentWalkDiffusion-263"><span class="linenos">263</span></a>        <span class="n">guidance_rescale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion-264"><a href="#LatentWalkDiffusion-264"><span class="linenos">264</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="LatentWalkDiffusion-264"><a href="#LatentWalkDiffusion-264"><span class="linenos">264</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PromptType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-265"><a href="#LatentWalkDiffusion-265"><span class="linenos">265</span></a>        <span class="n">output_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pil&quot;</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-266"><a href="#LatentWalkDiffusion-266"><span class="linenos">266</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion-267"><a href="#LatentWalkDiffusion-267"><span class="linenos">267</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="LatentWalkDiffusion-267"><a href="#LatentWalkDiffusion-267"><span class="linenos">267</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="LatentWalkDiffusion-268"><a href="#LatentWalkDiffusion-268"><span class="linenos">268</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion-269"><a href="#LatentWalkDiffusion-269"><span class="linenos">269</span></a><span class="sd">        Run inference by conditioning on text prompt starting from provided latent tensor.</span>
 </span><span id="LatentWalkDiffusion-270"><a href="#LatentWalkDiffusion-270"><span class="linenos">270</span></a>
 </span><span id="LatentWalkDiffusion-271"><a href="#LatentWalkDiffusion-271"><span class="linenos">271</span></a><span class="sd">        Parameters</span>
 </span><span id="LatentWalkDiffusion-272"><a href="#LatentWalkDiffusion-272"><span class="linenos">272</span></a><span class="sd">        ----------</span>
-</span><span id="LatentWalkDiffusion-273"><a href="#LatentWalkDiffusion-273"><span class="linenos">273</span></a><span class="sd">        prompt: Union[str, List[str]]</span>
+</span><span id="LatentWalkDiffusion-273"><a href="#LatentWalkDiffusion-273"><span class="linenos">273</span></a><span class="sd">        prompt: PromptType</span>
 </span><span id="LatentWalkDiffusion-274"><a href="#LatentWalkDiffusion-274"><span class="linenos">274</span></a><span class="sd">            Text prompt to condition on.</span>
 </span><span id="LatentWalkDiffusion-275"><a href="#LatentWalkDiffusion-275"><span class="linenos">275</span></a><span class="sd">        latent: torch.FloatTensor</span>
 </span><span id="LatentWalkDiffusion-276"><a href="#LatentWalkDiffusion-276"><span class="linenos">276</span></a><span class="sd">            Latent to start from.</span>
@@ -835,7 +835,7 @@
 </span><span id="LatentWalkDiffusion-284"><a href="#LatentWalkDiffusion-284"><span class="linenos">284</span></a><span class="sd">        guidance_rescale: float</span>
 </span><span id="LatentWalkDiffusion-285"><a href="#LatentWalkDiffusion-285"><span class="linenos">285</span></a><span class="sd">            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are</span>
 </span><span id="LatentWalkDiffusion-286"><a href="#LatentWalkDiffusion-286"><span class="linenos">286</span></a><span class="sd">            Flawed](https://arxiv.org/pdf/2305.08891.pdf).</span>
-</span><span id="LatentWalkDiffusion-287"><a href="#LatentWalkDiffusion-287"><span class="linenos">287</span></a><span class="sd">        negative_prompt: Optional[Union[str, List[str]]]</span>
+</span><span id="LatentWalkDiffusion-287"><a href="#LatentWalkDiffusion-287"><span class="linenos">287</span></a><span class="sd">        negative_prompt: Optional[PromptType]</span>
 </span><span id="LatentWalkDiffusion-288"><a href="#LatentWalkDiffusion-288"><span class="linenos">288</span></a><span class="sd">            Negative text prompt to uncondition on.</span>
 </span><span id="LatentWalkDiffusion-289"><a href="#LatentWalkDiffusion-289"><span class="linenos">289</span></a><span class="sd">        output_type: str</span>
 </span><span id="LatentWalkDiffusion-290"><a href="#LatentWalkDiffusion-290"><span class="linenos">290</span></a><span class="sd">            Type of output to return. One of [&quot;latent&quot;, &quot;pil&quot;, &quot;pt&quot;, &quot;np&quot;].</span>
@@ -845,7 +845,7 @@
 </span><span id="LatentWalkDiffusion-294"><a href="#LatentWalkDiffusion-294"><span class="linenos">294</span></a>
 </span><span id="LatentWalkDiffusion-295"><a href="#LatentWalkDiffusion-295"><span class="linenos">295</span></a><span class="sd">        Returns</span>
 </span><span id="LatentWalkDiffusion-296"><a href="#LatentWalkDiffusion-296"><span class="linenos">296</span></a><span class="sd">        -------</span>
-</span><span id="LatentWalkDiffusion-297"><a href="#LatentWalkDiffusion-297"><span class="linenos">297</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="LatentWalkDiffusion-297"><a href="#LatentWalkDiffusion-297"><span class="linenos">297</span></a><span class="sd">        OutputType</span>
 </span><span id="LatentWalkDiffusion-298"><a href="#LatentWalkDiffusion-298"><span class="linenos">298</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="LatentWalkDiffusion-299"><a href="#LatentWalkDiffusion-299"><span class="linenos">299</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion-300"><a href="#LatentWalkDiffusion-300"><span class="linenos">300</span></a>
@@ -899,7 +899,7 @@
 </span><span id="LatentWalkDiffusion-348"><a href="#LatentWalkDiffusion-348"><span class="linenos">348</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-349"><a href="#LatentWalkDiffusion-349"><span class="linenos">349</span></a>        <span class="n">embedding_interpolation_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lerp&quot;</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion-350"><a href="#LatentWalkDiffusion-350"><span class="linenos">350</span></a>        <span class="n">latent_interpolation_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;slerp&quot;</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion-351"><a href="#LatentWalkDiffusion-351"><span class="linenos">351</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="LatentWalkDiffusion-351"><a href="#LatentWalkDiffusion-351"><span class="linenos">351</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="LatentWalkDiffusion-352"><a href="#LatentWalkDiffusion-352"><span class="linenos">352</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion-353"><a href="#LatentWalkDiffusion-353"><span class="linenos">353</span></a><span class="sd">        Run inference by conditioning on text prompts and interpolating between them.</span>
 </span><span id="LatentWalkDiffusion-354"><a href="#LatentWalkDiffusion-354"><span class="linenos">354</span></a>
@@ -938,7 +938,7 @@
 </span><span id="LatentWalkDiffusion-387"><a href="#LatentWalkDiffusion-387"><span class="linenos">387</span></a>
 </span><span id="LatentWalkDiffusion-388"><a href="#LatentWalkDiffusion-388"><span class="linenos">388</span></a><span class="sd">        Returns</span>
 </span><span id="LatentWalkDiffusion-389"><a href="#LatentWalkDiffusion-389"><span class="linenos">389</span></a><span class="sd">        -------</span>
-</span><span id="LatentWalkDiffusion-390"><a href="#LatentWalkDiffusion-390"><span class="linenos">390</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="LatentWalkDiffusion-390"><a href="#LatentWalkDiffusion-390"><span class="linenos">390</span></a><span class="sd">        OutputType</span>
 </span><span id="LatentWalkDiffusion-391"><a href="#LatentWalkDiffusion-391"><span class="linenos">391</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="LatentWalkDiffusion-392"><a href="#LatentWalkDiffusion-392"><span class="linenos">392</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion-393"><a href="#LatentWalkDiffusion-393"><span class="linenos">393</span></a>
@@ -1033,7 +1033,7 @@ inheritance.</p>
                                         <input id="LatentWalkDiffusion.__init__-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
             
-        <span class="name">LatentWalkDiffusion</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">tokenizer</span><span class="p">:</span> <span class="n">transformers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clip</span><span class="o">.</span><span class="n">tokenization_clip</span><span class="o">.</span><span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">text_encoder</span><span class="p">:</span> <span class="n">transformers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clip</span><span class="o">.</span><span class="n">modeling_clip</span><span class="o">.</span><span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">vae</span><span class="p">:</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">autoencoder_kl</span><span class="o">.</span><span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">unet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">diffusers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">unet_2d_condition</span><span class="o">.</span><span class="n">UNet2DConditionModel</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">unet_3d_condition</span><span class="o">.</span><span class="n">UNet3DConditionModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">scheduler</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_ddim</span><span class="o">.</span><span class="n">DDIMScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_ddpm</span><span class="o">.</span><span class="n">DDPMScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_dpmsolver_multistep</span><span class="o">.</span><span class="n">DPMSolverMultistepScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_dpmsolver_singlestep</span><span class="o">.</span><span class="n">DPMSolverSinglestepScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_euler_ancestral_discrete</span><span class="o">.</span><span class="n">EulerAncestralDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_euler_discrete</span><span class="o">.</span><span class="n">EulerDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_heun_discrete</span><span class="o">.</span><span class="n">HeunDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_lms_discrete</span><span class="o">.</span><span class="n">LMSDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_pndm</span><span class="o">.</span><span class="n">PNDMScheduler</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span>,</span><span class="param">	<span class="n">device</span><span class="o">=</span><span class="s1">&#39;cuda&#39;</span>,</span><span class="param">	<span class="o">*</span><span class="n">args</span>,</span><span class="param">	<span class="o">**</span><span class="n">kwargs</span></span>)</span>
+        <span class="name">LatentWalkDiffusion</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">tokenizer</span><span class="p">:</span> <span class="n">transformers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clip</span><span class="o">.</span><span class="n">tokenization_clip</span><span class="o">.</span><span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">text_encoder</span><span class="p">:</span> <span class="n">transformers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clip</span><span class="o">.</span><span class="n">modeling_clip</span><span class="o">.</span><span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">vae</span><span class="p">:</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">autoencoder_kl</span><span class="o">.</span><span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">unet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">diffusers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">unet_2d_condition</span><span class="o">.</span><span class="n">UNet2DConditionModel</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">unet_3d_condition</span><span class="o">.</span><span class="n">UNet3DConditionModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">scheduler</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_deis_multistep</span><span class="o">.</span><span class="n">DEISMultistepScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_ddim</span><span class="o">.</span><span class="n">DDIMScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_ddpm</span><span class="o">.</span><span class="n">DDPMScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_dpmsolver_sde</span><span class="o">.</span><span class="n">DPMSolverSDEScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_dpmsolver_multistep</span><span class="o">.</span><span class="n">DPMSolverMultistepScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_dpmsolver_singlestep</span><span class="o">.</span><span class="n">DPMSolverSinglestepScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_euler_ancestral_discrete</span><span class="o">.</span><span class="n">EulerAncestralDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_euler_discrete</span><span class="o">.</span><span class="n">EulerDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_heun_discrete</span><span class="o">.</span><span class="n">HeunDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_k_dpm_2_discrete</span><span class="o">.</span><span class="n">KDPM2DiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_k_dpm_2_ancestral_discrete</span><span class="o">.</span><span class="n">KDPM2AncestralDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_lms_discrete</span><span class="o">.</span><span class="n">LMSDiscreteScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_pndm</span><span class="o">.</span><span class="n">PNDMScheduler</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">schedulers</span><span class="o">.</span><span class="n">scheduling_unipc_multistep</span><span class="o">.</span><span class="n">UniPCMultistepScheduler</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span>,</span><span class="param">	<span class="n">device</span><span class="o">=</span><span class="s1">&#39;cuda&#39;</span>,</span><span class="param">	<span class="o">*</span><span class="n">args</span>,</span><span class="param">	<span class="o">**</span><span class="n">kwargs</span></span>)</span>
 
                 <label class="view-source-button" for="LatentWalkDiffusion.__init__-view-source"><span>View Source</span></label>
 
@@ -1045,8 +1045,8 @@ inheritance.</p>
 </span><span id="LatentWalkDiffusion.__init__-20"><a href="#LatentWalkDiffusion.__init__-20"><span class="linenos">20</span></a>        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">CLIPTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.__init__-21"><a href="#LatentWalkDiffusion.__init__-21"><span class="linenos">21</span></a>        <span class="n">text_encoder</span><span class="p">:</span> <span class="n">CLIPTextModel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.__init__-22"><a href="#LatentWalkDiffusion.__init__-22"><span class="linenos">22</span></a>        <span class="n">vae</span><span class="p">:</span> <span class="n">AutoencoderKL</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion.__init__-23"><a href="#LatentWalkDiffusion.__init__-23"><span class="linenos">23</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNet</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion.__init__-24"><a href="#LatentWalkDiffusion.__init__-24"><span class="linenos">24</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">Scheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="LatentWalkDiffusion.__init__-23"><a href="#LatentWalkDiffusion.__init__-23"><span class="linenos">23</span></a>        <span class="n">unet</span><span class="p">:</span> <span class="n">UNetType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="LatentWalkDiffusion.__init__-24"><a href="#LatentWalkDiffusion.__init__-24"><span class="linenos">24</span></a>        <span class="n">scheduler</span><span class="p">:</span> <span class="n">SchedulerType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.__init__-25"><a href="#LatentWalkDiffusion.__init__-25"><span class="linenos">25</span></a>        <span class="n">torch_dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.__init__-26"><a href="#LatentWalkDiffusion.__init__-26"><span class="linenos">26</span></a>        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.__init__-27"><a href="#LatentWalkDiffusion.__init__-27"><span class="linenos">27</span></a>        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -1110,17 +1110,20 @@ inheritance.</p>
 
             <div class="docstring"><p>Modify a latent vector by adding noise.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>latent: torch.FloatTensor
-    The input latent vector to modify.
-strength: float
-    The strength of the modification, controlling the amount of noise added.</p>
+<ul>
+<li><strong>latent</strong> (torch.FloatTensor):
+The input latent vector to modify.</li>
+<li><strong>strength</strong> (float):
+The strength of the modification, controlling the amount of noise added.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.FloatTensor
-    Modified latent vector.</p>
+<ul>
+<li><strong>torch.FloatTensor</strong>: Modified latent vector.</li>
+</ul>
 </div>
 
 
@@ -1218,29 +1221,32 @@ strength: float
 
             <div class="docstring"><p>Generate latent by conditioning on prompt embedding using diffusion.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>embedding: torch.FloatTensor
-    Embedding of text prompt.
-num_inference_steps: int
-    Number of diffusion steps to run.
-guidance_scale: float
-    Guidance scale encourages the model to generate images following the prompt
-    closely, albeit at the cost of image quality.
-guidance_rescale: float
-    Guidance rescale from <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion Noise Schedules and Sample Steps are
-    Flawed</a>.
-latent: torch.FloatTensor
-    Latent to start diffusion from.
-return_latent_history: bool
-    Whether to return latent history. If True, return list of all latents
-    generated during diffusion steps.</p>
+<ul>
+<li><strong>embedding</strong> (torch.FloatTensor):
+Embedding of text prompt.</li>
+<li><strong>num_inference_steps</strong> (int):
+Number of diffusion steps to run.</li>
+<li><strong>guidance_scale</strong> (float):
+Guidance scale encourages the model to generate images following the prompt
+closely, albeit at the cost of image quality.</li>
+<li><strong>guidance_rescale</strong> (float):
+Guidance rescale from <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion Noise Schedules and Sample Steps are
+Flawed</a>.</li>
+<li><strong>latent</strong> (torch.FloatTensor):
+Latent to start diffusion from.</li>
+<li><strong>return_latent_history</strong> (bool):
+Whether to return latent history. If True, return list of all latents
+generated during diffusion steps.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>Union[torch.FloatTensor, List[torch.FloatTensor]]
-    Latent generated by diffusion. If return_latent_history is True, return list of
-    all latents generated during diffusion steps.</p>
+<ul>
+<li><strong>Union[torch.FloatTensor, List[torch.FloatTensor]]</strong>: Latent generated by diffusion. If return_latent_history is True, return list of
+all latents generated during diffusion steps.</li>
+</ul>
 </div>
 
 
@@ -1324,19 +1330,22 @@ return_latent_history: bool
 
             <div class="docstring"><p>Interpolate based on interpolation type.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>embedding: torch.FloatTensor
-    Embedding of text prompt.
-interpolation_steps: Union[int, List[int]]
-    Number of interpolation steps to run.
-embedding_interpolation_type: str
-    Type of interpolation to run. One of ["lerp", "slerp"].</p>
+<ul>
+<li><strong>embedding</strong> (torch.FloatTensor):
+Embedding of text prompt.</li>
+<li><strong>interpolation_steps</strong> (Union[int, List[int]]):
+Number of interpolation steps to run.</li>
+<li><strong>embedding_interpolation_type</strong> (str):
+Type of interpolation to run. One of ["lerp", "slerp"].</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.FloatTensor
-    Interpolated embedding.</p>
+<ul>
+<li><strong>torch.FloatTensor</strong>: Interpolated embedding.</li>
+</ul>
 </div>
 
 
@@ -1401,19 +1410,22 @@ embedding_interpolation_type: str
 
             <div class="docstring"><p>Interpolate latent based on interpolation type.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>latent: torch.FloatTensor
-    Latent to interpolate.
-interpolation_steps: Union[int, List[int]]
-    Number of interpolation steps to run.
-latent_interpolation_type: str
-    Type of interpolation to run. One of ["lerp", "slerp"].</p>
+<ul>
+<li><strong>latent</strong> (torch.FloatTensor):
+Latent to interpolate.</li>
+<li><strong>interpolation_steps</strong> (Union[int, List[int]]):
+Number of interpolation steps to run.</li>
+<li><strong>latent_interpolation_type</strong> (str):
+Type of interpolation to run. One of ["lerp", "slerp"].</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.FloatTensor
-    Interpolated latent.</p>
+<ul>
+<li><strong>torch.FloatTensor</strong>: Interpolated latent.</li>
+</ul>
 </div>
 
 
@@ -1433,22 +1445,22 @@ latent_interpolation_type: str
             <div class="pdoc-code codehilite"><pre><span></span><span id="LatentWalkDiffusion.generate-255"><a href="#LatentWalkDiffusion.generate-255"><span class="linenos">255</span></a>    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
 </span><span id="LatentWalkDiffusion.generate-256"><a href="#LatentWalkDiffusion.generate-256"><span class="linenos">256</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
 </span><span id="LatentWalkDiffusion.generate-257"><a href="#LatentWalkDiffusion.generate-257"><span class="linenos">257</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion.generate-258"><a href="#LatentWalkDiffusion.generate-258"><span class="linenos">258</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+</span><span id="LatentWalkDiffusion.generate-258"><a href="#LatentWalkDiffusion.generate-258"><span class="linenos">258</span></a>        <span class="n">prompt</span><span class="p">:</span> <span class="n">PromptType</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.generate-259"><a href="#LatentWalkDiffusion.generate-259"><span class="linenos">259</span></a>        <span class="n">latent</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.generate-260"><a href="#LatentWalkDiffusion.generate-260"><span class="linenos">260</span></a>        <span class="n">strength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.generate-261"><a href="#LatentWalkDiffusion.generate-261"><span class="linenos">261</span></a>        <span class="n">num_inference_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.generate-262"><a href="#LatentWalkDiffusion.generate-262"><span class="linenos">262</span></a>        <span class="n">guidance_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.5</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.generate-263"><a href="#LatentWalkDiffusion.generate-263"><span class="linenos">263</span></a>        <span class="n">guidance_rescale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion.generate-264"><a href="#LatentWalkDiffusion.generate-264"><span class="linenos">264</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="LatentWalkDiffusion.generate-264"><a href="#LatentWalkDiffusion.generate-264"><span class="linenos">264</span></a>        <span class="n">negative_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PromptType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.generate-265"><a href="#LatentWalkDiffusion.generate-265"><span class="linenos">265</span></a>        <span class="n">output_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pil&quot;</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.generate-266"><a href="#LatentWalkDiffusion.generate-266"><span class="linenos">266</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion.generate-267"><a href="#LatentWalkDiffusion.generate-267"><span class="linenos">267</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="LatentWalkDiffusion.generate-267"><a href="#LatentWalkDiffusion.generate-267"><span class="linenos">267</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="LatentWalkDiffusion.generate-268"><a href="#LatentWalkDiffusion.generate-268"><span class="linenos">268</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion.generate-269"><a href="#LatentWalkDiffusion.generate-269"><span class="linenos">269</span></a><span class="sd">        Run inference by conditioning on text prompt starting from provided latent tensor.</span>
 </span><span id="LatentWalkDiffusion.generate-270"><a href="#LatentWalkDiffusion.generate-270"><span class="linenos">270</span></a>
 </span><span id="LatentWalkDiffusion.generate-271"><a href="#LatentWalkDiffusion.generate-271"><span class="linenos">271</span></a><span class="sd">        Parameters</span>
 </span><span id="LatentWalkDiffusion.generate-272"><a href="#LatentWalkDiffusion.generate-272"><span class="linenos">272</span></a><span class="sd">        ----------</span>
-</span><span id="LatentWalkDiffusion.generate-273"><a href="#LatentWalkDiffusion.generate-273"><span class="linenos">273</span></a><span class="sd">        prompt: Union[str, List[str]]</span>
+</span><span id="LatentWalkDiffusion.generate-273"><a href="#LatentWalkDiffusion.generate-273"><span class="linenos">273</span></a><span class="sd">        prompt: PromptType</span>
 </span><span id="LatentWalkDiffusion.generate-274"><a href="#LatentWalkDiffusion.generate-274"><span class="linenos">274</span></a><span class="sd">            Text prompt to condition on.</span>
 </span><span id="LatentWalkDiffusion.generate-275"><a href="#LatentWalkDiffusion.generate-275"><span class="linenos">275</span></a><span class="sd">        latent: torch.FloatTensor</span>
 </span><span id="LatentWalkDiffusion.generate-276"><a href="#LatentWalkDiffusion.generate-276"><span class="linenos">276</span></a><span class="sd">            Latent to start from.</span>
@@ -1462,7 +1474,7 @@ latent_interpolation_type: str
 </span><span id="LatentWalkDiffusion.generate-284"><a href="#LatentWalkDiffusion.generate-284"><span class="linenos">284</span></a><span class="sd">        guidance_rescale: float</span>
 </span><span id="LatentWalkDiffusion.generate-285"><a href="#LatentWalkDiffusion.generate-285"><span class="linenos">285</span></a><span class="sd">            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are</span>
 </span><span id="LatentWalkDiffusion.generate-286"><a href="#LatentWalkDiffusion.generate-286"><span class="linenos">286</span></a><span class="sd">            Flawed](https://arxiv.org/pdf/2305.08891.pdf).</span>
-</span><span id="LatentWalkDiffusion.generate-287"><a href="#LatentWalkDiffusion.generate-287"><span class="linenos">287</span></a><span class="sd">        negative_prompt: Optional[Union[str, List[str]]]</span>
+</span><span id="LatentWalkDiffusion.generate-287"><a href="#LatentWalkDiffusion.generate-287"><span class="linenos">287</span></a><span class="sd">        negative_prompt: Optional[PromptType]</span>
 </span><span id="LatentWalkDiffusion.generate-288"><a href="#LatentWalkDiffusion.generate-288"><span class="linenos">288</span></a><span class="sd">            Negative text prompt to uncondition on.</span>
 </span><span id="LatentWalkDiffusion.generate-289"><a href="#LatentWalkDiffusion.generate-289"><span class="linenos">289</span></a><span class="sd">        output_type: str</span>
 </span><span id="LatentWalkDiffusion.generate-290"><a href="#LatentWalkDiffusion.generate-290"><span class="linenos">290</span></a><span class="sd">            Type of output to return. One of [&quot;latent&quot;, &quot;pil&quot;, &quot;pt&quot;, &quot;np&quot;].</span>
@@ -1472,7 +1484,7 @@ latent_interpolation_type: str
 </span><span id="LatentWalkDiffusion.generate-294"><a href="#LatentWalkDiffusion.generate-294"><span class="linenos">294</span></a>
 </span><span id="LatentWalkDiffusion.generate-295"><a href="#LatentWalkDiffusion.generate-295"><span class="linenos">295</span></a><span class="sd">        Returns</span>
 </span><span id="LatentWalkDiffusion.generate-296"><a href="#LatentWalkDiffusion.generate-296"><span class="linenos">296</span></a><span class="sd">        -------</span>
-</span><span id="LatentWalkDiffusion.generate-297"><a href="#LatentWalkDiffusion.generate-297"><span class="linenos">297</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="LatentWalkDiffusion.generate-297"><a href="#LatentWalkDiffusion.generate-297"><span class="linenos">297</span></a><span class="sd">        OutputType</span>
 </span><span id="LatentWalkDiffusion.generate-298"><a href="#LatentWalkDiffusion.generate-298"><span class="linenos">298</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="LatentWalkDiffusion.generate-299"><a href="#LatentWalkDiffusion.generate-299"><span class="linenos">299</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion.generate-300"><a href="#LatentWalkDiffusion.generate-300"><span class="linenos">300</span></a>
@@ -1512,34 +1524,37 @@ latent_interpolation_type: str
 
             <div class="docstring"><p>Run inference by conditioning on text prompt starting from provided latent tensor.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>prompt: Union[str, List[str]]
-    Text prompt to condition on.
-latent: torch.FloatTensor
-    Latent to start from.
-strength: float
-    The strength of the latent modification, controlling the amount of noise added.
-num_inference_steps: int
-    Number of diffusion steps to run.
-guidance_scale: float
-    Guidance scale encourages the model to generate images following the prompt
-    closely, albeit at the cost of image quality.
-guidance_rescale: float
-    Guidance rescale from <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion Noise Schedules and Sample Steps are
-    Flawed</a>.
-negative_prompt: Optional[Union[str, List[str]]]
-    Negative text prompt to uncondition on.
-output_type: str
-    Type of output to return. One of ["latent", "pil", "pt", "np"].
-return_latent_history: bool
-    Whether to return the latent history. If True, return list of all latents
-    generated during diffusion steps.</p>
+<ul>
+<li><strong>prompt</strong> (PromptType):
+Text prompt to condition on.</li>
+<li><strong>latent</strong> (torch.FloatTensor):
+Latent to start from.</li>
+<li><strong>strength</strong> (float):
+The strength of the latent modification, controlling the amount of noise added.</li>
+<li><strong>num_inference_steps</strong> (int):
+Number of diffusion steps to run.</li>
+<li><strong>guidance_scale</strong> (float):
+Guidance scale encourages the model to generate images following the prompt
+closely, albeit at the cost of image quality.</li>
+<li><strong>guidance_rescale</strong> (float):
+Guidance rescale from <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion Noise Schedules and Sample Steps are
+Flawed</a>.</li>
+<li><strong>negative_prompt</strong> (Optional[PromptType]):
+Negative text prompt to uncondition on.</li>
+<li><strong>output_type</strong> (str):
+Type of output to return. One of ["latent", "pil", "pt", "np"].</li>
+<li><strong>return_latent_history</strong> (bool):
+Whether to return the latent history. If True, return list of all latents
+generated during diffusion steps.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>Union[torch.Tensor, np.ndarray, List[Image.Image]]
-    Generated output based on output_type.</p>
+<ul>
+<li><strong>OutputType</strong>: Generated output based on output_type.</li>
+</ul>
 </div>
 
 
@@ -1572,7 +1587,7 @@ return_latent_history: bool
 </span><span id="LatentWalkDiffusion.interpolate-348"><a href="#LatentWalkDiffusion.interpolate-348"><span class="linenos">348</span></a>        <span class="n">return_latent_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.interpolate-349"><a href="#LatentWalkDiffusion.interpolate-349"><span class="linenos">349</span></a>        <span class="n">embedding_interpolation_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lerp&quot;</span><span class="p">,</span>
 </span><span id="LatentWalkDiffusion.interpolate-350"><a href="#LatentWalkDiffusion.interpolate-350"><span class="linenos">350</span></a>        <span class="n">latent_interpolation_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;slerp&quot;</span><span class="p">,</span>
-</span><span id="LatentWalkDiffusion.interpolate-351"><a href="#LatentWalkDiffusion.interpolate-351"><span class="linenos">351</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]]:</span>
+</span><span id="LatentWalkDiffusion.interpolate-351"><a href="#LatentWalkDiffusion.interpolate-351"><span class="linenos">351</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutputType</span><span class="p">:</span>
 </span><span id="LatentWalkDiffusion.interpolate-352"><a href="#LatentWalkDiffusion.interpolate-352"><span class="linenos">352</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion.interpolate-353"><a href="#LatentWalkDiffusion.interpolate-353"><span class="linenos">353</span></a><span class="sd">        Run inference by conditioning on text prompts and interpolating between them.</span>
 </span><span id="LatentWalkDiffusion.interpolate-354"><a href="#LatentWalkDiffusion.interpolate-354"><span class="linenos">354</span></a>
@@ -1611,7 +1626,7 @@ return_latent_history: bool
 </span><span id="LatentWalkDiffusion.interpolate-387"><a href="#LatentWalkDiffusion.interpolate-387"><span class="linenos">387</span></a>
 </span><span id="LatentWalkDiffusion.interpolate-388"><a href="#LatentWalkDiffusion.interpolate-388"><span class="linenos">388</span></a><span class="sd">        Returns</span>
 </span><span id="LatentWalkDiffusion.interpolate-389"><a href="#LatentWalkDiffusion.interpolate-389"><span class="linenos">389</span></a><span class="sd">        -------</span>
-</span><span id="LatentWalkDiffusion.interpolate-390"><a href="#LatentWalkDiffusion.interpolate-390"><span class="linenos">390</span></a><span class="sd">        Union[torch.Tensor, np.ndarray, List[Image.Image]]</span>
+</span><span id="LatentWalkDiffusion.interpolate-390"><a href="#LatentWalkDiffusion.interpolate-390"><span class="linenos">390</span></a><span class="sd">        OutputType</span>
 </span><span id="LatentWalkDiffusion.interpolate-391"><a href="#LatentWalkDiffusion.interpolate-391"><span class="linenos">391</span></a><span class="sd">            Generated output based on output_type.</span>
 </span><span id="LatentWalkDiffusion.interpolate-392"><a href="#LatentWalkDiffusion.interpolate-392"><span class="linenos">392</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="LatentWalkDiffusion.interpolate-393"><a href="#LatentWalkDiffusion.interpolate-393"><span class="linenos">393</span></a>
@@ -1699,43 +1714,46 @@ return_latent_history: bool
 
             <div class="docstring"><p>Run inference by conditioning on text prompts and interpolating between them.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>prompt: List[str]
-    List of text prompts to condition on.
-latent: Optional[torch.FloatTensor]
-    Latents to interpolate between. If None, latents are generated from noise
-    but image_height and image_width must be provided.
-image_height: Optional[int]
-    Height of image to generate.
-image_width: Optional[int]
-    Width of image to generate.
-num_inference_steps: int
-    Number of diffusion steps to run.
-interpolation_steps: Union[int, List[int]]
-    Number of interpolation steps to run.
-guidance_scale: float
-    Guidance scale encourages the model to generate images following the prompt
-    closely, albeit at the cost of image quality.
-guidance_rescale: float
-    Guidance rescale from <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion Noise Schedules and Sample Steps are
-    Flawed</a>.
-negative_prompt: Optional[List[str]]
-    Negative text prompts to uncondition on.
-output_type: str
-    Type of output to return. One of ["latent", "pil", "pt", "np"].
-return_latent_history: bool
-    Whether to return the latent history. If True, return list of all latents
-    generated during diffusion steps.
-embedding_interpolation_type: str
-    Type of interpolation to run for text embeddings. One of ["lerp", "slerp"].
-latent_interpolation_type: str
-    Type of interpolation to run for latents. One of ["lerp", "slerp"].</p>
+<ul>
+<li><strong>prompt</strong> (List[str]):
+List of text prompts to condition on.</li>
+<li><strong>latent</strong> (Optional[torch.FloatTensor]):
+Latents to interpolate between. If None, latents are generated from noise
+but image_height and image_width must be provided.</li>
+<li><strong>image_height</strong> (Optional[int]):
+Height of image to generate.</li>
+<li><strong>image_width</strong> (Optional[int]):
+Width of image to generate.</li>
+<li><strong>num_inference_steps</strong> (int):
+Number of diffusion steps to run.</li>
+<li><strong>interpolation_steps</strong> (Union[int, List[int]]):
+Number of interpolation steps to run.</li>
+<li><strong>guidance_scale</strong> (float):
+Guidance scale encourages the model to generate images following the prompt
+closely, albeit at the cost of image quality.</li>
+<li><strong>guidance_rescale</strong> (float):
+Guidance rescale from <a href="https://arxiv.org/pdf/2305.08891.pdf">Common Diffusion Noise Schedules and Sample Steps are
+Flawed</a>.</li>
+<li><strong>negative_prompt</strong> (Optional[List[str]]):
+Negative text prompts to uncondition on.</li>
+<li><strong>output_type</strong> (str):
+Type of output to return. One of ["latent", "pil", "pt", "np"].</li>
+<li><strong>return_latent_history</strong> (bool):
+Whether to return the latent history. If True, return list of all latents
+generated during diffusion steps.</li>
+<li><strong>embedding_interpolation_type</strong> (str):
+Type of interpolation to run for text embeddings. One of ["lerp", "slerp"].</li>
+<li><strong>latent_interpolation_type</strong> (str):
+Type of interpolation to run for latents. One of ["lerp", "slerp"].</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>Union[torch.Tensor, np.ndarray, List[Image.Image]]
-    Generated output based on output_type.</p>
+<ul>
+<li><strong>OutputType</strong>: Generated output based on output_type.</li>
+</ul>
 </div>
 
 
@@ -1755,6 +1773,7 @@ latent_interpolation_type: str
                 <dd id="LatentWalkDiffusion.vae_scale_factor" class="variable"><a href="base_diffusion.html#BaseDiffusion.vae_scale_factor">vae_scale_factor</a></dd>
                 <dd id="LatentWalkDiffusion.to" class="function"><a href="base_diffusion.html#BaseDiffusion.to">to</a></dd>
                 <dd id="LatentWalkDiffusion.share_components_with" class="function"><a href="base_diffusion.html#BaseDiffusion.share_components_with">share_components_with</a></dd>
+                <dd id="LatentWalkDiffusion.set_scheduler" class="function"><a href="base_diffusion.html#BaseDiffusion.set_scheduler">set_scheduler</a></dd>
                 <dd id="LatentWalkDiffusion.enable_attention_slicing" class="function"><a href="base_diffusion.html#BaseDiffusion.enable_attention_slicing">enable_attention_slicing</a></dd>
                 <dd id="LatentWalkDiffusion.disable_attention_slicing" class="function"><a href="base_diffusion.html#BaseDiffusion.disable_attention_slicing">disable_attention_slicing</a></dd>
                 <dd id="LatentWalkDiffusion.enable_slicing" class="function"><a href="base_diffusion.html#BaseDiffusion.enable_slicing">enable_slicing</a></dd>
