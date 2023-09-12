@@ -183,7 +183,7 @@ These results are generated using the [Inpainting](https://github.com/a-r-r-o-w/
   **Prompt:** _A painting of a cat, in the style of Vincent Van Gogh, hanging in a room_
 
   <div align="center">
-    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/045243d4-de76-43a2-b0fe-ca723e3e319f" controls loop autoplay> Your browser does not support the video tag. </video>
+    <video src="https://github.com/a-r-r-o-w/stablefused/assets/72266394/a71fd7ed-5ac6-49b1-812b-73c50d6ef851" controls loop autoplay> Your browser does not support the video tag. </video>
   </div>
 </details>
 
