@@ -37,3 +37,9 @@ from .utils import (
     save_model_to_cache,
     slerp,
 )
+
+from .apps.storybook import (
+    StoryBookAuthorBase,
+    G4FStoryBookAuthor,
+    StoryBook,
+)
