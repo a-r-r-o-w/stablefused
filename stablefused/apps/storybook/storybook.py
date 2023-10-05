@@ -1,9 +1,20 @@
 import json
+import numpy as np
 import os
 
+from moviepy.editor import (
+    AudioFileClip,
+    CompositeAudioClip,
+    CompositeVideoClip,
+    ImageClip,
+    concatenate_audioclips,
+    concatenate_videoclips,
+    vfx,
+)
 from stablefused import TextToImageDiffusion
-from stablefused.apps.storybook import StoryBookAuthorBase
-from typing import Dict, List, Union
+from stablefused.apps.storybook import StoryBookAuthorBase, StoryBookSpeakerBase
+from stablefused.utils import write_text_on_image
+from typing import Dict, List, Optional, Union
 
 
 class StoryBook:
@@ -20,12 +31,13 @@ class StoryBook:
         self,
         author: StoryBookAuthorBase,
         artist: TextToImageDiffusion,
-        speaker=None,
+        speaker: Optional[StoryBookSpeakerBase] = None,
         *,
         config: Union[str, Dict[str, str]] = "config/default_1_shot.json",
     ) -> None:
         self.author = author
         self.artist = artist
+        self.speaker = speaker
         self.config = config
 
         self._process_config(self.config)
@@ -76,19 +88,71 @@ class StoryBook:
         self,
         user_prompt: str,
         *,
+        frame_duration: int = 1,
         display_captions: bool = True,
+        caption_fontsize: int = 30,
+        caption_fontfile: str = "arial.ttf",
+        caption_padding: int = 10,
+        speedup_factor: int = 1,
+        num_retries: int = 3,
         output_filename="output.mp4",
     ) -> None:
         messages = [*self.messages, self.create_prompt("user", user_prompt)]
-        storybook = self.author(messages)
-        storybook = self.validate_output(storybook)
+
+        for i in range(num_retries):
+            try:
+                storybook = self.author(messages)
+                storybook = self.validate_output(storybook)
+                break
+            except Exception as e:
+                print(f"Error: {str(e)}")
+                print(f"Retrying ({i + 1}/{num_retries})...")
+                continue
+        else:
+            raise Exception("Failed to generate storybook. Please try again.")
+
         prompt = [item["prompt"] for item in storybook]
         negative_prompt = (
             [self.negative_prompt] * len(prompt)
             if self.negative_prompt is not None
             else None
         )
+
         images = self.artist(
             prompt=prompt, negative_prompt=negative_prompt, **self.artist_call_kwargs
         )
-        return storybook, images
+
+        if display_captions:
+            images = [
+                write_text_on_image(
+                    image,
+                    storypart.get("story"),
+                    fontfile=caption_fontfile,
+                    fontsize=caption_fontsize,
+                    padding=caption_padding,
+                )
+                for image, storypart in zip(images, storybook)
+            ]
+
+        if self.speaker is not None:
+            stories = [item.get("story") for item in storybook]
+            audioclips = []
+
+            for audiofile in self.speaker(stories, yield_files=True):
+                audioclips.append(AudioFileClip(audiofile))
+
+            audioclip: CompositeAudioClip = concatenate_audioclips(audioclips)
+            frame_duration = audioclip.duration / len(images)
+        else:
+            audioclip = None
+
+        video = [
+            ImageClip(np.array(image), duration=frame_duration) for image in images
+        ]
+        video = concatenate_videoclips(video)
+        video: CompositeVideoClip = video.set_audio(audioclip)
+        video: CompositeVideoClip = video.set_fps(60)
+        video: CompositeVideoClip = video.fx(vfx.speedx, speedup_factor)
+        video.write_videofile(output_filename)
+
+        return storybook

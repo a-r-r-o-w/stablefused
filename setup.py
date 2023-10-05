@@ -24,7 +24,9 @@ setup(
         "torch==2.0.1",
         "transformers==4.31.0",
         "matplotlib==3.7.2",
+        "moviepy==1.0.3",
         "numpy==1.25.2",
+        "pillow==9.5.0",
         "scipy==1.11.1",
     ],
     extras_require={

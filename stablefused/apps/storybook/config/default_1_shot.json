@@ -1,8 +1,8 @@
 {
   "negative_prompt": "(((deformed))), (((disfigured))), unrealistic, blur, boring background, mutation, mutated, malformed, censored, colorless, bad shadow, missing parts, cropped, watermark, username, text, signature, low quality, low resolution, unattractive",
   "attributes": "high quality, realistic, octane render",
-  "image_height": 32,
-  "image_width": 32,
+  "image_height": 512,
+  "image_width": 512,
   "num_inference_steps": 20,
   "guidance_scale": 7.5,
   "guidance_rescale": 0.7,
