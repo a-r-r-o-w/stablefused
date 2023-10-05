@@ -13,6 +13,10 @@ from .image_utils import (
     pil_to_video,
     pil_to_gif,
     pt_to_numpy,
+    write_text_on_image,
+)
+from .import_utils import (
+    LazyImporter,
 )
 from .model_cache import (
     save_model_to_cache,

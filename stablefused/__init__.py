@@ -36,10 +36,14 @@ from .utils import (
     resolve_scheduler,
     save_model_to_cache,
     slerp,
+    write_text_on_image,
+    LazyImporter,
 )
 
 from .apps.storybook import (
     StoryBookAuthorBase,
     G4FStoryBookAuthor,
     StoryBook,
+    StoryBookSpeakerBase,
+    gTTSStoryBookSpeaker,
 )
