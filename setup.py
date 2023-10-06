@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 setup(
     name="stablefused",
-    version="0.1.9",
+    version="0.2.0",
     description="StableFused is a toy library to experiment with Stable Diffusion inspired by 🤗 diffusers and various other sources!",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -20,6 +20,7 @@ setup(
         "diffusers==0.19.3",
         "ftfy==6.1.1",
         "imageio==2.31.1",
+        "imageio-ffmpeg==0.4.8",
         "imageio-ffmpeg==0.4.8",
         "torch==2.0.1",
         "transformers==4.31.0",
