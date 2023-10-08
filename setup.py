@@ -17,6 +17,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "accelerate==0.21.0",
+        "dataclasses-json==0.6.1",
         "diffusers==0.19.3",
         "ftfy==6.1.1",
         "imageio==2.31.1",
@@ -34,7 +35,11 @@ setup(
             "black==23.7.0",
             "pytest==7.4.0",
             "twine>=4.0.2",
-        ]
+        ],
+        "extras": [
+            "g4f==0.1.3.5",
+            "gtts==2.4.0",
+        ],
     },
     classifiers=[
         "Development Status :: 1 - Planning",

@@ -4,10 +4,17 @@
 
 from .diffusion import (
     BaseDiffusion,
+    ImageToImageConfig,
     ImageToImageDiffusion,
+    InpaintConfig,
+    InpaintWalkConfig,
     InpaintDiffusion,
+    LatentWalkConfig,
+    LatentWalkInterpolateConfig,
     LatentWalkDiffusion,
+    TextToImageConfig,
     TextToImageDiffusion,
+    TextToVideoConfig,
     TextToVideoDiffusion,
 )
 
@@ -43,6 +50,7 @@ from .utils import (
 from .apps.storybook import (
     StoryBookAuthorBase,
     G4FStoryBookAuthor,
+    StoryBookConfig,
     StoryBook,
     StoryBookSpeakerBase,
     gTTSStoryBookSpeaker,
