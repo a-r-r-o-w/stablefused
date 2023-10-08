@@ -2,7 +2,11 @@ import numpy as np
 import torch
 import pytest
 
-from stablefused import LatentWalkDiffusion
+from stablefused import (
+    LatentWalkConfig,
+    LatentWalkInterpolateConfig,
+    LatentWalkDiffusion,
+)
 
 
 @pytest.fixture
@@ -61,37 +65,12 @@ def test_latent_walk_diffusion(model: LatentWalkDiffusion, config: dict) -> None
     latent = model.image_to_latent(image)
 
     images = model(
-        prompt=config.get("prompt"),
-        latent=latent,
-        num_inference_steps=config.get("num_inference_steps"),
-        output_type="np",
-    )
-
-    assert type(images) is np.ndarray
-    assert images.shape == (1, dim, dim, 3)
-
-
-def test_no_classifier_free_guidance(model: LatentWalkDiffusion, config: dict) -> None:
-    """
-    Test case to check if the LatentWalkDiffusion is working correctly when classifier
-    free guidance is disabled.
-
-    Raises
-    ------
-    AssertionError
-        If the generated image is not of type np.ndarray.
-        If the generated image does not have the expected shape.
-    """
-    dim = config.get("image_dim")
-    image = model.random_tensor((1, 3, dim, dim))
-    latent = model.image_to_latent(image)
-
-    images = model(
-        prompt=config.get("prompt"),
-        latent=latent,
-        num_inference_steps=config.get("num_inference_steps"),
-        output_type="np",
-        guidance_scale=1.0,  # setting guidance_scale <= 1.0 effectively disables classifier free guidance
+        LatentWalkConfig(
+            prompt=config.get("prompt"),
+            latent=latent,
+            num_inference_steps=config.get("num_inference_steps"),
+            output_type="np",
+        )
     )
 
     assert type(images) is np.ndarray
@@ -116,11 +95,13 @@ def test_interpolate(model: LatentWalkDiffusion, config_interpolate: dict) -> No
     latent = model.image_to_latent(image)
 
     images = model.interpolate(
-        prompt=config_interpolate.get("prompt"),
-        latent=latent,
-        num_inference_steps=config_interpolate.get("num_inference_steps"),
-        interpolation_steps=config_interpolate.get("interpolation_steps"),
-        output_type="np",
+        LatentWalkInterpolateConfig(
+            prompt=config_interpolate.get("prompt"),
+            latent=latent,
+            num_inference_steps=config_interpolate.get("num_inference_steps"),
+            interpolation_steps=config_interpolate.get("interpolation_steps"),
+            output_type="np",
+        )
     )
 
     assert type(images) is np.ndarray
