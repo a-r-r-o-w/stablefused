@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 
 from PIL import Image
+from dataclasses import dataclass
 from diffusers import AutoencoderKL
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
@@ -17,6 +18,126 @@ from stablefused.typing import (
     SchedulerType,
     UNetType,
 )
+
+
+@dataclass
+class InpaintConfig:
+    """
+    Configuration class for running inference with InpaintDiffusion.
+
+    Parameters
+    ----------
+    prompt: PromptType
+            Text prompt to condition on.
+    image: ImageType
+        Input image to condition on.
+    mask: ImageType
+        Input mask to condition on. Must have same height and width as image.
+        Must have 1 channel. Must have values between 0 and 1. Values below 0.5
+        are treated as 0 and values above 0.5 are treated as 1. Values that are
+        1 (white) will be inpainted and values that are 0 (black) will be
+        preserved.
+    image_height: int
+        Height of image to generate. If height of provided image and image_height
+        do not match, image will be resized to image_height using PIL Lanczos method.
+    image_width: int
+        Width of image to generate. If width of provided image and image_width
+        do not match, image will be resized to image_width using PIL Lanczos method.
+    num_inference_steps: int
+        Number of diffusion steps to run.
+    start_step: int
+        Step to start diffusion from. The higher the value, the more similar the generated
+        image will be to the input image.
+    guidance_scale: float
+        Guidance scale encourages the model to generate images following the prompt
+        closely, albeit at the cost of image quality.
+    guidance_rescale: float
+        Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+        Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+    negative_prompt: Optional[PromptType]
+        Negative text prompt to uncondition on.
+    output_type: str
+        Type of output to return. One of ["latent", "pil", "pt", "np"].
+    return_latent_history: bool
+        Whether to return the latent history. If True, return list of all latents
+        generated during diffusion steps.
+    """
+
+    prompt: PromptType
+    image: ImageType
+    mask: ImageType
+    image_height: int = 512
+    image_width: int = 512
+    num_inference_steps: int = 50
+    start_step: int = 0
+    guidance_scale: float = 7.5
+    guidance_rescale: float = 0.7
+    negative_prompt: Optional[PromptType] = None
+    output_type: str = "pil"
+    return_latent_history: bool = False
+
+
+@dataclass
+class InpaintWalkConfig:
+    """
+    Configuration class for running inpaint walking with InpaintDiffusion.
+
+    Parameters
+    ----------
+    prompt: PromptType
+        Text prompt to condition on.
+    image: Image.Image
+        Input image to condition on for inpainting.
+    walk_type: Union[InpaintWalkType, List[InpaintWalkType]]
+        Type of walk to perform. If List[InpaintWalkType], must have length of
+        num_inpainting_steps.
+    image_height: int
+        Height of image to generate. If height of provided image and image_height
+        do not match, image will be resized to image_height using PIL Lanczos method.
+    image_width: int
+        Width of image to generate. If width of provided image and image_width
+        do not match, image will be resized to image_width using PIL Lanczos method.
+    height_translation_per_step: int
+        Number of pixels to translate image up/down per step.
+    width_translation_per_step: int
+        Number of pixels to translate image left/right per step.
+    translation_factor: Optional[float]
+        Factor to translate image by. If provided, overrides height_translation_per_step
+        and width_translation_per_step. Must be between 0 and 1.
+    num_inpainting_steps: int
+        Number of inpainting steps to run.
+    interpolation_steps: int
+        Number of interpolation steps to run between inpainting steps.
+    num_inference_steps: int
+        Number of diffusion steps to run.
+    start_step: int
+        Step to start diffusion from. The higher the value, the more similar the generated
+        image will be to the input image.
+    guidance_scale: float
+        Guidance scale encourages the model to generate images following the prompt
+        closely, albeit at the cost of image quality.
+    guidance_rescale: float
+        Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+        Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+    negative_prompt: Optional[PromptType]
+        Negative text prompt to uncondition on.
+    """
+
+    prompt: PromptType
+    image: Image.Image
+    walk_type: Union[InpaintWalkType, List[InpaintWalkType]]
+    image_height: int = 512
+    image_width: int = 512
+    height_translation_per_step: int = 64
+    width_translation_per_step: int = 64
+    translation_factor: Optional[float] = None
+    num_inpainting_steps: int = 4
+    interpolation_steps: int = 60
+    num_inference_steps: int = 50
+    start_step: int = 0
+    guidance_scale: float = 7.5
+    guidance_rescale: float = 0.7
+    negative_prompt: Optional[PromptType] = None
 
 
 class InpaintDiffusion(BaseDiffusion):
@@ -512,6 +633,7 @@ class InpaintDiffusion(BaseDiffusion):
         Tuple[torch.FloatTensor, torch.FloatTensor, torch.FloatTensor]
             Tuple of image, mask and masked_image.
         """
+
         if image is None or mask is None:
             raise ValueError("image and mask cannot be None")
         if type(image) != type(mask):
@@ -536,64 +658,34 @@ class InpaintDiffusion(BaseDiffusion):
     @torch.no_grad()
     def __call__(
         self,
-        prompt: PromptType,
-        image: ImageType,
-        mask: ImageType,
-        image_height: int = 512,
-        image_width: int = 512,
-        num_inference_steps: int = 50,
-        start_step: int = 0,
-        guidance_scale: float = 7.5,
-        guidance_rescale: float = 0.7,
-        negative_prompt: Optional[PromptType] = None,
-        output_type: str = "pil",
-        return_latent_history: bool = False,
+        config: InpaintConfig,
     ) -> OutputType:
         """
         Run inference by conditioning on input image, mask and prompt.
 
         Parameters
         ----------
-        prompt: PromptType
-            Text prompt to condition on.
-        image: ImageType
-            Input image to condition on.
-        mask: ImageType
-            Input mask to condition on. Must have same height and width as image.
-            Must have 1 channel. Must have values between 0 and 1. Values below 0.5
-            are treated as 0 and values above 0.5 are treated as 1. Values that are
-            1 (white) will be inpainted and values that are 0 (black) will be
-            preserved.
-        image_height: int
-            Height of image to generate. If height of provided image and image_height
-            do not match, image will be resized to image_height using PIL Lanczos method.
-        image_width: int
-            Width of image to generate. If width of provided image and image_width
-            do not match, image will be resized to image_width using PIL Lanczos method.
-        num_inference_steps: int
-            Number of diffusion steps to run.
-        start_step: int
-            Step to start diffusion from. The higher the value, the more similar the generated
-            image will be to the input image.
-        guidance_scale: float
-            Guidance scale encourages the model to generate images following the prompt
-            closely, albeit at the cost of image quality.
-        guidance_rescale: float
-            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
-            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[PromptType]
-            Negative text prompt to uncondition on.
-        output_type: str
-            Type of output to return. One of ["latent", "pil", "pt", "np"].
-        return_latent_history: bool
-            Whether to return the latent history. If True, return list of all latents
-            generated during diffusion steps.
+        config: InpaintConfig
+            Configuration for running inference with InpaintDiffusion.
 
         Returns
         -------
         OutputType
             Generated output based on output_type.
         """
+
+        prompt = config.prompt
+        image = config.image
+        mask = config.mask
+        image_height = config.image_height
+        image_width = config.image_width
+        num_inference_steps = config.num_inference_steps
+        start_step = config.start_step
+        guidance_scale = config.guidance_scale
+        guidance_rescale = config.guidance_rescale
+        negative_prompt = config.negative_prompt
+        output_type = config.output_type
+        return_latent_history = config.return_latent_history
 
         # Validate input
         self.validate_input(
@@ -647,70 +739,37 @@ class InpaintDiffusion(BaseDiffusion):
 
     def walk(
         self,
-        prompt: PromptType,
-        image: Image.Image,
-        walk_type: Union[InpaintWalkType, List[InpaintWalkType]],
-        image_height: int = 512,
-        image_width: int = 512,
-        height_translation_per_step: int = 64,
-        width_translation_per_step: int = 64,
-        translation_factor: Optional[float] = None,
-        num_inpainting_steps: int = 4,
-        interpolation_steps: int = 60,
-        num_inference_steps: int = 50,
-        start_step: int = 0,
-        guidance_scale: float = 7.5,
-        guidance_rescale: float = 0.7,
-        negative_prompt: Optional[PromptType] = None,
+        config: InpaintWalkConfig,
     ) -> OutputType:
         """
         Inpaint image by walking in direction(s) of choice.
 
         Parameters
         ----------
-        prompt: PromptType
-            Text prompt to condition on.
-        image: Image.Image
-            Input image to condition on for inpainting.
-        walk_type: Union[InpaintWalkType, List[InpaintWalkType]]
-            Type of walk to perform. If List[InpaintWalkType], must have length of
-            num_inpainting_steps.
-        image_height: int
-            Height of image to generate. If height of provided image and image_height
-            do not match, image will be resized to image_height using PIL Lanczos method.
-        image_width: int
-            Width of image to generate. If width of provided image and image_width
-            do not match, image will be resized to image_width using PIL Lanczos method.
-        height_translation_per_step: int
-            Number of pixels to translate image up/down per step.
-        width_translation_per_step: int
-            Number of pixels to translate image left/right per step.
-        translation_factor: Optional[float]
-            Factor to translate image by. If provided, overrides height_translation_per_step
-            and width_translation_per_step. Must be between 0 and 1.
-        num_inpainting_steps: int
-            Number of inpainting steps to run.
-        interpolation_steps: int
-            Number of interpolation steps to run between inpainting steps.
-        num_inference_steps: int
-            Number of diffusion steps to run.
-        start_step: int
-            Step to start diffusion from. The higher the value, the more similar the generated
-            image will be to the input image.
-        guidance_scale: float
-            Guidance scale encourages the model to generate images following the prompt
-            closely, albeit at the cost of image quality.
-        guidance_rescale: float
-            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
-            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[PromptType]
-            Negative text prompt to uncondition on.
+        config: InpaintWalkConfig
+            Configuration for running inpaint walking with InpaintDiffusion.
 
         Returns
         -------
         OutputType
             Generated output based on output_type.
         """
+
+        prompt = config.prompt
+        image = config.image
+        walk_type = config.walk_type
+        image_height = config.image_height
+        image_width = config.image_width
+        height_translation_per_step = config.height_translation_per_step
+        width_translation_per_step = config.width_translation_per_step
+        translation_factor = config.translation_factor
+        num_inpainting_steps = config.num_inpainting_steps
+        interpolation_steps = config.interpolation_steps
+        num_inference_steps = config.num_inference_steps
+        start_step = config.start_step
+        guidance_scale = config.guidance_scale
+        guidance_rescale = config.guidance_rescale
+        negative_prompt = config.negative_prompt
 
         self.validate_input(
             prompt=prompt,

@@ -51,11 +51,13 @@ def test_text_to_image_diffusion(model: TextToImageDiffusion, config: dict) -> N
 
     dim = config.get("image_dim")
     images = model(
-        prompt=config.get("prompt"),
-        image_height=dim,
-        image_width=dim,
-        num_inference_steps=config.get("num_inference_steps"),
-        output_type="np",
+        TextToImageConfig(
+            prompt=config.get("prompt"),
+            image_height=dim,
+            image_width=dim,
+            num_inference_steps=config.get("num_inference_steps"),
+            output_type="np",
+        )
     )
 
     assert type(images) is np.ndarray

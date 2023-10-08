@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import pytest
 
-from stablefused import ImageToImageDiffusion
+from stablefused import ImageToImageConfig, ImageToImageDiffusion
 
 
 @pytest.fixture
@@ -50,10 +50,12 @@ def test_image_to_image_diffusion(model: ImageToImageDiffusion, config: dict) ->
     image = model.random_tensor((1, 3, dim, dim))
 
     images = model(
-        image=image,
-        prompt=config.get("prompt"),
-        num_inference_steps=config.get("num_inference_steps"),
-        output_type="np",
+        ImageToImageConfig(
+            image=image,
+            prompt=config.get("prompt"),
+            num_inference_steps=config.get("num_inference_steps"),
+            output_type="np",
+        )
     )
 
     assert type(images) is np.ndarray
@@ -75,12 +77,14 @@ def test_return_latent_history(model: ImageToImageDiffusion, config: dict) -> No
     history_size = config.get("num_inference_steps") + 1 - config.get("start_step")
 
     images = model(
-        image=image,
-        prompt=config.get("prompt"),
-        num_inference_steps=config.get("num_inference_steps"),
-        start_step=config.get("start_step"),
-        output_type="pt",
-        return_latent_history=True,
+        ImageToImageConfig(
+            image=image,
+            prompt=config.get("prompt"),
+            num_inference_steps=config.get("num_inference_steps"),
+            start_step=config.get("start_step"),
+            output_type="pt",
+            return_latent_history=True,
+        )
     )
 
     assert type(images) is torch.Tensor
