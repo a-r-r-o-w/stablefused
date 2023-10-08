@@ -92,7 +92,7 @@ class LatentWalkInterpolateConfig:
         Type of interpolation to run for latents. One of ["lerp", "slerp"].
     """
 
-    prompt: List[str]
+    prompt: List[str] = None
     latent: Optional[torch.FloatTensor] = None
     image_height: Optional[int] = None
     image_width: Optional[int] = None

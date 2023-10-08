@@ -2,6 +2,8 @@ import json
 import numpy as np
 import os
 
+from dataclasses import dataclass
+from dataclasses_json import DataClassJsonMixin
 from moviepy.editor import (
     AudioFileClip,
     CompositeAudioClip,
@@ -9,38 +11,48 @@ from moviepy.editor import (
     ImageClip,
     concatenate_audioclips,
     concatenate_videoclips,
-    vfx,
 )
-from stablefused import TextToImageDiffusion
+from typing import Dict, List, Optional, Union
+
+from stablefused import (
+    TextToImageConfig,
+    TextToImageDiffusion,
+    LatentWalkInterpolateConfig,
+    LatentWalkDiffusion,
+)
 from stablefused.apps.storybook import StoryBookAuthorBase, StoryBookSpeakerBase
 from stablefused.utils import write_text_on_image
-from typing import Dict, List, Optional, Union
+
+
+@dataclass
+class StoryBookConfig(DataClassJsonMixin):
+    """
+    Configuration class for running inference with StoryBook.
+    """
+
+    prompt: str
+    artist_config: Union[TextToImageConfig, LatentWalkInterpolateConfig]
+    artist_attributes: str = ""
+    messages: List[Dict[str, str]] = None
+    display_captions: bool = True
+    caption_fontsize: int = 30
+    caption_fontfile: str = "arial.ttf"
+    caption_padding: int = 10
+    frame_duration: int = 1
+    num_retries: int = 3
+    output_filename: str = "output.mp4"
 
 
 class StoryBook:
-    _artist_call_attributes = [
-        "image_height",
-        "image_width",
-        "num_inference_steps",
-        "guidance_scale",
-        "guidance_rescale",
-        "negative_prompt",
-    ]
-
     def __init__(
         self,
         author: StoryBookAuthorBase,
-        artist: TextToImageDiffusion,
+        artist: Union[TextToImageDiffusion, LatentWalkDiffusion],
         speaker: Optional[StoryBookSpeakerBase] = None,
-        *,
-        config: Union[str, Dict[str, str]] = "config/default_1_shot.json",
     ) -> None:
         self.author = author
         self.artist = artist
         self.speaker = speaker
-        self.config = config
-
-        self._process_config(self.config)
 
     def _process_config(self, config: Union[str, Dict[str, str]]) -> None:
         if isinstance(config, str):
@@ -55,6 +67,7 @@ class StoryBook:
         }
         self.negative_prompt = self.artist_call_kwargs.pop("negative_prompt", None)
         self.messages: List[Dict[str, str]] = config.get("messages")
+        self.attributes = config.get("attributes", "")
 
     def create_prompt(self, role: str, content: str) -> Dict[str, str]:
         return {"role": role, "content": content}
@@ -86,18 +99,33 @@ class StoryBook:
 
     def __call__(
         self,
-        user_prompt: str,
-        *,
-        frame_duration: int = 1,
-        display_captions: bool = True,
-        caption_fontsize: int = 30,
-        caption_fontfile: str = "arial.ttf",
-        caption_padding: int = 10,
-        speedup_factor: int = 1,
-        num_retries: int = 3,
-        output_filename="output.mp4",
+        config: StoryBookConfig,
     ) -> None:
-        messages = [*self.messages, self.create_prompt("user", user_prompt)]
+        print(config.to_json(indent=2))
+        prompt = config.prompt
+        artist_config = config.artist_config
+        artist_attributes = config.artist_attributes
+        messages = config.messages
+        display_captions = config.display_captions
+        caption_fontsize = config.caption_fontsize
+        caption_fontfile = config.caption_fontfile
+        caption_padding = config.caption_padding
+        frame_duration = config.frame_duration
+        num_retries = config.num_retries
+        output_filename = config.output_filename
+
+        if (
+            isinstance(artist_config, TextToImageConfig)
+            and isinstance(self.artist, LatentWalkDiffusion)
+        ) or (
+            isinstance(artist_config, LatentWalkInterpolateConfig)
+            and isinstance(self.artist, TextToImageDiffusion)
+        ):
+            raise ValueError(
+                "Artist is not compatible with the provided artist config."
+            )
+
+        messages.extend(self.create_prompt("user", prompt))
 
         for i in range(num_retries):
             try:
@@ -111,16 +139,15 @@ class StoryBook:
         else:
             raise Exception("Failed to generate storybook. Please try again.")
 
-        prompt = [item["prompt"] for item in storybook]
-        negative_prompt = (
-            [self.negative_prompt] * len(prompt)
-            if self.negative_prompt is not None
+        prompt = [f"{item['prompt']}, {artist_attributes}" for item in storybook]
+        artist_config.prompt = prompt
+        artist_config.negative_prompt = (
+            [artist_config.negative_prompt] * len(storybook)
+            if artist_config.negative_prompt is not None
             else None
         )
 
-        images = self.artist(
-            prompt=prompt, negative_prompt=negative_prompt, **self.artist_call_kwargs
-        )
+        images = self.artist(artist_config)
 
         if display_captions:
             images = [
@@ -149,10 +176,9 @@ class StoryBook:
         video = [
             ImageClip(np.array(image), duration=frame_duration) for image in images
         ]
-        video = concatenate_videoclips(video)
-        video: CompositeVideoClip = video.set_audio(audioclip)
-        video: CompositeVideoClip = video.set_fps(60)
-        video: CompositeVideoClip = video.fx(vfx.speedx, speedup_factor)
+        video: CompositeVideoClip = concatenate_videoclips(video)
+        video = video.set_audio(audioclip)
+        video = video.set_fps(60)
         video.write_videofile(output_filename)
 
         return storybook

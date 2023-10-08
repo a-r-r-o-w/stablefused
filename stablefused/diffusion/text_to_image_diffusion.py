@@ -42,7 +42,7 @@ class TextToImageConfig:
         generated during diffusion steps.
     """
 
-    prompt: PromptType
+    prompt: PromptType = ""
     image_height: int = 512
     image_width: int = 512
     num_inference_steps: int = 50
