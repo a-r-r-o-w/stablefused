@@ -17,10 +17,10 @@ class LazyImporter:
         if self.module is None:
             try:
                 self.module = importlib.import_module(self.module_name)
-            except ImportError:
+            except ModuleNotFoundError:
                 if import_error_message is None:
                     import_error_message = (
                         f"'{self.module_name}' is not installed. Please install it."
                     )
-                raise ImportError(import_error_message)
+                raise ModuleNotFoundError(import_error_message)
         return self.module

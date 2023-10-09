@@ -125,7 +125,7 @@ class StoryBook:
                 "Artist is not compatible with the provided artist config."
             )
 
-        messages.extend(self.create_prompt("user", prompt))
+        messages.append(self.create_prompt("user", prompt))
 
         for i in range(num_retries):
             try:
@@ -147,7 +147,10 @@ class StoryBook:
             else None
         )
 
-        images = self.artist(artist_config)
+        if isinstance(self.artist, TextToImageDiffusion):
+            images = self.artist(artist_config)
+        else:
+            images = self.artist.interpolate(artist_config)
 
         if display_captions:
             images = [
@@ -169,13 +172,25 @@ class StoryBook:
                 audioclips.append(AudioFileClip(audiofile))
 
             audioclip: CompositeAudioClip = concatenate_audioclips(audioclips)
-            frame_duration = audioclip.duration / len(images)
+            frame_duration = audioclip.duration / len(prompt)
         else:
             audioclip = None
 
-        video = [
-            ImageClip(np.array(image), duration=frame_duration) for image in images
-        ]
+        if isinstance(self.artist, TextToImageDiffusion):
+            video = [
+                ImageClip(np.array(image), duration=frame_duration) for image in images
+            ]
+        else:
+            num_frames_per_prompt = config.artist_config.interpolation_steps
+            video = []
+            for i in range(0, len(images), num_frames_per_prompt):
+                current_images = images[i : i + num_frames_per_prompt]
+                current_clips = [
+                    ImageClip(np.array(image), duration=frame_duration)
+                    for image in current_images
+                ]
+                video.append(concatenate_videoclips(current_clips))
+
         video: CompositeVideoClip = concatenate_videoclips(video)
         video = video.set_audio(audioclip)
         video = video.set_fps(60)
