@@ -153,16 +153,36 @@ class StoryBook:
             images = self.artist.interpolate(artist_config)
 
         if display_captions:
-            images = [
-                write_text_on_image(
-                    image,
-                    storypart.get("story"),
-                    fontfile=caption_fontfile,
-                    fontsize=caption_fontsize,
-                    padding=caption_padding,
-                )
-                for image, storypart in zip(images, storybook)
-            ]
+            if isinstance(self.artist, TextToImageDiffusion):
+                images = [
+                    write_text_on_image(
+                        image,
+                        storypart.get("story"),
+                        fontfile=caption_fontfile,
+                        fontsize=caption_fontsize,
+                        padding=caption_padding,
+                    )
+                    for image, storypart in zip(images, storybook)
+                ]
+            else:
+                num_frames_per_prompt = config.artist_config.interpolation_steps
+                image_list = []
+                for i in range(0, len(images), num_frames_per_prompt):
+                    current_images = images[i : i + num_frames_per_prompt]
+                    current_story = storybook[i // num_frames_per_prompt]
+                    image_list.extend(
+                        [
+                            write_text_on_image(
+                                image,
+                                current_story.get("story"),
+                                fontfile=caption_fontfile,
+                                fontsize=caption_fontsize,
+                                padding=caption_padding,
+                            )
+                            for image in current_images
+                        ]
+                    )
+                images = image_list
 
         if self.speaker is not None:
             stories = [item.get("story") for item in storybook]
