@@ -27,7 +27,7 @@ setup(
         "matplotlib==3.7.2",
         "moviepy==1.0.3",
         "numpy==1.25.2",
-        "pillow==9.5.0",
+        "pillow==10.0.1",
         "scipy==1.11.1",
     ],
     extras_require={
