@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from PIL import Image
+from dataclasses import dataclass
 from diffusers import AutoencoderKL
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
@@ -10,6 +10,101 @@ from typing import List, Optional, Union
 from stablefused.diffusion import BaseDiffusion
 from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
 from stablefused.utils import lerp, slerp
+
+
+@dataclass
+class LatentWalkConfig:
+    """
+    Configuration class for running inference using LatentWalkDiffusion.
+
+    Parameters
+    ----------
+    prompt: PromptType
+        Text prompt to condition on.
+    latent: torch.FloatTensor
+        Latent to start from.
+    strength: float
+        The strength of the latent modification, controlling the amount of noise added.
+    num_inference_steps: int
+        Number of diffusion steps to run.
+    guidance_scale: float
+        Guidance scale encourages the model to generate images following the prompt
+        closely, albeit at the cost of image quality.
+    guidance_rescale: float
+        Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+        Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+    negative_prompt: Optional[PromptType]
+        Negative text prompt to uncondition on.
+    output_type: str
+        Type of output to return. One of ["latent", "pil", "pt", "np"].
+    return_latent_history: bool
+        Whether to return the latent history. If True, return list of all latents
+        generated during diffusion steps.
+    """
+
+    prompt: PromptType
+    latent: torch.FloatTensor
+    strength: float = 0.2
+    num_inference_steps: int = 50
+    guidance_scale: float = 7.5
+    guidance_rescale: float = 0.7
+    negative_prompt: Optional[PromptType] = None
+    output_type: str = "pil"
+    return_latent_history: bool = False
+
+
+@dataclass
+class LatentWalkInterpolateConfig:
+    """
+    Configuration class for running interpolation using LatentWalkDiffusion.
+
+    Parameters
+    ----------
+    prompt: List[str]
+        List of text prompts to condition on.
+    latent: Optional[torch.FloatTensor]
+        Latents to interpolate between. If None, latents are generated from noise
+        but image_height and image_width must be provided.
+    image_height: Optional[int]
+        Height of image to generate.
+    image_width: Optional[int]
+        Width of image to generate.
+    num_inference_steps: int
+        Number of diffusion steps to run.
+    interpolation_steps: Union[int, List[int]]
+        Number of interpolation steps to run.
+    guidance_scale: float
+        Guidance scale encourages the model to generate images following the prompt
+        closely, albeit at the cost of image quality.
+    guidance_rescale: float
+        Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+        Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+    negative_prompt: Optional[List[str]]
+        Negative text prompts to uncondition on.
+    output_type: str
+        Type of output to return. One of ["latent", "pil", "pt", "np"].
+    return_latent_history: bool
+        Whether to return the latent history. If True, return list of all latents
+        generated during diffusion steps.
+    embedding_interpolation_type: str
+        Type of interpolation to run for text embeddings. One of ["lerp", "slerp"].
+    latent_interpolation_type: str
+        Type of interpolation to run for latents. One of ["lerp", "slerp"].
+    """
+
+    prompt: List[str] = None
+    latent: Optional[torch.FloatTensor] = None
+    image_height: Optional[int] = None
+    image_width: Optional[int] = None
+    num_inference_steps: int = 50
+    interpolation_steps: Union[int, List[int]] = 8
+    guidance_scale: float = 7.5
+    guidance_rescale: float = 0.7
+    negative_prompt: Optional[List[str]] = None
+    output_type: str = "pil"
+    return_latent_history: bool = False
+    embedding_interpolation_type: str = "lerp"
+    latent_interpolation_type: str = "slerp"
 
 
 class LatentWalkDiffusion(BaseDiffusion):
@@ -254,48 +349,31 @@ class LatentWalkDiffusion(BaseDiffusion):
     @torch.no_grad()
     def __call__(
         self,
-        prompt: PromptType,
-        latent: torch.FloatTensor,
-        strength: float = 0.2,
-        num_inference_steps: int = 50,
-        guidance_scale: float = 7.5,
-        guidance_rescale: float = 0.7,
-        negative_prompt: Optional[PromptType] = None,
-        output_type: str = "pil",
-        return_latent_history: bool = False,
+        config: LatentWalkConfig,
     ) -> OutputType:
         """
         Run inference by conditioning on text prompt starting from provided latent tensor.
 
         Parameters
         ----------
-        prompt: PromptType
-            Text prompt to condition on.
-        latent: torch.FloatTensor
-            Latent to start from.
-        strength: float
-            The strength of the latent modification, controlling the amount of noise added.
-        num_inference_steps: int
-            Number of diffusion steps to run.
-        guidance_scale: float
-            Guidance scale encourages the model to generate images following the prompt
-            closely, albeit at the cost of image quality.
-        guidance_rescale: float
-            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
-            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[PromptType]
-            Negative text prompt to uncondition on.
-        output_type: str
-            Type of output to return. One of ["latent", "pil", "pt", "np"].
-        return_latent_history: bool
-            Whether to return the latent history. If True, return list of all latents
-            generated during diffusion steps.
+        config: LatentWalkConfig
+            Configuration for running inference using LatentWalkDiffusion.
 
         Returns
         -------
         OutputType
             Generated output based on output_type.
         """
+
+        prompt = config.prompt
+        latent = config.latent
+        strength = config.strength
+        num_inference_steps = config.num_inference_steps
+        guidance_scale = config.guidance_scale
+        guidance_rescale = config.guidance_rescale
+        negative_prompt = config.negative_prompt
+        output_type = config.output_type
+        return_latent_history = config.return_latent_history
 
         # Validate input
         self.validate_input(
@@ -334,61 +412,35 @@ class LatentWalkDiffusion(BaseDiffusion):
     @torch.no_grad()
     def interpolate(
         self,
-        prompt: List[str],
-        latent: Optional[torch.FloatTensor] = None,
-        image_height: Optional[int] = None,
-        image_width: Optional[int] = None,
-        num_inference_steps: int = 50,
-        interpolation_steps: Union[int, List[int]] = 8,
-        guidance_scale: float = 7.5,
-        guidance_rescale: float = 0.7,
-        negative_prompt: Optional[List[str]] = None,
-        output_type: str = "pil",
-        return_latent_history: bool = False,
-        embedding_interpolation_type: str = "lerp",
-        latent_interpolation_type: str = "slerp",
+        config: LatentWalkInterpolateConfig,
     ) -> OutputType:
         """
         Run inference by conditioning on text prompts and interpolating between them.
 
         Parameters
         ----------
-        prompt: List[str]
-            List of text prompts to condition on.
-        latent: Optional[torch.FloatTensor]
-            Latents to interpolate between. If None, latents are generated from noise
-            but image_height and image_width must be provided.
-        image_height: Optional[int]
-            Height of image to generate.
-        image_width: Optional[int]
-            Width of image to generate.
-        num_inference_steps: int
-            Number of diffusion steps to run.
-        interpolation_steps: Union[int, List[int]]
-            Number of interpolation steps to run.
-        guidance_scale: float
-            Guidance scale encourages the model to generate images following the prompt
-            closely, albeit at the cost of image quality.
-        guidance_rescale: float
-            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
-            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[List[str]]
-            Negative text prompts to uncondition on.
-        output_type: str
-            Type of output to return. One of ["latent", "pil", "pt", "np"].
-        return_latent_history: bool
-            Whether to return the latent history. If True, return list of all latents
-            generated during diffusion steps.
-        embedding_interpolation_type: str
-            Type of interpolation to run for text embeddings. One of ["lerp", "slerp"].
-        latent_interpolation_type: str
-            Type of interpolation to run for latents. One of ["lerp", "slerp"].
+        config: LatentWalkInterpolateConfig
+            Configuration for running interpolation using LatentWalkDiffusion.
 
         Returns
         -------
         OutputType
             Generated output based on output_type.
         """
+
+        prompt = config.prompt
+        latent = config.latent
+        image_height = config.image_height
+        image_width = config.image_width
+        num_inference_steps = config.num_inference_steps
+        interpolation_steps = config.interpolation_steps
+        guidance_scale = config.guidance_scale
+        guidance_rescale = config.guidance_rescale
+        negative_prompt = config.negative_prompt
+        output_type = config.output_type
+        return_latent_history = config.return_latent_history
+        embedding_interpolation_type = config.embedding_interpolation_type
+        latent_interpolation_type = config.latent_interpolation_type
 
         # Validate input
         self.validate_input(

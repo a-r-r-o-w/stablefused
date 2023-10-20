@@ -92,6 +92,7 @@ class BaseDiffusion(ABC):
             if model is None:
                 save_model_to_cache(self)
             else:
+                print("here")
                 self.share_components_with(model)
 
     def to(self, device: str) -> "BaseDiffusion":

@@ -2,8 +2,8 @@ import imageio
 import numpy as np
 import torch
 
-from PIL import Image
-from typing import List, Union
+from PIL import Image, ImageDraw, ImageFont
+from typing import List, Tuple, Union
 
 
 def pt_to_numpy(images: torch.FloatTensor) -> np.ndarray:
@@ -193,3 +193,51 @@ def image_grid(images: List[Image.Image], rows: int, cols: int) -> Image.Image:
     for i, image in enumerate(images):
         grid.paste(image, box=(i % cols * w, i // cols * h))
     return grid
+
+
+def write_text_on_image(
+    image: Image.Image,
+    text: str,
+    fontfile: str = "arial.ttf",
+    fontsize: int = 30,
+    padding: Union[int, Tuple[int, int]] = 10,
+) -> Image.Image:
+    if isinstance(padding, int):
+        padding = (padding, padding)
+
+    try:
+        font = ImageFont.truetype(fontfile, size=fontsize)
+    except IOError:
+        font = ImageFont.load_default()
+
+    image = image.copy()
+    image_width, image_height = image.size
+    max_text_width = image_width - padding[0] * 2
+
+    draw = ImageDraw.Draw(image)
+    text_width, text_height = draw.textsize(text, font)
+    x = (image_width - text_width) / 2
+    y = image_height - text_height - padding[1]
+
+    lines = []
+    words = text.split()
+    current_line = ""
+    for word in words:
+        test_line = current_line + " " + word if current_line else word
+        test_width, _ = draw.textsize(test_line, font)
+        if test_width <= max_text_width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+    if current_line:
+        lines.append(current_line)
+
+    y_start = y
+    for line in lines:
+        text_width, text_height = draw.textsize(line, font)
+        x = (image_width - text_width) / 2
+        draw.text((x, y_start), line, fill="white", font=font)
+        y_start += text_height
+
+    return image

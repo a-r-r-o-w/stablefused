@@ -2,6 +2,7 @@ import numpy as np
 import torch
 
 from PIL import Image
+from dataclasses import dataclass
 from diffusers import AutoencoderKL
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
@@ -9,6 +10,48 @@ from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
 from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
+
+
+@dataclass
+class ImageToImageConfig:
+    """
+    Configuration class for running inference with ImageToImageDiffusion.
+
+    Parameters
+    ----------
+    image: Image.Image
+        Input image to condition on.
+    prompt: PromptType
+        Text prompt to condition on.
+    num_inference_steps: int
+        Number of diffusion steps to run.
+    start_step: int
+        Step to start diffusion from. The higher the value, the more similar the generated
+        image will be to the input image.
+    guidance_scale: float
+        Guidance scale encourages the model to generate images following the prompt
+        closely, albeit at the cost of image quality.
+    guidance_rescale: float
+        Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+        Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+    negative_prompt: Optional[PromptType]
+        Negative text prompt to uncondition on.
+    output_type: str
+        Type of output to return. One of ["latent", "pil", "pt", "np"].
+    return_latent_history: bool
+        Whether to return the latent history. If True, return list of all latents
+        generated during diffusion steps.
+    """
+
+    image: Image.Image
+    prompt: PromptType
+    num_inference_steps: int = 50
+    start_step: int = 0
+    guidance_scale: float = 7.5
+    guidance_rescale: float = 0.7
+    negative_prompt: Optional[PromptType] = None
+    output_type: str = "pil"
+    return_latent_history: bool = False
 
 
 class ImageToImageDiffusion(BaseDiffusion):
@@ -126,51 +169,30 @@ class ImageToImageDiffusion(BaseDiffusion):
         return torch.stack(latent_history) if return_latent_history else latent
 
     @torch.no_grad()
-    def __call__(
-        self,
-        image: Image.Image,
-        prompt: PromptType,
-        num_inference_steps: int = 50,
-        start_step: int = 0,
-        guidance_scale: float = 7.5,
-        guidance_rescale: float = 0.7,
-        negative_prompt: Optional[PromptType] = None,
-        output_type: str = "pil",
-        return_latent_history: bool = False,
-    ) -> OutputType:
+    def __call__(self, config: ImageToImageConfig) -> OutputType:
         """
         Run inference by conditioning on input image and text prompt.
 
         Parameters
         ----------
-        image: Image.Image
-            Input image to condition on.
-        prompt: PromptType
-            Text prompt to condition on.
-        num_inference_steps: int
-            Number of diffusion steps to run.
-        start_step: int
-            Step to start diffusion from. The higher the value, the more similar the generated
-            image will be to the input image.
-        guidance_scale: float
-            Guidance scale encourages the model to generate images following the prompt
-            closely, albeit at the cost of image quality.
-        guidance_rescale: float
-            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
-            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[PromptType]
-            Negative text prompt to uncondition on.
-        output_type: str
-            Type of output to return. One of ["latent", "pil", "pt", "np"].
-        return_latent_history: bool
-            Whether to return the latent history. If True, return list of all latents
-            generated during diffusion steps.
+        config: ImageToImageConfig
+            Configuration for running inference with ImageToImageDiffusion.
 
         Returns
         -------
         OutputType
             Generated output based on output_type.
         """
+
+        image = config.image
+        prompt = config.prompt
+        num_inference_steps = config.num_inference_steps
+        start_step = config.start_step
+        guidance_scale = config.guidance_scale
+        guidance_rescale = config.guidance_rescale
+        negative_prompt = config.negative_prompt
+        output_type = config.output_type
+        return_latent_history = config.return_latent_history
 
         # Validate input
         self.validate_input(

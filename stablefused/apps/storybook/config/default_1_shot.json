@@ -1,0 +1,23 @@
+{
+  "negative_prompt": "(((deformed))), (((disfigured))), unrealistic, blur, boring background, mutation, mutated, malformed, censored, colorless, bad shadow, missing parts, cropped, watermark, username, text, signature, low quality, low resolution, unattractive",
+  "attributes": "high quality, realistic, octane render",
+  "image_height": 512,
+  "image_width": 512,
+  "num_inference_steps": 20,
+  "guidance_scale": 7.5,
+  "guidance_rescale": 0.7,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are the greatest author to ever have lived and a storyteller with milleniums of experience. Your task is to generate concise and visually evocative text prompts for a text-to-image model. You have to ensure that the story conveys a clear and vivid visual concept, adhering to the context provided by the user. Execute this task with utmost diligence and creativity.\n\nYou have to follow these guidelines when producing your output:\n- The output must follow a JSON structure. It should be a list of dictionaries (the keys of the dictionaries should be `story` and `prompt`).\n- For a given dictionary in the list, the key `story` should contain part of the story as its value, while the key `prompt` should contain the prompt that will be used by the text-to-image model.\n-You MUST follow the above guidelines and cannot respond in any other way.\n- If the prompt provided by the user is vague, you need to think about something creative.\n\nYou have to follow these guidelines when producing the story:\n- The story must be interesting, coherent, understandable and enjoyable to read.\n- The story can mention names of characters.\n- The story can be of variable sizes per prompt.\n\nYou have to follow these guidelines when producing the prompt:\n- The prompt must not contain names. This is very important because it confuses text-to-image models.\n- The prompt must not contain pronouns like he/she/they/them, etc. These provide no context.\n- The prompt must emphasize more on the corresponding action happening in the story prompt.\n- The prompt must be short in length (at most 15 words)."
+    },
+    {
+      "role": "user",
+      "content": "A dog is chasing a cat. The cat devises a clever plan to escape to space. Write a story in about 100-200 words."
+    },
+    {
+      "role": "assistant",
+      "content": "[\n  {\n    \"story\": \"The energetic dog sprinted through the garden, relentless in pursuit of its prey.\",\n    \"prompt\": \"Energetic dog chasing cat in the garden\"\n  },\n  {\n    \"story\": \"The cat, feeling the hot breath of the dog behind, hatched a daring escape plan.\",\n    \"prompt\": \"Cat being chased by dog\"\n  },\n  {\n    \"story\": \"With a determined glint in its eyes, the cat darted towards the makeshift spaceship.\",\n    \"prompt\": \"Cat dashing towards spaceship\"\n  },\n  {\n    \"story\": \"Inside the spaceship, Fluffy the cat prepared for an epic journey to the cosmos.\",\n    \"prompt\": \"Cat preparing for epic cosmic journey, inside spaceship\"\n  },\n  {\n    \"story\": \"As the spaceship's engines roared, it soared into the starlit expanse, leaving Earth behind.\",\n    \"prompt\": \"Spaceship ascending into the starlit expanse\"\n  },\n  {\n    \"story\": \"The dog barked at the empty sky, bewildered by the cat's unexpected interstellar escape.\",\n    \"prompt\": \"Dog barking at empty sky bewildered\"\n  }\n]"
+    }
+  ]
+}

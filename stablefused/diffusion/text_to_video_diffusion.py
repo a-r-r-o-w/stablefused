@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from PIL import Image
+from dataclasses import dataclass
 from diffusers import AutoencoderKL
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
@@ -9,6 +9,52 @@ from typing import List, Optional, Union
 
 from stablefused.diffusion import BaseDiffusion
 from stablefused.typing import PromptType, OutputType, SchedulerType, UNetType
+
+
+@dataclass
+class TextToVideoConfig:
+    """
+    Configuration class for running inference with TextToVideoDiffusion.
+
+    Parameters
+    ----------
+    prompt: PromptType
+        Text prompt to condition on.
+    video_height: int
+        Height of video to generate.
+    video_width: int
+        Width of video to generate.
+    video_frames: int
+        Number of frames to generate in video.
+    num_inference_steps: int
+        Number of diffusion steps to run.
+    guidance_scale: float
+        Guidance scale encourages the model to generate images following the prompt
+        closely, albeit at the cost of image quality.
+    guidance_rescale: float
+        Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
+        Flawed](https://arxiv.org/pdf/2305.08891.pdf).
+    negative_prompt: Optional[PromptType]
+        Negative text prompt to uncondition on.
+    latent: Optional[torch.FloatTensor]
+        Latent to start from. If None, latent is generated from noise.
+    output_type: str
+        Type of output to return. One of ["latent", "pil", "pt", "np"].
+    decode_batch_size: int
+        Batch size to use when decoding latent to image.
+    """
+
+    prompt: PromptType
+    video_height: int = 512
+    video_width: int = 512
+    video_frames: int = 24
+    num_inference_steps: int = 50
+    guidance_scale: float = 7.5
+    guidance_rescale: float = 0.7
+    negative_prompt: Optional[PromptType] = None
+    latent: Optional[torch.FloatTensor] = None
+    output_type: str = "pil"
+    decode_batch_size: int = 4
 
 
 class TextToVideoDiffusion(BaseDiffusion):
@@ -178,53 +224,33 @@ class TextToVideoDiffusion(BaseDiffusion):
     @torch.no_grad()
     def __call__(
         self,
-        prompt: PromptType,
-        video_height: int = 512,
-        video_width: int = 512,
-        video_frames: int = 24,
-        num_inference_steps: int = 50,
-        guidance_scale: float = 7.5,
-        guidance_rescale: float = 0.7,
-        negative_prompt: Optional[PromptType] = None,
-        latent: Optional[torch.FloatTensor] = None,
-        output_type: str = "pil",
-        decode_batch_size: int = 4,
+        config: TextToVideoConfig,
     ) -> OutputType:
         """
         Run inference by conditioning on text prompt.
 
         Parameters
         ----------
-        prompt: PromptType
-            Text prompt to condition on.
-        video_height: int
-            Height of video to generate.
-        video_width: int
-            Width of video to generate.
-        video_frames: int
-            Number of frames to generate in video.
-        num_inference_steps: int
-            Number of diffusion steps to run.
-        guidance_scale: float
-            Guidance scale encourages the model to generate images following the prompt
-            closely, albeit at the cost of image quality.
-        guidance_rescale: float
-            Guidance rescale from [Common Diffusion Noise Schedules and Sample Steps are
-            Flawed](https://arxiv.org/pdf/2305.08891.pdf).
-        negative_prompt: Optional[PromptType]
-            Negative text prompt to uncondition on.
-        latent: Optional[torch.FloatTensor]
-            Latent to start from. If None, latent is generated from noise.
-        output_type: str
-            Type of output to return. One of ["latent", "pil", "pt", "np"].
-        decode_batch_size: int
-            Batch size to use when decoding latent to image.
+        config: TextToVideoConfig
+            Configuration for running inference with TextToVideoDiffusion.
 
         Returns
         -------
         OutputType
             Generated output based on output_type.
         """
+
+        prompt = config.prompt
+        video_height = config.video_height
+        video_width = config.video_width
+        video_frames = config.video_frames
+        num_inference_steps = config.num_inference_steps
+        guidance_scale = config.guidance_scale
+        guidance_rescale = config.guidance_rescale
+        negative_prompt = config.negative_prompt
+        latent = config.latent
+        output_type = config.output_type
+        decode_batch_size = config.decode_batch_size
 
         # Validate input
         self.validate_input(

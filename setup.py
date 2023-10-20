@@ -17,6 +17,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "accelerate==0.21.0",
+        "dataclasses-json==0.6.1",
         "diffusers==0.19.3",
         "ftfy==6.1.1",
         "imageio==2.31.1",
@@ -24,7 +25,9 @@ setup(
         "torch==2.0.1",
         "transformers==4.31.0",
         "matplotlib==3.7.2",
+        "moviepy==1.0.3",
         "numpy==1.25.2",
+        "pillow==9.5.0",
         "scipy==1.11.1",
     ],
     extras_require={
@@ -32,7 +35,12 @@ setup(
             "black==23.7.0",
             "pytest==7.4.0",
             "twine>=4.0.2",
-        ]
+        ],
+        "extras": [
+            "g4f==0.1.5.6",
+            "curl-cffi==0.5.7",
+            "gtts==2.4.0",
+        ],
     },
     classifiers=[
         "Development Status :: 1 - Planning",
