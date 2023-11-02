@@ -47,7 +47,7 @@ from .utils import (
     LazyImporter,
 )
 
-from .apps.storybook import (
+from .apps import (
     StoryBookAuthorBase,
     G4FStoryBookAuthor,
     StoryBookConfig,

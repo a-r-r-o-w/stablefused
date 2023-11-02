@@ -206,7 +206,9 @@ class StoryBook:
             for i in range(0, len(images), num_frames_per_prompt):
                 current_images = images[i : i + num_frames_per_prompt]
                 current_clips = [
-                    ImageClip(np.array(image), duration=frame_duration / num_frames_per_prompt)
+                    ImageClip(
+                        np.array(image), duration=frame_duration / num_frames_per_prompt
+                    )
                     for image in current_images
                 ]
                 video.append(concatenate_videoclips(current_clips))

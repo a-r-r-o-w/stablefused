@@ -22,7 +22,7 @@ setup(
         "ftfy==6.1.1",
         "imageio==2.31.1",
         "imageio-ffmpeg==0.4.8",
-        "torch==2.0.1",
+        "torch==2.1.0",
         "transformers==4.31.0",
         "matplotlib==3.7.2",
         "moviepy==1.0.3",
